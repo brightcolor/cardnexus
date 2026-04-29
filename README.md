@@ -28,19 +28,37 @@ Built for teams and organizations.
 
 ## Quick start
 
-One command. That's it.
+One command. Clones the repo to `/opt/cardnexus`, generates a secret and starts everything.
 
 ```bash
-curl -sL https://raw.githubusercontent.com/brightcolor/cardnexus/main/docker-compose.yml \
-  | BETTER_AUTH_SECRET=$(openssl rand -base64 32) docker compose -f - up -d
+curl -fsSL https://raw.githubusercontent.com/brightcolor/cardnexus/main/quickstart.sh | sudo sh
 ```
 
-Open **http://localhost:3000** and log in with `admin@example.com` / `admin123`.
+Open **http://&lt;your-ip&gt;:3000** and log in with `admin@example.com` / `admin123`.
 
 > **Change the admin password immediately** after first login.
 
+The script:
+- Creates `/opt/cardnexus` and clones the repository there
+- Generates a random `BETTER_AUTH_SECRET` and writes `.env`
+- Pulls the Docker image and starts the stack via `docker compose`
+- On re-run: pulls the latest code and image instead of re-installing
+
 <details>
-<summary>Alternative: docker run</summary>
+<summary>Manual setup</summary>
+
+```bash
+git clone https://github.com/brightcolor/cardnexus.git /opt/cardnexus
+cd /opt/cardnexus
+echo "BETTER_AUTH_SECRET=$(openssl rand -base64 32)" > .env
+echo "APP_URL=http://your-server-ip:3000" >> .env
+docker compose up -d
+```
+
+</details>
+
+<details>
+<summary>docker run (one-liner, no git)</summary>
 
 ```bash
 docker run -d \
