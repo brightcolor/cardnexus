@@ -1,0 +1,44 @@
+import { db } from "./db";
+
+export interface PlatformSettings {
+  id: string;
+  appName: string;
+  appUrl: string;
+  faviconUrl: string | null;
+  logoUrl: string | null;
+  primaryColor: string;
+  supportEmail: string | null;
+  footerText: string | null;
+}
+
+const DEFAULTS: Omit<PlatformSettings, "id"> = {
+  appName: "FreddieCard",
+  appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+  faviconUrl: null,
+  logoUrl: null,
+  primaryColor: "#0F172A",
+  supportEmail: null,
+  footerText: null,
+};
+
+// Cache for 60s in production to avoid DB hit on every request
+let cache: { data: PlatformSettings; at: number } | null = null;
+const TTL = 60_000;
+
+export async function getPlatformSettings(): Promise<PlatformSettings> {
+  if (cache && Date.now() - cache.at < TTL) return cache.data;
+
+  const row = await db.platformSettings.upsert({
+    where: { id: "main" },
+    create: { id: "main", ...DEFAULTS },
+    update: {},
+  });
+
+  const data = row as PlatformSettings;
+  cache = { data, at: Date.now() };
+  return data;
+}
+
+export function invalidateSettingsCache() {
+  cache = null;
+}

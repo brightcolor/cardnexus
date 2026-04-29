@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# next
+.next/
+out/
+
+# database
+*.db
+*.db-journal
+prisma/migrations/
+
+# env
+.env
+.env.local
+.env.production
+
+# uploads
+uploads/
+public/uploads/
+
+# misc
+.DS_Store
+*.pem
+.vercel
+*.tsbuildinfo
+next-env.d.ts

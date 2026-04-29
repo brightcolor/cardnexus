@@ -1,0 +1,238 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── better-auth required tables ─────────────────────────────────────────────
+
+model user {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean
+  image         String?
+  createdAt     DateTime
+  updatedAt     DateTime
+
+  // Role system
+  role          String    @default("member") // super_admin | company_admin | team_leader | member
+
+  // Relations
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  card           Card?
+  sentInvitations Invitation[] @relation("InvitationSender")
+  analytics      CardAnalytic[]
+
+  sessions       session[]
+  accounts       account[]
+
+  @@map("user")
+}
+
+model session {
+  id        String   @id
+  userId    String
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime
+  updatedAt DateTime
+
+  @@map("session")
+}
+
+model account {
+  id                   String    @id
+  userId               String
+  user                 user      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountId            String
+  providerId           String
+  accessToken          String?
+  refreshToken         String?
+  idToken              String?
+  accessTokenExpiresAt DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                String?
+  password             String?
+  createdAt            DateTime
+  updatedAt            DateTime
+
+  @@unique([providerId, accountId])
+  @@map("account")
+}
+
+model verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime
+  updatedAt  DateTime
+
+  @@map("verification")
+}
+
+// ─── App Models ──────────────────────────────────────────────────────────────
+
+model Organization {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  logo        String?
+  domain      String?
+  primaryColor String  @default("#0F172A")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       user[]
+  invitations Invitation[]
+  settings    OrganizationSettings?
+}
+
+model OrganizationSettings {
+  id             String       @id @default(cuid())
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Branding defaults
+  cardFooterText      String?
+  defaultTemplate     String  @default("classic")
+  defaultFontFamily   String  @default("inter")
+  defaultLayoutStyle  String  @default("standard")
+  defaultAccentColor  String?
+
+  // Member permissions (global)
+  allowMemberTemplateChange Boolean @default(true)
+  allowMemberColorChange    Boolean @default(false)
+  allowMemberFontChange     Boolean @default(true)
+  allowMemberLayoutChange   Boolean @default(true)
+
+  // Brand kit: JSON string[] of hex colors the org endorses
+  brandColors String? // e.g. '["#0F172A","#2563EB","#16A34A"]'
+
+  // Per-department overrides: JSON Record<deptName, DeptPolicy>
+  // DeptPolicy: { allowTemplateChange?, allowColorChange?, allowFontChange?, allowLayoutChange? }
+  departmentPolicies String?
+
+  // Features
+  walletEnabled      Boolean @default(false)
+  analyticsEnabled   Boolean @default(true)
+  leadCaptureEnabled Boolean @default(false)
+}
+
+model Card {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   user   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Identity
+  slug      String  @unique
+  isPublic  Boolean @default(true)
+
+  // Personal
+  firstName  String?
+  lastName   String?
+  title      String?
+  company    String?
+  department String?
+  bio        String?
+  avatarUrl  String?
+
+  // Contact
+  phone   String?
+  mobile  String?
+  email   String?
+  website String?
+  address String?
+
+  // Social
+  linkedin  String?
+  xing      String?
+  twitter   String?
+  instagram String?
+  github    String?
+  youtube   String?
+
+  // Custom links (JSON array: [{label, url}])
+  customLinks String @default("[]")
+
+  // Appearance
+  templateId   String @default("classic")
+  primaryColor String @default("#0F172A")
+  accentColor  String?
+  fontFamily   String @default("inter")  // inter | serif | mono | display
+  layoutStyle  String @default("standard") // standard | centered | compact
+  roundedStyle String @default("default")  // default | sharp | pill
+  showQrOnCard Boolean @default(false)
+  coverUrl     String?
+
+  // Stats (denormalized for fast reads)
+  totalViews Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  analytics CardAnalytic[]
+}
+
+model CardAnalytic {
+  id        String   @id @default(cuid())
+  cardSlug  String
+  userId    String?
+  user      user?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  card      Card?    @relation(fields: [cardSlug], references: [slug])
+
+  event     String   // view | vcard_download | qr_scan | link_click | wallet_save
+  linkLabel String?  // for link_click events
+  source    String?  // nfc | qr | direct | share
+
+  ip        String?
+  country   String?
+  device    String?  // mobile | desktop | tablet
+
+  createdAt DateTime @default(now())
+
+  @@index([cardSlug])
+  @@index([createdAt])
+}
+
+// ─── Platform-wide settings (singleton row, id = "main") ─────────────────────
+
+model PlatformSettings {
+  id         String  @id @default("main")
+  appName    String  @default("FreddieCard")
+  appUrl     String  @default("http://localhost:3000")
+  faviconUrl String?
+  logoUrl    String?
+  primaryColor String @default("#0F172A")
+  supportEmail String?
+  footerText String?
+}
+
+model Invitation {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  email          String
+  role           String       @default("member")
+  token          String       @unique
+  expiresAt      DateTime
+
+  senderId       String
+  sender         user         @relation("InvitationSender", fields: [senderId], references: [id])
+
+  acceptedAt     DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([token])
+  @@index([email])
+}
