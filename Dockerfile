@@ -22,12 +22,19 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
 # Placeholder env for build time — overridden at runtime
-ENV DATABASE_URL="file:/app/data/app.db"
 ENV BETTER_AUTH_SECRET="build-placeholder-replace-at-runtime"
 ENV BETTER_AUTH_URL="http://localhost:3000"
 ENV NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ENV APP_URL="http://localhost:3000"
 
+# Create a temporary SQLite DB for the build step so Prisma client initialises
+# without hitting a missing-file error. getPlatformSettings() has a try/catch
+# and returns safe defaults when the DB is unreachable, so this is belt-and-
+# suspenders; the actual data volume is mounted at runtime.
+RUN mkdir -p /tmp/builddb && \
+    DATABASE_URL="file:/tmp/builddb/app.db" npx prisma db push --skip-generate
+
+ENV DATABASE_URL="file:/tmp/builddb/app.db"
 RUN npm run build
 
 # ─── Stage 3: Runner ─────────────────────────────────────────────────────────

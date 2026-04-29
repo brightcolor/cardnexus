@@ -28,15 +28,20 @@ const TTL = 60_000;
 export async function getPlatformSettings(): Promise<PlatformSettings> {
   if (cache && Date.now() - cache.at < TTL) return cache.data;
 
-  const row = await db.platformSettings.upsert({
-    where: { id: "main" },
-    create: { id: "main", ...DEFAULTS },
-    update: {},
-  });
+  try {
+    const row = await db.platformSettings.upsert({
+      where: { id: "main" },
+      create: { id: "main", ...DEFAULTS },
+      update: {},
+    });
 
-  const data = row as PlatformSettings;
-  cache = { data, at: Date.now() };
-  return data;
+    const data = row as PlatformSettings;
+    cache = { data, at: Date.now() };
+    return data;
+  } catch {
+    // DB not available (e.g. during Docker image build) — return safe defaults
+    return { id: "main", ...DEFAULTS };
+  }
 }
 
 export function invalidateSettingsCache() {
