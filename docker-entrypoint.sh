@@ -3,15 +3,32 @@ set -e
 
 mkdir -p /app/data /app/public/uploads
 export DATABASE_URL="${DATABASE_URL:-file:/app/data/app.db}"
-
-echo "[cardnexus] Running database migrations..."
-# prisma@6 is installed globally in the image (see Dockerfile)
-prisma db push --schema /app/prisma/schema.prisma
-
 DB_FILE="${DATABASE_URL#file:}"
-if [ -f "$DB_FILE" ] && [ "$(stat -c%s "$DB_FILE" 2>/dev/null || stat -f%z "$DB_FILE" 2>/dev/null || echo 999999)" -lt 65536 ]; then
-  echo "[cardnexus] Fresh database — seeding admin..."
-  node /app/seed_run.js 2>/dev/null || echo "[cardnexus] Seed skipped (script not present yet)"
+
+if [ ! -f "$DB_FILE" ]; then
+  echo "[cardnexus] First run — copying pre-initialised database..."
+  cp /app/prisma/base.db "$DB_FILE"
+
+  echo "[cardnexus] Seeding default admin (admin@example.com / admin123)..."
+  node -e "
+const { PrismaClient } = require('/app/node_modules/@prisma/client');
+const { hashPassword } = require('/app/node_modules/@better-auth/utils/dist/password.node.cjs');
+async function seed() {
+  const db = new PrismaClient({ datasources: { db: { url: process.env.DATABASE_URL } } });
+  try {
+    const id = require('crypto').randomUUID();
+    const hashed = await hashPassword('admin123');
+    await db.user.create({ data: { id, name: 'Admin', email: 'admin@example.com',
+      emailVerified: true, createdAt: new Date(), updatedAt: new Date(), role: 'super_admin' } });
+    await db.account.create({ data: { id: require('crypto').randomUUID(), userId: id, accountId: id,
+      providerId: 'credential', password: hashed, createdAt: new Date(), updatedAt: new Date() } });
+    console.log('[cardnexus] Admin seeded: admin@example.com / admin123');
+  } finally { await db.\$disconnect(); }
+}
+seed().catch(e => console.error('[cardnexus] Seed error:', e.message));
+"
+else
+  echo "[cardnexus] Existing database found — skipping init"
 fi
 
 echo "[cardnexus] Starting application..."

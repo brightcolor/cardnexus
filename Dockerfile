@@ -15,24 +15,24 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generate Prisma client (targets the runner OS)
+# Generate Prisma client for the runner OS (linux-musl-openssl-3.0.x)
 RUN npx prisma generate
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
-# Placeholder env for build time — overridden at runtime
-ENV BETTER_AUTH_SECRET="build-placeholder-replace-at-runtime"
+# Build-time env placeholders — overridden at runtime via docker-compose
+ENV BETTER_AUTH_SECRET="build-placeholder"
 ENV BETTER_AUTH_URL="http://localhost:3000"
 ENV NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ENV APP_URL="http://localhost:3000"
 
-# Create a temporary SQLite DB for the build step so Prisma client initialises
-# without hitting a missing-file error. getPlatformSettings() has a try/catch
-# and returns safe defaults when the DB is unreachable, so this is belt-and-
-# suspenders; the actual data volume is mounted at runtime.
+# Create a pre-initialised base SQLite DB (schema only, no data).
+# At first container startup the entrypoint copies this to the data volume —
+# no prisma CLI needed at runtime, avoiding Prisma version conflicts.
 RUN mkdir -p /tmp/builddb && \
-    DATABASE_URL="file:/tmp/builddb/app.db" npx prisma db push
+    DATABASE_URL="file:/tmp/builddb/app.db" npx prisma db push && \
+    cp /tmp/builddb/app.db /app/prisma/base.db
 
 ENV DATABASE_URL="file:/tmp/builddb/app.db"
 RUN npm run build
@@ -50,25 +50,20 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs \
  && adduser  --system --uid 1001 nextjs
 
-# Copy built output
+# Copy built Next.js standalone output
 RUN mkdir -p ./public
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
-# Install Prisma 6 CLI globally — pinned version avoids npx pulling Prisma 7
-# at runtime (Prisma 7 broke schema.prisma datasource url syntax)
-RUN npm install -g prisma@6 --prefer-offline 2>/dev/null || npm install -g prisma@6
-
-# Copy Prisma schema + generated client (needed for db push + app queries)
+# Copy Prisma schema + generated client (needed for app queries at runtime)
+# base.db is the pre-initialised empty database used for first-run bootstrap
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
-# Copy seed script + its deps
-COPY --from=builder /app/node_modules/tsx ./node_modules/tsx
+# Copy @better-auth for runtime seeding
 COPY --from=builder /app/node_modules/@better-auth ./node_modules/@better-auth
-COPY --from=builder /app/node_modules/nanoid ./node_modules/nanoid
 
 # Entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
@@ -83,7 +78,6 @@ VOLUME ["/app/data", "/app/public/uploads"]
 USER nextjs
 
 EXPOSE 3000
-
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
