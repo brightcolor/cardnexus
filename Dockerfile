@@ -56,16 +56,14 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
-# Copy Prisma schema + client + CLI (all needed for db push at runtime)
-# Copying the CLI from builder ensures we use Prisma 6 and never fall back
-# to npx pulling Prisma 7 (which has breaking schema.prisma syntax changes)
+# Install Prisma 6 CLI globally — pinned version avoids npx pulling Prisma 7
+# at runtime (Prisma 7 broke schema.prisma datasource url syntax)
+RUN npm install -g prisma@6 --prefer-offline 2>/dev/null || npm install -g prisma@6
+
+# Copy Prisma schema + generated client (needed for db push + app queries)
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-RUN mkdir -p node_modules/.bin && \
-    ln -sf /app/node_modules/prisma/build/index.js /usr/local/bin/prisma && \
-    chmod +x /usr/local/bin/prisma
 
 # Copy seed script + its deps
 COPY --from=builder /app/node_modules/tsx ./node_modules/tsx
