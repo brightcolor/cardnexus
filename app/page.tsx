@@ -113,7 +113,7 @@ export default function LandingPage() {
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg">
-            <Link href="/c/demo">Demo-Karte ansehen</Link>
+            <Link href="/login">Anmelden</Link>
           </Button>
         </div>
 
