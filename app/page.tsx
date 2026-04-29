@@ -80,6 +80,9 @@ export default function LandingPage() {
               <span className="font-semibold text-gray-900">CardNexus</span>
             </div>
             <div className="flex items-center gap-3">
+              <Link href="/c/demo" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                Demo
+              </Link>
               <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                 Anmelden
               </Link>
@@ -113,7 +116,7 @@ export default function LandingPage() {
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg">
-            <Link href="/login">Anmelden</Link>
+            <Link href="/c/demo">Live-Demo ansehen</Link>
           </Button>
         </div>
 
