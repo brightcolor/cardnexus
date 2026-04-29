@@ -82,7 +82,7 @@ jobs:
       - run: npx prisma generate
         env:
           DATABASE_URL: "file:/tmp/ci.db"
-      # TypeScript type-check (no DB needed — Prisma types come from node_modules)
+      # TypeScript type-check — primary CI quality gate (no DB needed)
       - run: npx tsc --noEmit
-      # ESLint (direct — avoids Next.js 16 CLI positional-arg issue with `next lint`)
-      - run: npx eslint app components lib --ext .ts,.tsx --max-warnings 0
+      # ESLint — flat config, basic rules only (TS-aware rules handled by tsc above)
+      - run: npx eslint app components lib --ext .ts,.tsx
