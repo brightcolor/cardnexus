@@ -80,4 +80,4 @@ jobs:
           cache: "npm"
       - run: npm ci --frozen-lockfile
       - run: npx prisma generate
-      - run: npx next lint --dir app --dir components --dir lib
+      - run: npx next lint
