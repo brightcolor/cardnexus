@@ -32,7 +32,7 @@ ENV APP_URL="http://localhost:3000"
 # and returns safe defaults when the DB is unreachable, so this is belt-and-
 # suspenders; the actual data volume is mounted at runtime.
 RUN mkdir -p /tmp/builddb && \
-    DATABASE_URL="file:/tmp/builddb/app.db" npx prisma db push --skip-generate
+    DATABASE_URL="file:/tmp/builddb/app.db" npx prisma db push
 
 ENV DATABASE_URL="file:/tmp/builddb/app.db"
 RUN npm run build

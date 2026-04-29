@@ -8,10 +8,9 @@ mkdir -p /app/data /app/public/uploads
 export DATABASE_URL="${DATABASE_URL:-file:/app/data/app.db}"
 
 echo "[cardnexus] Running database migrations..."
-npx prisma db push --skip-generate
+npx prisma db push
 
 # Seed only when the database is freshly created (no users yet)
-USER_COUNT=$(npx prisma studio --help > /dev/null 2>&1 || true)
 DB_FILE="${DATABASE_URL#file:}"
 
 # Simple heuristic: if the db file is smaller than 64KB it was just created
