@@ -70,7 +70,7 @@ export function AdminSettingsClient({ settings: initial }: { settings: PlatformS
               id="appName"
               value={s.appName}
               onChange={(e) => update("appName", e.target.value)}
-              placeholder="FreddieCard"
+              placeholder="CardNexus"
               maxLength={64}
             />
             <p className="text-xs text-muted-foreground">

@@ -133,7 +133,7 @@ export function PublicCardView({ card, source }: Props) {
       {/* Powered by */}
       <p className="mt-8 text-xs text-gray-400">
         Erstellt mit{" "}
-        <a href="/" className="hover:text-gray-600 transition-colors font-medium">FreddieCard</a>
+        <a href="/" className="hover:text-gray-600 transition-colors font-medium">CardNexus</a>
       </p>
     </div>
   );

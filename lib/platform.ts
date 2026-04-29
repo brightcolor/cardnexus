@@ -12,7 +12,7 @@ export interface PlatformSettings {
 }
 
 const DEFAULTS: Omit<PlatformSettings, "id"> = {
-  appName: "FreddieCard",
+  appName: "CardNexus",
   appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
   faviconUrl: null,
   logoUrl: null,

@@ -25,7 +25,7 @@ interface SidebarProps {
   logoUrl?: string | null;
 }
 
-export function Sidebar({ userRole, orgName, appName = "FreddieCard", logoUrl }: SidebarProps) {
+export function Sidebar({ userRole, orgName, appName = "CardNexus", logoUrl }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
 

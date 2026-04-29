@@ -77,7 +77,7 @@ export default function LandingPage() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-900">
                 <span className="text-xs font-bold text-white">FC</span>
               </div>
-              <span className="font-semibold text-gray-900">FreddieCard</span>
+              <span className="font-semibold text-gray-900">CardNexus</span>
             </div>
             <div className="flex items-center gap-3">
               <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
@@ -157,7 +157,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Alles was du brauchst</h2>
-            <p className="text-gray-500 max-w-xl mx-auto">Von der persönlichen Karte bis zur unternehmensweiten Lösung – FreddieCard wächst mit dir.</p>
+            <p className="text-gray-500 max-w-xl mx-auto">Von der persönlichen Karte bis zur unternehmensweiten Lösung – CardNexus wächst mit dir.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map(({ icon: Icon, title, description }) => (
@@ -224,9 +224,9 @@ export default function LandingPage() {
             <div className="flex h-6 w-6 items-center justify-center rounded bg-gray-900">
               <span className="text-[10px] font-bold text-white">FC</span>
             </div>
-            <span className="text-sm font-medium text-gray-700">FreddieCard</span>
+            <span className="text-sm font-medium text-gray-700">CardNexus</span>
           </div>
-          <p className="text-sm text-gray-400">© {new Date().getFullYear()} FreddieCard. Alle Rechte vorbehalten.</p>
+          <p className="text-sm text-gray-400">© {new Date().getFullYear()} CardNexus. Alle Rechte vorbehalten.</p>
           <div className="flex gap-4 text-sm text-gray-400">
             <a href="#" className="hover:text-gray-700 transition-colors">Datenschutz</a>
             <a href="#" className="hover:text-gray-700 transition-colors">Impressum</a>
