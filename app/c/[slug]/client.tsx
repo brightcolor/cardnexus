@@ -66,7 +66,7 @@ export function PublicCardView({ card, source }: Props) {
       try {
         await navigator.share({ title: name, url });
         track(card.slug, "view", "share");
-      } catch {}
+      } catch { /* user cancelled share dialog */ }
     } else {
       await navigator.clipboard.writeText(url);
       setShared(true);
