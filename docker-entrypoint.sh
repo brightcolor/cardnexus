@@ -1,21 +1,18 @@
 #!/bin/sh
 set -e
 
-# Ensure the data directory exists and is writable
 mkdir -p /app/data /app/public/uploads
-
-# Default DATABASE_URL to the volume path if not set
 export DATABASE_URL="${DATABASE_URL:-file:/app/data/app.db}"
 
 echo "[cardnexus] Running database migrations..."
-npx prisma db push
+# Use the Prisma 6 CLI bundled in the image (see Dockerfile)
+# Never rely on `npx prisma` which would pull Prisma 7 with breaking schema changes
+prisma db push --schema /app/prisma/schema.prisma
 
-# Seed only when the database is freshly created (no users yet)
 DB_FILE="${DATABASE_URL#file:}"
 
-# Simple heuristic: if the db file is smaller than 64KB it was just created
 if [ -f "$DB_FILE" ] && [ "$(stat -c%s "$DB_FILE" 2>/dev/null || stat -f%z "$DB_FILE" 2>/dev/null || echo 999999)" -lt 65536 ]; then
-  echo "[cardnexus] Fresh database detected — seeding default admin..."
+  echo "[cardnexus] Fresh database — seeding default admin..."
   cd /app && node -e "
 const { PrismaClient } = require('@prisma/client');
 const { hashPassword } = require('@better-auth/utils/password');
