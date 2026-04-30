@@ -39,7 +39,10 @@ RUN npm run build
 
 # ─── Stage 3: Runner ─────────────────────────────────────────────────────────
 FROM node:20-alpine AS runner
-RUN apk add --no-cache openssl curl
+# su-exec: lightweight setuid helper (same pattern as official postgres/redis images)
+RUN apk add --no-cache openssl curl su-exec \
+ && addgroup -g 1001 -S nodejs \
+ && adduser  -u 1001 -S nextjs -G nodejs
 
 WORKDIR /app
 
@@ -65,8 +68,9 @@ COPY --from=builder /app/node_modules/@better-auth ./node_modules/@better-auth
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Persistent volume mount points
-RUN mkdir -p /app/data /app/public/uploads
+# Persistent volume mount points — owned by nextjs so su-exec drop works
+RUN mkdir -p /app/data /app/public/uploads \
+ && chown -R nextjs:nodejs /app
 
 EXPOSE 3000
 ENV PORT=3000

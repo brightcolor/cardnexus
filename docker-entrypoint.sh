@@ -1,18 +1,26 @@
 #!/bin/sh
 set -e
 
+# This script runs as root so it can fix bind-mount ownership,
+# then drops privileges to the nextjs user before starting Node.
+
 log() { printf '[cardnexus] %s %s\n' "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" "$*"; }
 
+# Ensure data dirs exist and belong to the app user (handles bind mounts
+# created by root on the host, and named volumes with wrong ownership).
 mkdir -p /app/data /app/public/uploads
+chown nextjs:nodejs /app/data /app/public/uploads
+
 export DATABASE_URL="${DATABASE_URL:-file:/app/data/app.db}"
 DB_FILE="${DATABASE_URL#file:}"
 
 if [ ! -f "$DB_FILE" ]; then
   log "First run — copying pre-initialised database..."
   cp /app/prisma/base.db "$DB_FILE"
+  chown nextjs:nodejs "$DB_FILE"
 
   log "Seeding default admin (admin@example.com / admin123)..."
-  node -e "
+  su-exec nextjs node -e "
 const { PrismaClient } = require('/app/node_modules/@prisma/client');
 const { hashPassword } = require('/app/node_modules/@better-auth/utils/dist/password.node.cjs');
 async function seed() {
@@ -34,4 +42,4 @@ else
 fi
 
 log "Starting application..."
-exec "$@"
+exec su-exec nextjs "$@"
