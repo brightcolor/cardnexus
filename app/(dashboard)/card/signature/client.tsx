@@ -112,30 +112,30 @@ const INSTRUCTIONS: Record<string, { title: string; steps: string[] }> = {
   gmail: {
     title: "Gmail",
     steps: [
-      "Öffne Gmail → Einstellungen (⚙️) → Alle Einstellungen anzeigen",
-      "Scrolle zu „Signatur" und klicke auf „Neue Signatur erstellen"",
+      "Oeffne Gmail -> Einstellungen -> Alle Einstellungen anzeigen",
+      'Scrolle zu "Signatur" und klicke auf "Neue Signatur erstellen"',
       "Gib einen Namen ein, klicke in das Textfeld",
-      "Füge den kopierten Code ein (Strg+V / ⌘V)",
+      "Fuge den kopierten Code ein (Strg+V / Cmd+V)",
       "Speichere die Einstellungen ganz unten",
     ],
   },
   outlook: {
     title: "Outlook",
     steps: [
-      "Öffne Outlook → Datei → Optionen → E-Mail → Signaturen",
-      "Klicke auf „Neu" und gib einen Namen ein",
-      "Öffne den HTML-Editor (Alternativ: öffne den Code in einem Browser, markiere alles, kopiere)",
-      "Füge den Code in das Signaturfeld ein",
-      "Wähle die Signatur für neue Nachrichten und Antworten",
+      "Oeffne Outlook -> Datei -> Optionen -> E-Mail -> Signaturen",
+      'Klicke auf "Neu" und gib einen Namen ein',
+      "Oeffne den HTML-Editor, fuge den Code ein",
+      "Fuge den Code in das Signaturfeld ein",
+      "Waehle die Signatur fuer neue Nachrichten und Antworten",
     ],
   },
   apple: {
     title: "Apple Mail",
     steps: [
-      "Öffne Mail → Einstellungen → Signaturen",
-      "Klicke auf „+" und gib einen Namen ein",
-      "Deaktiviere „Immer klassisches Design"",
-      "Füge den HTML-Code ein (für reines HTML: öffne Terminal → erstelle .html-Datei → ziehe in Signaturfeld)",
+      "Oeffne Mail -> Einstellungen -> Signaturen",
+      'Klicke auf "+" und gib einen Namen ein',
+      'Deaktiviere "Immer klassisches Design"',
+      "Fuge den HTML-Code ein (Terminal -> .html-Datei erstellen -> in Signaturfeld ziehen)",
     ],
   },
 };
