@@ -7,11 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { CardData } from "@/types";
-import { Download, Share2, QrCode, Wallet, X, Loader2, UserPlus, CheckCircle2 } from "lucide-react";
+import { Download, Share2, QrCode, Wallet, X, Loader2, UserPlus, CheckCircle2, CalendarDays } from "lucide-react";
 
 interface Props {
   card: CardData;
   source?: string;
+  showBadge?: boolean;
 }
 
 function track(slug: string, event: string, source?: string) {
@@ -22,7 +23,7 @@ function track(slug: string, event: string, source?: string) {
   }).catch(() => {});
 }
 
-export function PublicCardView({ card, source }: Props) {
+export function PublicCardView({ card, source, showBadge = true }: Props) {
   const [showQR, setShowQR] = useState(false);
   const [showLead, setShowLead] = useState(false);
   const [shared, setShared] = useState(false);
@@ -92,6 +93,15 @@ export function PublicCardView({ card, source }: Props) {
           }
         </Button>
 
+        {card.bookingUrl && (
+          <Button asChild className="w-full" size="lg" style={{ backgroundColor: card.primaryColor }}>
+            <a href={card.bookingUrl} target="_blank" rel="noopener noreferrer">
+              <CalendarDays className="h-4 w-4" />
+              Termin buchen
+            </a>
+          </Button>
+        )}
+
         <Button variant="outline" className="w-full" size="lg" onClick={() => setShowLead(true)}>
           <UserPlus className="h-4 w-4" />
           Kontakt hinterlassen
@@ -142,11 +152,13 @@ export function PublicCardView({ card, source }: Props) {
         <LeadModal card={card} onClose={() => setShowLead(false)} />
       )}
 
-      {/* Powered by */}
-      <p className="mt-8 text-xs text-gray-400">
-        Erstellt mit{" "}
-        <a href="/" className="hover:text-gray-600 transition-colors font-medium">CardNexus</a>
-      </p>
+      {/* Powered by — only for free plan */}
+      {showBadge && (
+        <p className="mt-8 text-xs text-gray-400">
+          Erstellt mit{" "}
+          <a href="/" className="hover:text-gray-600 transition-colors font-medium">CardNexus</a>
+        </p>
+      )}
     </div>
   );
 }

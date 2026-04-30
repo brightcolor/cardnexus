@@ -13,6 +13,7 @@ import { CardPreview } from "./CardPreview";
 import { TEMPLATES } from "@/types";
 import type { CardData, CustomLink, TemplateId, DesignPolicy } from "@/types";
 import { Plus, Trash2, Save, Eye, Lock } from "lucide-react";
+import { FREE_TEMPLATES } from "@/lib/plans";
 
 interface CardEditorProps {
   initialCard?: Partial<CardData>;
@@ -20,6 +21,8 @@ interface CardEditorProps {
   policy?: DesignPolicy;
   /** When set, PATCH requests go here instead of /api/cards */
   saveEndpoint?: string;
+  /** User's current plan — restricts templates for free users */
+  userPlan?: string;
 }
 
 const FONT_OPTIONS = [
@@ -85,7 +88,8 @@ function LockedBadge() {
   );
 }
 
-export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, saveEndpoint }: CardEditorProps) {
+export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, saveEndpoint, userPlan = "free" }: CardEditorProps) {
+  const allTemplates = userPlan !== "free";
   const router = useRouter();
 
   const defaultCard: Partial<CardData> = {
@@ -246,6 +250,11 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
               <Label>Adresse</Label>
               <Input value={card.address ?? ""} onChange={(e) => update("address", e.target.value || null)} placeholder="Musterstraße 1, 80331 München" />
             </div>
+            <div className="space-y-1.5">
+              <Label>Terminbuchungs-Link <span className="text-xs font-normal text-muted-foreground">(Pro)</span></Label>
+              <Input value={card.bookingUrl ?? ""} onChange={(e) => update("bookingUrl", e.target.value || null)} placeholder="https://calendly.com/..." type="url" />
+              <p className="text-xs text-muted-foreground">Wird als Button auf deiner Karte angezeigt.</p>
+            </div>
           </TabsContent>
 
           {/* ── Social ── */}
@@ -281,13 +290,20 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {TEMPLATES.map((t) => {
-                  const locked = !policy.allowTemplateChange;
+                  const policyLocked = !policy.allowTemplateChange;
+                  const planLocked = !allTemplates && !FREE_TEMPLATES.includes(t.id);
+                  const locked = policyLocked || planLocked;
                   return (
                     <button key={t.id} type="button" disabled={locked}
                       onClick={() => !locked && update("templateId", t.id as TemplateId)}
-                      className={`rounded-xl border-2 p-4 text-left transition-all ${
+                      className={`rounded-xl border-2 p-4 text-left transition-all relative ${
                         card.templateId === t.id ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground"
                       } ${locked ? "opacity-50 cursor-not-allowed" : ""}`}>
+                      {planLocked && (
+                        <span className="absolute top-2 right-2 text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-medium flex items-center gap-0.5">
+                          <Lock className="h-2.5 w-2.5" /> Pro
+                        </span>
+                      )}
                       <div className="h-8 w-8 rounded-lg mb-2" style={{ backgroundColor: t.preview }} />
                       <p className="text-sm font-medium">{t.name}</p>
                       <p className="text-xs text-muted-foreground">{t.description}</p>

@@ -3,7 +3,10 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getDeviceType } from "@/lib/utils";
+import { canUseFeature } from "@/lib/plans";
 import { z } from "zod";
+
+const MILESTONES = [100, 500, 1000, 5000, 10000];
 
 const trackSchema = z.object({
   cardSlug: z.string(),
@@ -35,13 +38,48 @@ export async function POST(request: NextRequest) {
   });
 
   if (event === "view") {
-    await db.card.updateMany({
+    const updated = await db.card.updateMany({
       where: { slug: cardSlug },
       data: { totalViews: { increment: 1 } },
     });
+
+    // Check milestone notifications (fire-and-forget)
+    if (updated.count > 0) {
+      checkMilestone(cardSlug).catch(() => {});
+    }
   }
 
   return NextResponse.json({ ok: true });
+}
+
+async function checkMilestone(cardSlug: string) {
+  const card = await db.card.findUnique({
+    where: { slug: cardSlug },
+    select: { totalViews: true, userId: true },
+  });
+  if (!card) return;
+
+  const milestone = MILESTONES.find((m) => card.totalViews === m);
+  if (!milestone) return;
+
+  const user = await db.user.findUnique({
+    where: { id: card.userId },
+    select: { email: true, name: true, plan: true, planExpiresAt: true },
+  });
+  if (!user) return;
+  if (!canUseFeature("milestoneNotifications", user.plan ?? "free", user.planExpiresAt)) return;
+
+  // Store notification in DB for in-app display
+  await db.notification.upsert({
+    where: { userId_type_value: { userId: card.userId, type: "milestone", value: String(milestone) } },
+    update: {},
+    create: {
+      userId: card.userId,
+      type: "milestone",
+      value: String(milestone),
+      message: `Deine Karte hat ${milestone.toLocaleString("de-DE")} Aufrufe erreicht!`,
+    },
+  }).catch(() => {}); // Notification model may not exist yet — silently ignore
 }
 
 export async function GET(request: NextRequest) {

@@ -50,6 +50,7 @@ const updateSchema = z.object({
   avatarBorder: z.enum(["none", "ring", "glow"]).optional(),
   cardBackground: z.enum(["white", "tinted", "gradient"]).optional(),
   logoUrl: urlOrPath.optional().nullable(),
+  bookingUrl: z.string().url().optional().nullable(),
 });
 
 function emptyToNull<T extends Record<string, unknown>>(obj: T): T {

@@ -10,7 +10,7 @@ export const metadata = { title: "Meine Karte" };
 
 export default async function CardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
-  const user = session!.user as { id: string; organizationId?: string; role?: string };
+  const user = session!.user as { id: string; organizationId?: string; role?: string; plan?: string; planExpiresAt?: Date };
 
   const [raw, orgSettings] = await Promise.all([
     db.card.findUnique({ where: { userId: user.id } }),
@@ -40,7 +40,7 @@ export default async function CardPage() {
         </p>
       </div>
 
-      <CardEditor initialCard={card ?? undefined} isNew={!card} policy={policy} />
+      <CardEditor initialCard={card ?? undefined} isNew={!card} policy={policy} userPlan={user.plan ?? "free"} />
 
       {card && (
         <div className="border-t border-border pt-8">

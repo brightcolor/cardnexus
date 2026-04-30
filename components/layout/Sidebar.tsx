@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, CreditCard, Users, BarChart2,
   Settings, LogOut, Shield, UserCheck, Mail,
+  Megaphone, Nfc, Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOut } from "@/lib/auth-client";
@@ -16,7 +17,9 @@ const navItems = [
   { href: "/card/signature", label: "Signatur",      icon: Mail },
   { href: "/team",           label: "Team",          icon: Users },
   { href: "/leads",          label: "Leads",         icon: UserCheck },
+  { href: "/campaigns",      label: "Kampagnen",     icon: Megaphone },
   { href: "/analytics",      label: "Analytics",     icon: BarChart2 },
+  { href: "/nfc",            label: "NFC",           icon: Nfc },
   { href: "/settings",       label: "Einstellungen", icon: Settings },
 ];
 
@@ -62,7 +65,7 @@ export function Sidebar({ userRole, orgName, appName = "CardNexus", logoUrl }: S
       {/* Navigation */}
       <nav className="flex-1 space-y-1 p-3 overflow-y-auto">
         {navItems.map(({ href, label, icon: Icon }) => {
-          // "Signatur" is a sub-page of /card — active when path starts with /card/signature
+          // /card should only be active on exactly /card, not /card/signature
           const isActive = href === "/card"
             ? pathname === "/card"
             : pathname === href || pathname.startsWith(href + "/");
@@ -84,6 +87,19 @@ export function Sidebar({ userRole, orgName, appName = "CardNexus", logoUrl }: S
             </Link>
           );
         })}
+
+        <Link
+          href="/upgrade"
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors mt-2",
+            pathname.startsWith("/upgrade")
+              ? "bg-primary text-primary-foreground"
+              : "text-amber-600 hover:bg-amber-50 hover:text-amber-700 dark:text-amber-400 dark:hover:bg-amber-950"
+          )}
+        >
+          <Zap className="h-4 w-4 shrink-0" />
+          Upgrade
+        </Link>
 
         {userRole === "super_admin" && (
           <Link

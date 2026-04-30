@@ -25,6 +25,7 @@ interface OrgSettings {
   cardFooterText?: string | null;
   brandColors?: string | null;
   departmentPolicies?: string | null;
+  templateCardData?: string | null;
 }
 
 interface Props {
@@ -74,6 +75,20 @@ export function SettingsClientPage({ user, org }: Props) {
     } catch { return []; }
   });
   const [newDeptName, setNewDeptName] = useState("");
+
+  // Org template card defaults (for bulk import)
+  const [templateCompany, setTemplateCompany] = useState<string>(() => {
+    try { return org?.settings?.templateCardData ? JSON.parse(org.settings.templateCardData).company ?? "" : ""; }
+    catch { return ""; }
+  });
+  const [templateColor, setTemplateColor] = useState<string>(() => {
+    try { return org?.settings?.templateCardData ? JSON.parse(org.settings.templateCardData).primaryColor ?? "#0F172A" : "#0F172A"; }
+    catch { return "#0F172A"; }
+  });
+  const [templateId, setTemplateId] = useState<string>(() => {
+    try { return org?.settings?.templateCardData ? JSON.parse(org.settings.templateCardData).templateId ?? "classic" : "classic"; }
+    catch { return "classic"; }
+  });
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -136,6 +151,11 @@ export function SettingsClientPage({ user, org }: Props) {
           analyticsEnabled,
           brandColors: brandColors.length > 0 ? JSON.stringify(brandColors) : null,
           departmentPolicies: deptRows.length > 0 ? JSON.stringify(deptPolicies) : null,
+          templateCardData: JSON.stringify({
+            company: templateCompany || null,
+            primaryColor: templateColor,
+            templateId,
+          }),
         },
       }),
     });
@@ -394,6 +414,48 @@ export function SettingsClientPage({ user, org }: Props) {
               <p className="text-xs text-muted-foreground">
                 Neue Abteilungen erben die globalen Berechtigungen oben als Startwert.
               </p>
+            </CardContent>
+          </Card>
+
+          {/* Template card defaults (for bulk import) */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <LayoutTemplate className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-base">Karten-Vorlage (Bulk Import)</CardTitle>
+              </div>
+              <CardDescription>
+                Diese Werte werden beim CSV-Import als Standardwerte für neue Karten verwendet.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-1.5">
+                <Label>Unternehmensname</Label>
+                <Input value={templateCompany} onChange={(e) => setTemplateCompany(e.target.value)} placeholder={orgName} />
+                <p className="text-xs text-muted-foreground">Wird eingetragen wenn CSV keine Firma enthält.</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label>Template</Label>
+                  <Select value={templateId} onValueChange={setTemplateId}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {["classic","modern","minimal","dark","bold","glass","retro","neon","corporate"].map((t) => (
+                        <SelectItem key={t} value={t} className="capitalize">{t}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Primärfarbe</Label>
+                  <div className="flex items-center gap-2">
+                    <input type="color" value={templateColor} onChange={(e) => setTemplateColor(e.target.value)}
+                      className="h-9 w-12 rounded border border-input cursor-pointer" />
+                    <Input value={templateColor} onChange={(e) => setTemplateColor(e.target.value)}
+                      className="font-mono" maxLength={7} />
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
 

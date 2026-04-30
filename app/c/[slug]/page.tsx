@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import type { CardData } from "@/types";
 import { PublicCardView } from "./client";
+import { canUseFeature } from "@/lib/plans";
 import type { Metadata } from "next";
 
 interface Props {
@@ -28,12 +29,13 @@ export default async function PublicCardPage({ params, searchParams }: Props) {
 
   const raw = await db.card.findUnique({
     where: { slug },
-    include: { user: { select: { name: true, email: true } } },
+    include: { user: { select: { name: true, email: true, plan: true, planExpiresAt: true } } },
   });
 
   if (!raw || !raw.isPublic) notFound();
 
   const card = { ...raw, customLinks: JSON.parse(raw.customLinks) } as CardData;
+  const whiteLabel = canUseFeature("whiteLabel", raw.user?.plan ?? "free", raw.user?.planExpiresAt);
 
-  return <PublicCardView card={card} source={source} />;
+  return <PublicCardView card={card} source={source} showBadge={!whiteLabel} />;
 }

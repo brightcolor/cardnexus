@@ -21,12 +21,17 @@ model user {
   // Role system
   role          String    @default("member") // super_admin | company_admin | team_leader | member
 
+  // Subscription plan
+  plan          String    @default("free") // free | pro | business
+  planExpiresAt DateTime?
+
   // Relations
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id])
   card           Card?
   sentInvitations Invitation[] @relation("InvitationSender")
   analytics      CardAnalytic[]
+  notifications  Notification[]
 
   sessions       session[]
   accounts       account[]
@@ -91,6 +96,9 @@ model Organization {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  plan        String   @default("free") // free | pro | business
+  customDomain String?
+
   users       user[]
   invitations Invitation[]
   settings    OrganizationSettings?
@@ -126,6 +134,7 @@ model OrganizationSettings {
   analyticsEnabled       Boolean @default(true)
   leadCaptureEnabled     Boolean @default(false)
   teamDirectoryEnabled   Boolean @default(true)
+  templateCardData       String? // JSON: default card values for new members
 }
 
 model Card {
@@ -184,14 +193,31 @@ model Card {
   // Directory
   showInTeamDirectory Boolean @default(true)
 
+  // Booking
+  bookingUrl  String?  // appointment booking URL (Cal.com, Calendly, etc.)
+
   // Stats (denormalized for fast reads)
   totalViews Int @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  analytics CardAnalytic[]
-  leads     Lead[]
+  analytics  CardAnalytic[]
+  leads      Lead[]
+  campaigns  Campaign[]
+}
+
+model Campaign {
+  id        String    @id @default(cuid())
+  cardId    String
+  card      Card      @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  name      String
+  urlSlug   String    @unique
+  views     Int       @default(0)
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([cardId])
 }
 
 model Lead {
@@ -240,6 +266,20 @@ model PlatformSettings {
   primaryColor String @default("#0F172A")
   supportEmail String?
   footerText String?
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // milestone | system
+  value     String   // e.g. "1000" for milestone count
+  message   String
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, type, value], name: "userId_type_value")
+  @@index([userId])
 }
 
 model Invitation {

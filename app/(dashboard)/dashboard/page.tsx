@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Eye, QrCode, Download, ArrowRight, Plus } from "lucide-react";
+import { LiveViews } from "./LiveViews";
 
 export default async function DashboardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -57,15 +58,7 @@ export default async function DashboardPage() {
           <div className="grid sm:grid-cols-3 gap-4">
             <Card>
               <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Aufrufe gesamt</p>
-                    <p className="text-3xl font-bold mt-1">{card.totalViews.toLocaleString("de-DE")}</p>
-                  </div>
-                  <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
-                    <Eye className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                </div>
+                <LiveViews initialViews={card.totalViews} cardSlug={card.slug} />
               </CardContent>
             </Card>
             <Card>

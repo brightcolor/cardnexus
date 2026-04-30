@@ -1,4 +1,5 @@
 export type Role = "super_admin" | "company_admin" | "team_leader" | "member";
+export type Plan = "free" | "pro" | "business";
 
 export interface UserProfile {
   id: string;
@@ -59,6 +60,7 @@ export interface CardData {
   roundedStyle?: string | null;
   showQrOnCard?: boolean;
   showInTeamDirectory?: boolean;
+  bookingUrl?: string | null;
   shadowStyle?: string | null;
   socialStyle?: string | null;
   avatarBorder?: string | null;
@@ -185,6 +187,16 @@ export interface DesignPolicy {
     layoutStyle: string;
     accentColor?: string;
   };
+}
+
+export interface Campaign {
+  id: string;
+  cardId: string;
+  name: string;
+  urlSlug: string;
+  views: number;
+  expiresAt?: string | null;
+  createdAt: string;
 }
 
 export interface Lead {
