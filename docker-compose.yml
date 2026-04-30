@@ -1,6 +1,6 @@
 services:
   cardnexus:
-    image: ghcr.io/brightcolor/cardnexus:latest
+    image: ghcr.io/brightcolor/cardnexus:main
     container_name: cardnexus
     restart: unless-stopped
     ports:
