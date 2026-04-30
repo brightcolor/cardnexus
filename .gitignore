@@ -17,9 +17,10 @@ prisma/migrations/
 .env.local
 .env.production
 
-# uploads
-uploads/
+# uploads (user files — not tracked)
 public/uploads/
+# but DO track the route handler that serves them
+!app/uploads/
 
 # misc
 .DS_Store
