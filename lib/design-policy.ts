@@ -18,6 +18,7 @@ const OPEN_POLICY: DesignPolicy = {
   allowColorChange: true,
   allowFontChange: true,
   allowLayoutChange: true,
+  canEditLogo: true,
   brandColors: [],
   defaults: { template: "classic", fontFamily: "inter", layoutStyle: "standard" },
 };
@@ -44,6 +45,7 @@ export function resolveDesignPolicy(
     allowColorChange: deptOverride?.allowColorChange ?? orgSettings.allowMemberColorChange,
     allowFontChange: deptOverride?.allowFontChange ?? orgSettings.allowMemberFontChange,
     allowLayoutChange: deptOverride?.allowLayoutChange ?? orgSettings.allowMemberLayoutChange,
+    canEditLogo: false, // overridden per-user in the page based on role
     brandColors,
     defaults: {
       template: orgSettings.defaultTemplate,

@@ -49,6 +49,11 @@ const updateSchema = z.object({
   roundedStyle: z.enum(["default", "sharp", "pill"]).optional(),
   showQrOnCard: z.boolean().optional(),
   isPublic: z.boolean().optional(),
+  shadowStyle: z.enum(["none", "sm", "md", "lg", "xl"]).optional(),
+  socialStyle: z.enum(["icons", "outline", "minimal"]).optional(),
+  avatarBorder: z.enum(["none", "ring", "glow"]).optional(),
+  cardBackground: z.enum(["white", "tinted", "gradient"]).optional(),
+  logoUrl: urlOrPath.optional().nullable(),
 });
 
 function emptyToNull<T extends Record<string, unknown>>(obj: T): T {

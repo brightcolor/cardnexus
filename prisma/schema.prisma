@@ -164,14 +164,21 @@ model Card {
   customLinks String @default("[]")
 
   // Appearance
-  templateId   String @default("classic")
-  primaryColor String @default("#0F172A")
-  accentColor  String?
-  fontFamily   String @default("inter")  // inter | serif | mono | display
-  layoutStyle  String @default("standard") // standard | centered | compact
-  roundedStyle String @default("default")  // default | sharp | pill
-  showQrOnCard Boolean @default(false)
-  coverUrl     String?
+  templateId     String  @default("classic")
+  primaryColor   String  @default("#0F172A")
+  accentColor    String?
+  fontFamily     String  @default("inter")    // inter | serif | mono | display
+  layoutStyle    String  @default("standard") // standard | centered | compact
+  roundedStyle   String  @default("default")  // default | sharp | pill
+  showQrOnCard   Boolean @default(false)
+  coverUrl       String?
+
+  // Extended appearance
+  shadowStyle    String  @default("md")      // none | sm | md | lg | xl
+  socialStyle    String  @default("icons")   // icons | outline | minimal
+  avatarBorder   String  @default("none")    // none | ring | glow
+  cardBackground String  @default("white")   // white | tinted | gradient
+  logoUrl        String?                     // org logo (admin-controlled) or personal logo
 
   // Stats (denormalized for fast reads)
   totalViews Int @default(0)

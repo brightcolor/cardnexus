@@ -43,6 +43,12 @@ const updateSchema = z.object({
   roundedStyle: z.enum(["default", "sharp", "pill"]).optional(),
   showQrOnCard: z.boolean().optional(),
   isPublic: z.boolean().optional(),
+  // Extended appearance
+  shadowStyle: z.enum(["none", "sm", "md", "lg", "xl"]).optional(),
+  socialStyle: z.enum(["icons", "outline", "minimal"]).optional(),
+  avatarBorder: z.enum(["none", "ring", "glow"]).optional(),
+  cardBackground: z.enum(["white", "tinted", "gradient"]).optional(),
+  logoUrl: urlOrPath.optional().nullable(),
 });
 
 function emptyToNull<T extends Record<string, unknown>>(obj: T): T {
@@ -112,6 +118,20 @@ export async function PATCH(request: NextRequest) {
   const { customLinks, ...rest } = parsed.data;
   const updateData: Record<string, unknown> = { ...rest };
   if (customLinks !== undefined) updateData.customLinks = JSON.stringify(customLinks);
+
+  // Logo permission: org members (non-admin) may not change the logo —
+  // only the org admin (company_admin/super_admin) or users without an org can.
+  if ("logoUrl" in updateData) {
+    const dbUser = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: { organizationId: true, role: true },
+    });
+    const inOrg = !!dbUser?.organizationId;
+    const isAdmin = dbUser?.role === "company_admin" || dbUser?.role === "super_admin";
+    if (inOrg && !isAdmin) {
+      delete updateData.logoUrl;
+    }
+  }
 
   const card = await db.card.update({
     where: { userId: session.user.id },

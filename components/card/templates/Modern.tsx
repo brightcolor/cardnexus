@@ -1,35 +1,48 @@
-import { Phone, Mail, Globe, MapPin, Linkedin, Twitter, Github } from "lucide-react";
+import { Phone, Mail, Globe, MapPin } from "lucide-react";
 import type { CardData } from "@/types";
-import { fontClass, radiusClass } from "../CardPreview";
+import { fontClass, radiusClass, shadowClass, avatarBorderStyle } from "../CardPreview";
+import { SocialLinks } from "./SocialLinks";
 
 export function ModernTemplate({ card }: { card: Partial<CardData> }) {
-  const color = card.primaryColor ?? "#0F172A";
-  const accent = card.accentColor ?? color;
-  const font = fontClass(card.fontFamily);
-  const radius = radiusClass(card.roundedStyle);
+  const color   = card.primaryColor ?? "#0F172A";
+  const accent  = card.accentColor  ?? color;
+  const font    = fontClass(card.fontFamily);
+  const radius  = radiusClass(card.roundedStyle);
+  const shadow  = shadowClass(card.shadowStyle);
   const isCompact = card.layoutStyle === "compact";
+  const avBorder  = avatarBorderStyle(card.avatarBorder, accent, color);
 
   return (
-    <div className={`w-full max-w-sm bg-white ${radius} shadow-xl overflow-hidden ${font}`}>
+    <div className={`relative w-full max-w-sm bg-white ${radius} ${shadow} overflow-hidden ${font}`}>
       {/* Gradient header */}
-      <div className={`relative ${isCompact ? "h-20" : "h-32"} flex items-end pb-0`} style={{ backgroundColor: color }}>
+      <div className={`relative ${isCompact ? "h-20" : "h-32"}`} style={{ backgroundColor: color }}>
         {card.coverUrl && (
           <img src={card.coverUrl} alt="" className="absolute inset-0 h-full w-full object-cover opacity-30" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+
+        {/* Logo on header */}
+        {card.logoUrl && (
+          <div className="absolute top-3 right-3">
+            <img
+              src={card.logoUrl}
+              alt="Logo"
+              className="h-7 w-auto max-w-[64px] object-contain opacity-90"
+              style={{ filter: "brightness(0) invert(1)" }}
+            />
+          </div>
+        )}
       </div>
 
-      {/* Avatar – overlaps header */}
+      {/* Avatar overlapping header */}
       <div className={`flex justify-center ${isCompact ? "-mt-8" : "-mt-12"} mb-4 relative z-10`}>
         <div
-          className={`${isCompact ? "h-16 w-16" : "h-24 w-24"} rounded-full border-4 border-white shadow-lg overflow-hidden flex items-center justify-center text-white ${isCompact ? "text-xl" : "text-2xl"} font-bold`}
-          style={{ backgroundColor: color }}
+          className={`${isCompact ? "h-16 w-16" : "h-24 w-24"} rounded-full border-4 border-white overflow-hidden flex items-center justify-center text-white ${isCompact ? "text-xl" : "text-2xl"} font-bold`}
+          style={{ backgroundColor: color, ...avBorder }}
         >
-          {card.avatarUrl ? (
-            <img src={card.avatarUrl} alt="" className="h-full w-full object-cover" />
-          ) : (
-            `${card.firstName?.[0] ?? ""}${card.lastName?.[0] ?? ""}`
-          )}
+          {card.avatarUrl
+            ? <img src={card.avatarUrl} alt="" className="h-full w-full object-cover" />
+            : `${card.firstName?.[0] ?? ""}${card.lastName?.[0] ?? ""}`}
         </div>
       </div>
 
@@ -38,17 +51,9 @@ export function ModernTemplate({ card }: { card: Partial<CardData> }) {
         <h1 className="text-xl font-bold text-gray-900">
           {card.firstName} {card.lastName}
         </h1>
-        {card.title && (
-          <p className="text-sm font-semibold mt-0.5" style={{ color }}>
-            {card.title}
-          </p>
-        )}
-        {card.company && (
-          <p className="text-sm text-gray-500 mt-0.5">{card.company}</p>
-        )}
-        {card.bio && (
-          <p className="text-xs text-gray-400 mt-3 leading-relaxed">{card.bio}</p>
-        )}
+        {card.title && <p className="text-sm font-semibold mt-0.5" style={{ color }}>{card.title}</p>}
+        {card.company && <p className="text-sm text-gray-500 mt-0.5">{card.company}</p>}
+        {card.bio && <p className="text-xs text-gray-400 mt-3 leading-relaxed">{card.bio}</p>}
       </div>
 
       {/* Contact rows */}
@@ -86,44 +91,22 @@ export function ModernTemplate({ card }: { card: Partial<CardData> }) {
       </div>
 
       {/* Social + custom links */}
-      {(card.linkedin || card.twitter || card.github || card.xing || (card.customLinks && card.customLinks.length > 0)) && (
-        <div className="px-6 py-5 space-y-2">
-          {(card.linkedin || card.twitter || card.github) && (
-            <div className="flex gap-2 justify-center mb-3">
-              {card.linkedin && (
-                <a href={card.linkedin} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border hover:bg-gray-50 transition-colors"
-                  style={{ borderColor: accent, color: accent }}>
-                  <Linkedin className="h-3 w-3" /> LinkedIn
-                </a>
-              )}
-              {card.twitter && (
-                <a href={card.twitter} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border hover:bg-gray-50 transition-colors"
-                  style={{ borderColor: accent, color: accent }}>
-                  <Twitter className="h-3 w-3" /> Twitter
-                </a>
-              )}
-              {card.github && (
-                <a href={card.github} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border hover:bg-gray-50 transition-colors"
-                  style={{ borderColor: accent, color: accent }}>
-                  <Github className="h-3 w-3" /> GitHub
-                </a>
-              )}
-            </div>
-          )}
-          {card.customLinks?.map((link, i) => (
-            <a key={i} href={link.url} target="_blank" rel="noopener noreferrer"
-              className="flex items-center justify-center w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
-              style={{ backgroundColor: accent }}>
-              {link.label}
-            </a>
-          ))}
-        </div>
-      )}
+      <div className="px-6 pb-5">
+        <SocialLinks card={card} accent={accent} isCentered />
+        {card.customLinks && card.customLinks.length > 0 && (
+          <div className="mt-4 space-y-2">
+            {card.customLinks.map((link, i) => (
+              <a key={i} href={link.url} target="_blank" rel="noopener noreferrer"
+                className="flex items-center justify-center w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                style={{ backgroundColor: accent }}>
+                {link.label}
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
 
-      {/* QR on card */}
+      {/* QR */}
       {card.showQrOnCard && card.slug && (
         <div className="px-6 pb-4 flex items-center gap-3">
           <img src={`/api/qr/${card.slug}`} alt="QR Code" className="h-12 w-12" />

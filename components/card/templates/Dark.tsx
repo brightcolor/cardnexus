@@ -1,84 +1,90 @@
-import { Phone, Mail, Globe, MapPin, Linkedin, Twitter, Github, Instagram } from "lucide-react";
+import { Phone, Mail, Globe, MapPin } from "lucide-react";
 import type { CardData } from "@/types";
-import { fontClass, radiusClass } from "../CardPreview";
+import { fontClass, radiusClass, shadowClass, avatarBorderStyle } from "../CardPreview";
+import { SocialLinks } from "./SocialLinks";
 
 export function DarkTemplate({ card }: { card: Partial<CardData> }) {
-  const color = card.primaryColor ?? "#6366f1";
-  const accent = card.accentColor ?? color;
-  const font = fontClass(card.fontFamily);
-  const radius = radiusClass(card.roundedStyle);
+  const color   = card.primaryColor ?? "#6366f1";
+  const accent  = card.accentColor  ?? color;
+  const font    = fontClass(card.fontFamily);
+  const radius  = radiusClass(card.roundedStyle);
+  const shadow  = shadowClass(card.shadowStyle);
   const isCentered = card.layoutStyle === "centered";
+  const avBorder   = avatarBorderStyle(card.avatarBorder, accent, color);
+
+  // Dark-specific background can still have subtle variation
+  const bgColor = card.cardBackground === "tinted"
+    ? `linear-gradient(160deg, #1e293b 0%, #111827 100%)`
+    : card.cardBackground === "gradient"
+    ? `linear-gradient(160deg, #1e293b 0%, ${color}30 100%)`
+    : "#111827";
 
   return (
-    <div className={`w-full max-w-sm ${radius} shadow-2xl overflow-hidden ${font}`} style={{ background: "#111827" }}>
+    <div
+      className={`relative w-full max-w-sm ${radius} ${shadow} overflow-hidden ${font}`}
+      style={{ background: bgColor }}
+    >
       {/* Top glow bar */}
       <div className="h-1 w-full" style={{ background: `linear-gradient(to right, ${color}, ${color}88)` }} />
 
       <div className="p-8">
+        {/* Logo */}
+        {card.logoUrl && (
+          <div className={`mb-5 ${isCentered ? "flex justify-center" : ""}`}>
+            <img
+              src={card.logoUrl}
+              alt="Logo"
+              className="h-7 w-auto max-w-[80px] object-contain opacity-60"
+              style={{ filter: "brightness(0) invert(1)" }}
+            />
+          </div>
+        )}
+
         {/* Avatar + Name */}
         <div className={`flex ${isCentered ? "flex-col items-center text-center" : "items-center"} gap-5 mb-6`}>
           <div
             className="h-20 w-20 shrink-0 rounded-2xl overflow-hidden flex items-center justify-center text-white text-2xl font-bold"
-            style={{ background: `linear-gradient(135deg, ${color}, ${color}88)` }}
+            style={{ background: `linear-gradient(135deg, ${color}, ${color}88)`, ...avBorder }}
           >
-            {card.avatarUrl ? (
-              <img src={card.avatarUrl} alt="" className="h-full w-full object-cover" />
-            ) : (
-              `${card.firstName?.[0] ?? ""}${card.lastName?.[0] ?? ""}`
-            )}
+            {card.avatarUrl
+              ? <img src={card.avatarUrl} alt="" className="h-full w-full object-cover" />
+              : `${card.firstName?.[0] ?? ""}${card.lastName?.[0] ?? ""}`}
           </div>
 
           <div>
             <h1 className="text-xl font-bold text-white leading-tight">
               {card.firstName} {card.lastName}
             </h1>
-            {card.title && (
-              <p className="text-sm font-medium mt-0.5" style={{ color: accent }}>
-                {card.title}
-              </p>
-            )}
-            {card.company && (
-              <p className="text-sm text-gray-400 mt-0.5">{card.company}</p>
-            )}
+            {card.title && <p className="text-sm font-medium mt-0.5" style={{ color: accent }}>{card.title}</p>}
+            {card.company && <p className="text-sm text-gray-400 mt-0.5">{card.company}</p>}
           </div>
         </div>
 
-        {/* Bio */}
-        {card.bio && (
-          <p className="text-sm text-gray-400 mb-6 leading-relaxed">{card.bio}</p>
-        )}
+        {card.bio && <p className="text-sm text-gray-400 mb-6 leading-relaxed">{card.bio}</p>}
 
         {/* Contact */}
         <div className="space-y-3 mb-6">
           {card.phone && (
             <a href={`tel:${card.phone}`} className="flex items-center gap-3 group">
-              <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${accent}20` }}>
-                <Phone className="h-4 w-4" style={{ color: accent }} />
-              </div>
+              <DarkIcon icon={Phone} accent={accent} />
               <span className="text-sm text-gray-300 group-hover:text-white transition-colors">{card.phone}</span>
             </a>
           )}
           {card.mobile && (
             <a href={`tel:${card.mobile}`} className="flex items-center gap-3 group">
-              <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${accent}20` }}>
-                <Phone className="h-4 w-4" style={{ color: accent }} />
-              </div>
+              <DarkIcon icon={Phone} accent={accent} />
               <span className="text-sm text-gray-300 group-hover:text-white transition-colors">{card.mobile}</span>
             </a>
           )}
           {card.email && (
             <a href={`mailto:${card.email}`} className="flex items-center gap-3 group">
-              <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${accent}20` }}>
-                <Mail className="h-4 w-4" style={{ color: accent }} />
-              </div>
+              <DarkIcon icon={Mail} accent={accent} />
               <span className="text-sm text-gray-300 group-hover:text-white transition-colors">{card.email}</span>
             </a>
           )}
           {card.website && (
             <a href={card.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group">
-              <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${accent}20` }}>
-                <Globe className="h-4 w-4" style={{ color: accent }} />
-              </div>
+              <DarkIcon icon={Globe} accent={accent} />
               <span className="text-sm text-gray-300 group-hover:text-white transition-colors">
                 {card.website.replace(/^https?:\/\//, "")}
               </span>
@@ -86,61 +92,42 @@ export function DarkTemplate({ card }: { card: Partial<CardData> }) {
           )}
           {card.address && (
             <div className="flex items-start gap-3">
-              <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: `${accent}20` }}>
-                <MapPin className="h-4 w-4" style={{ color: accent }} />
-              </div>
+              <DarkIcon icon={MapPin} accent={accent} />
               <span className="text-sm text-gray-400">{card.address}</span>
             </div>
           )}
         </div>
 
-        {/* Social */}
-        {(card.linkedin || card.twitter || card.github || card.instagram) && (
-          <div className="flex gap-2 mb-5">
-            {card.linkedin && (
-              <a href={card.linkedin} target="_blank" rel="noopener noreferrer"
-                className="h-9 w-9 rounded-lg flex items-center justify-center hover:opacity-80 transition-opacity"
-                style={{ backgroundColor: `${accent}30`, color }}>
-                <Linkedin className="h-4 w-4" />
-              </a>
-            )}
-            {card.twitter && (
-              <a href={card.twitter} target="_blank" rel="noopener noreferrer"
-                className="h-9 w-9 rounded-lg flex items-center justify-center hover:opacity-80 transition-opacity"
-                style={{ backgroundColor: `${accent}30`, color }}>
-                <Twitter className="h-4 w-4" />
-              </a>
-            )}
-            {card.github && (
-              <a href={card.github} target="_blank" rel="noopener noreferrer"
-                className="h-9 w-9 rounded-lg flex items-center justify-center hover:opacity-80 transition-opacity"
-                style={{ backgroundColor: `${accent}30`, color }}>
-                <Github className="h-4 w-4" />
-              </a>
-            )}
-            {card.instagram && (
-              <a href={card.instagram} target="_blank" rel="noopener noreferrer"
-                className="h-9 w-9 rounded-lg flex items-center justify-center hover:opacity-80 transition-opacity"
-                style={{ backgroundColor: `${accent}30`, color }}>
-                <Instagram className="h-4 w-4" />
-              </a>
-            )}
-          </div>
-        )}
+        <SocialLinks card={card} accent={accent} isCentered={isCentered} dark />
 
-        {/* Custom links */}
         {card.customLinks && card.customLinks.length > 0 && (
-          <div className="space-y-2">
+          <div className="mt-4 space-y-2">
             {card.customLinks.map((link, i) => (
               <a key={i} href={link.url} target="_blank" rel="noopener noreferrer"
                 className="flex items-center justify-center w-full py-2.5 rounded-xl text-sm font-medium transition-opacity hover:opacity-80"
-                style={{ backgroundColor: `${accent}20`, color }}>
+                style={{ backgroundColor: `${accent}20`, color: accent }}>
                 {link.label}
               </a>
             ))}
           </div>
         )}
+
+        {card.showQrOnCard && card.slug && (
+          <div className="mt-4 flex items-center gap-3">
+            <img src={`/api/qr/${card.slug}`} alt="QR Code" className="h-12 w-12 invert opacity-70" />
+            <p className="text-xs text-gray-500">Scan für digitale Karte</p>
+          </div>
+        )}
       </div>
+    </div>
+  );
+}
+
+function DarkIcon({ icon: Icon, accent }: { icon: React.ElementType; accent: string }) {
+  return (
+    <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0"
+      style={{ backgroundColor: `${accent}20` }}>
+      <Icon className="h-4 w-4" style={{ color: accent }} />
     </div>
   );
 }

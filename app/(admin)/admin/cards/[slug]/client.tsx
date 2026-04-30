@@ -9,6 +9,7 @@ const ADMIN_POLICY: DesignPolicy = {
   allowColorChange: true,
   allowFontChange: true,
   allowLayoutChange: true,
+  canEditLogo: true,
   brandColors: [],
   defaults: { template: "classic", fontFamily: "inter", layoutStyle: "standard" },
 };

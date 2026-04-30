@@ -10,7 +10,7 @@ export const metadata = { title: "Meine Karte" };
 
 export default async function CardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
-  const user = session!.user as { id: string; organizationId?: string };
+  const user = session!.user as { id: string; organizationId?: string; role?: string };
 
   const [raw, orgSettings] = await Promise.all([
     db.card.findUnique({ where: { userId: user.id } }),
@@ -23,7 +23,13 @@ export default async function CardPage() {
     ? ({ ...raw, customLinks: JSON.parse(raw.customLinks) } as CardData)
     : null;
 
-  const policy = resolveDesignPolicy(orgSettings, card?.department);
+  const basePolicy = resolveDesignPolicy(orgSettings, card?.department);
+  const canEditLogo =
+    !user.organizationId ||
+    user.role === "company_admin" ||
+    user.role === "super_admin";
+
+  const policy = { ...basePolicy, canEditLogo };
 
   return (
     <div className="space-y-8 max-w-5xl">

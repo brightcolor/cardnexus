@@ -58,6 +58,11 @@ export interface CardData {
   layoutStyle?: string | null;
   roundedStyle?: string | null;
   showQrOnCard?: boolean;
+  shadowStyle?: string | null;
+  socialStyle?: string | null;
+  avatarBorder?: string | null;
+  cardBackground?: string | null;
+  logoUrl?: string | null;
   totalViews: number;
 
   createdAt: Date;
@@ -141,6 +146,7 @@ export interface DesignPolicy {
   allowColorChange: boolean;
   allowFontChange: boolean;
   allowLayoutChange: boolean;
+  canEditLogo: boolean;
   brandColors: string[];
   defaults: {
     template: string;
