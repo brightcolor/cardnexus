@@ -41,5 +41,8 @@ else
   log "Existing database found — skipping init"
 fi
 
+log "Applying database migrations (prisma db push)..."
+su-exec nextjs npx prisma db push --skip-generate --accept-data-loss 2>&1 | while IFS= read -r line; do log "$line"; done
+
 log "Starting application..."
 exec su-exec nextjs "$@"
