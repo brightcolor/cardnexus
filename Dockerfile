@@ -46,10 +46,6 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Non-root user
-RUN addgroup --system --gid 1001 nodejs \
- && adduser  --system --uid 1001 nextjs
-
 # Copy built Next.js standalone output
 RUN mkdir -p ./public
 COPY --from=builder /app/public ./public
@@ -70,12 +66,7 @@ COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Persistent volume mount points
-RUN mkdir -p /app/data /app/public/uploads \
- && chown -R nextjs:nodejs /app/data /app/public/uploads /app
-
-VOLUME ["/app/data", "/app/public/uploads"]
-
-USER nextjs
+RUN mkdir -p /app/data /app/public/uploads
 
 EXPOSE 3000
 ENV PORT=3000
