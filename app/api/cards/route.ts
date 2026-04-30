@@ -35,13 +35,14 @@ const updateSchema = z.object({
   customLinks: z
     .array(z.object({ label: z.string(), url: z.string() }))
     .optional(),
-  templateId: z.enum(["classic", "modern", "minimal", "dark"]).optional(),
+  templateId: z.enum(["classic", "modern", "minimal", "dark", "bold", "glass", "retro", "neon", "corporate"]).optional(),
   primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
   accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional().nullable(),
   fontFamily: z.enum(["inter", "serif", "mono", "display"]).optional(),
   layoutStyle: z.enum(["standard", "centered", "compact"]).optional(),
   roundedStyle: z.enum(["default", "sharp", "pill"]).optional(),
   showQrOnCard: z.boolean().optional(),
+  showInTeamDirectory: z.boolean().optional(),
   isPublic: z.boolean().optional(),
   // Extended appearance
   shadowStyle: z.enum(["none", "sm", "md", "lg", "xl"]).optional(),

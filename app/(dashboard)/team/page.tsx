@@ -17,7 +17,9 @@ export default async function TeamPage() {
   const [users, invitations, org] = await Promise.all([
     db.user.findMany({
       where: orgId ? { organizationId: orgId } : {},
-      include: { card: { select: { slug: true, isPublic: true } } },
+      include: {
+        card: { select: { slug: true, isPublic: true, showInTeamDirectory: true } },
+      },
       orderBy: { createdAt: "desc" },
     }),
     canManageUsers(role) && orgId
@@ -30,7 +32,11 @@ export default async function TeamPage() {
     orgId
       ? db.organization.findUnique({
           where: { id: orgId },
-          select: { name: true, _count: { select: { users: true } } },
+          select: {
+            name: true, slug: true,
+            _count: { select: { users: true } },
+            settings: { select: { teamDirectoryEnabled: true } },
+          },
         })
       : null,
   ]);
@@ -50,8 +56,10 @@ export default async function TeamPage() {
       currentUserId={user.id}
       currentUserRole={role}
       orgName={org?.name}
+      orgSlug={org?.slug}
       memberCount={org?._count.users ?? users.length}
       canManage={canManageUsers(role)}
+      teamDirectoryEnabled={org?.settings?.teamDirectoryEnabled ?? true}
     />
   );
 }

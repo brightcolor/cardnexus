@@ -122,9 +122,10 @@ model OrganizationSettings {
   departmentPolicies String?
 
   // Features
-  walletEnabled      Boolean @default(false)
-  analyticsEnabled   Boolean @default(true)
-  leadCaptureEnabled Boolean @default(false)
+  walletEnabled          Boolean @default(false)
+  analyticsEnabled       Boolean @default(true)
+  leadCaptureEnabled     Boolean @default(false)
+  teamDirectoryEnabled   Boolean @default(true)
 }
 
 model Card {
@@ -180,6 +181,9 @@ model Card {
   cardBackground String  @default("white")   // white | tinted | gradient
   logoUrl        String?                     // org logo (admin-controlled) or personal logo
 
+  // Directory
+  showInTeamDirectory Boolean @default(true)
+
   // Stats (denormalized for fast reads)
   totalViews Int @default(0)
 
@@ -187,6 +191,20 @@ model Card {
   updatedAt DateTime @updatedAt
 
   analytics CardAnalytic[]
+  leads     Lead[]
+}
+
+model Lead {
+  id        String   @id @default(cuid())
+  cardId    String
+  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  name      String
+  email     String?
+  phone     String?
+  message   String?
+  createdAt DateTime @default(now())
+
+  @@index([cardId])
 }
 
 model CardAnalytic {

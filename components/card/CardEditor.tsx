@@ -101,8 +101,9 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
     socialStyle:    "icons",
     avatarBorder:   "none",
     cardBackground: "white",
-    showQrOnCard:   false,
-    isPublic:       true,
+    showQrOnCard:         false,
+    showInTeamDirectory:  true,
+    isPublic:             true,
     customLinks:    [],
   };
 
@@ -522,6 +523,15 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
                 <p className="text-xs text-muted-foreground">Karte für alle sichtbar</p>
               </div>
               <Switch checked={card.isPublic ?? true} onCheckedChange={(v) => update("isPublic", v)} />
+            </div>
+
+            {/* Team directory toggle */}
+            <div className="flex items-center justify-between rounded-lg border border-border p-4">
+              <div>
+                <p className="text-sm font-medium">Im Team-Verzeichnis anzeigen</p>
+                <p className="text-xs text-muted-foreground">Profil im öffentlichen Verzeichnis deiner Organisation sichtbar</p>
+              </div>
+              <Switch checked={card.showInTeamDirectory ?? true} onCheckedChange={(v) => update("showInTeamDirectory", v)} />
             </div>
           </TabsContent>
 

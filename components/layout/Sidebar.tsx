@@ -4,18 +4,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, CreditCard, Users, BarChart2,
-  Settings, LogOut, Shield,
+  Settings, LogOut, Shield, UserCheck, Mail,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 
 const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/card", label: "Meine Karte", icon: CreditCard },
-  { href: "/team", label: "Team", icon: Users },
-  { href: "/analytics", label: "Analytics", icon: BarChart2 },
-  { href: "/settings", label: "Einstellungen", icon: Settings },
+  { href: "/dashboard",      label: "Dashboard",     icon: LayoutDashboard },
+  { href: "/card",           label: "Meine Karte",   icon: CreditCard },
+  { href: "/card/signature", label: "Signatur",      icon: Mail },
+  { href: "/team",           label: "Team",          icon: Users },
+  { href: "/leads",          label: "Leads",         icon: UserCheck },
+  { href: "/analytics",      label: "Analytics",     icon: BarChart2 },
+  { href: "/settings",       label: "Einstellungen", icon: Settings },
 ];
 
 interface SidebarProps {
@@ -59,21 +61,29 @@ export function Sidebar({ userRole, orgName, appName = "CardNexus", logoUrl }: S
 
       {/* Navigation */}
       <nav className="flex-1 space-y-1 p-3 overflow-y-auto">
-        {navItems.map(({ href, label, icon: Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-              pathname === href || pathname.startsWith(href + "/")
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-accent hover:text-foreground"
-            )}
-          >
-            <Icon className="h-4 w-4 shrink-0" />
-            {label}
-          </Link>
-        ))}
+        {navItems.map(({ href, label, icon: Icon }) => {
+          // "Signatur" is a sub-page of /card — active when path starts with /card/signature
+          const isActive = href === "/card"
+            ? pathname === "/card"
+            : pathname === href || pathname.startsWith(href + "/");
+
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                isActive
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground",
+                href === "/card/signature" ? "pl-8" : ""
+              )}
+            >
+              <Icon className="h-4 w-4 shrink-0" />
+              {label}
+            </Link>
+          );
+        })}
 
         {userRole === "super_admin" && (
           <Link

@@ -58,6 +58,7 @@ export interface CardData {
   layoutStyle?: string | null;
   roundedStyle?: string | null;
   showQrOnCard?: boolean;
+  showInTeamDirectory?: boolean;
   shadowStyle?: string | null;
   socialStyle?: string | null;
   avatarBorder?: string | null;
@@ -184,6 +185,16 @@ export interface DesignPolicy {
     layoutStyle: string;
     accentColor?: string;
   };
+}
+
+export interface Lead {
+  id: string;
+  cardId: string;
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  message?: string | null;
+  createdAt: string; // ISO string after serialization
 }
 
 export interface ApiResponse<T = unknown> {
