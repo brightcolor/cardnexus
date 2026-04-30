@@ -77,7 +77,7 @@ export interface CustomLink {
   icon?: string;
 }
 
-export type TemplateId = "classic" | "modern" | "minimal" | "dark";
+export type TemplateId = "classic" | "modern" | "minimal" | "dark" | "bold" | "glass" | "retro" | "neon" | "corporate";
 
 export interface Template {
   id: TemplateId;
@@ -110,6 +110,36 @@ export const TEMPLATES: Template[] = [
     name: "Dark",
     description: "Dunkel und elegant",
     preview: "#111827",
+  },
+  {
+    id: "bold",
+    name: "Bold",
+    description: "Zweispaltiges Layout mit farbigem Panel",
+    preview: "#1e293b",
+  },
+  {
+    id: "glass",
+    name: "Glass",
+    description: "Glasmorphismus auf Farbverlauf",
+    preview: "#6366f1",
+  },
+  {
+    id: "retro",
+    name: "Retro",
+    description: "Vintage-Stil mit Schmuckelementen",
+    preview: "#FDF6E3",
+  },
+  {
+    id: "neon",
+    name: "Neon",
+    description: "Cyberpunk-Glowing auf dunklem Hintergrund",
+    preview: "#07090f",
+  },
+  {
+    id: "corporate",
+    name: "Corporate",
+    description: "Formell und strukturiert für Unternehmen",
+    preview: "#1e3a5f",
   },
 ];
 

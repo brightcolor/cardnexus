@@ -3,6 +3,11 @@ import { ClassicTemplate } from "./templates/Classic";
 import { ModernTemplate } from "./templates/Modern";
 import { MinimalTemplate } from "./templates/Minimal";
 import { DarkTemplate } from "./templates/Dark";
+import { BoldTemplate } from "./templates/Bold";
+import { GlassTemplate } from "./templates/Glass";
+import { RetroTemplate } from "./templates/Retro";
+import { NeonTemplate } from "./templates/Neon";
+import { CorporateTemplate } from "./templates/Corporate";
 
 interface CardPreviewProps {
   card: Partial<CardData>;
@@ -19,10 +24,15 @@ export function CardPreview({ card, scale = 1 }: CardPreviewProps) {
         transformOrigin: "top center",
       }}
     >
-      {template === "classic" && <ClassicTemplate card={card} />}
-      {template === "modern" && <ModernTemplate card={card} />}
-      {template === "minimal" && <MinimalTemplate card={card} />}
-      {template === "dark" && <DarkTemplate card={card} />}
+      {template === "classic"   && <ClassicTemplate   card={card} />}
+      {template === "modern"    && <ModernTemplate    card={card} />}
+      {template === "minimal"   && <MinimalTemplate   card={card} />}
+      {template === "dark"      && <DarkTemplate      card={card} />}
+      {template === "bold"      && <BoldTemplate      card={card} />}
+      {template === "glass"     && <GlassTemplate     card={card} />}
+      {template === "retro"     && <RetroTemplate     card={card} />}
+      {template === "neon"      && <NeonTemplate      card={card} />}
+      {template === "corporate" && <CorporateTemplate card={card} />}
     </div>
   );
 }
