@@ -6,8 +6,8 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - cardnexus-db:/app/data
-      - cardnexus-uploads:/app/public/uploads
+      - ./data:/app/data
+      - ./uploads:/app/public/uploads
     environment:
       # Required: generate with: openssl rand -base64 32
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET in .env}
@@ -22,6 +22,3 @@ services:
       retries: 3
       start_period: 40s
 
-volumes:
-  cardnexus-db:
-  cardnexus-uploads:

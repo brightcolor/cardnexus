@@ -17,7 +17,9 @@ prisma/migrations/
 .env.local
 .env.production
 
-# uploads (user files — not tracked)
+# runtime data directories (bind mounts — not tracked)
+data/
+uploads/
 public/uploads/
 # but DO track the route handler that serves them
 !app/uploads/

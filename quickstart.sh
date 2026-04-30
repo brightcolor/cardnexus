@@ -43,6 +43,11 @@ else
   warn ".env already exists — skipping secret generation."
 fi
 
+# ── Create data directories (bind mounts) ────────────────────────────────────
+mkdir -p data uploads
+info "Data directory:    ${INSTALL_DIR}/data"
+info "Uploads directory: ${INSTALL_DIR}/uploads"
+
 # ── Start ─────────────────────────────────────────────────────────────────────
 info "Starting CardNexus via Docker Compose..."
 docker compose pull
