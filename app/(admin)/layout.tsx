@@ -3,12 +3,12 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Users, Building2, LayoutDashboard, Settings2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ArrowLeft, Users, Building2, LayoutDashboard, Settings2, CreditCard } from "lucide-react";
 
 const adminNav = [
   { href: "/admin", label: "Übersicht", icon: LayoutDashboard },
   { href: "/admin/users", label: "Benutzer", icon: Users },
+  { href: "/admin/cards", label: "Karten", icon: CreditCard },
   { href: "/admin/organizations", label: "Organisationen", icon: Building2 },
   { href: "/admin/settings", label: "Einstellungen", icon: Settings2 },
 ];
@@ -25,7 +25,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 h-16 flex items-center gap-6">
           <div className="flex items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded bg-gray-900">
-              <span className="text-[10px] font-bold text-white">FC</span>
+              <span className="text-[10px] font-bold text-white">CN</span>
             </div>
             <span className="text-sm font-semibold">Super Admin</span>
           </div>

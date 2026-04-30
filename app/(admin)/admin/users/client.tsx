@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getInitials, getRoleLabel, formatDate } from "@/lib/utils";
-import { Search } from "lucide-react";
+import { Search, Pencil } from "lucide-react";
+import Link from "next/link";
 import type { Role } from "@/types";
 
 const ROLE_VARIANT: Record<string, "default" | "secondary" | "outline" | "warning"> = {
@@ -95,9 +96,18 @@ export function AdminUsersClient({ users: initial, currentUserId }: { users: Adm
                 </td>
                 <td className="px-4 py-3 hidden lg:table-cell">
                   {user.card ? (
-                    <a href={`/c/${user.card.slug}`} target="_blank" className="text-xs text-primary hover:underline">
-                      {user.card.slug}
-                    </a>
+                    <div className="flex items-center gap-2">
+                      <a href={`/c/${user.card.slug}`} target="_blank" className="text-xs text-primary hover:underline">
+                        {user.card.slug}
+                      </a>
+                      <Link
+                        href={`/admin/cards/${user.card.slug}`}
+                        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                        title="Karte bearbeiten"
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </Link>
+                    </div>
                   ) : <span className="text-muted-foreground text-xs">—</span>}
                 </td>
                 <td className="px-4 py-3 text-muted-foreground text-xs hidden lg:table-cell">

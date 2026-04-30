@@ -18,6 +18,8 @@ interface CardEditorProps {
   initialCard?: Partial<CardData>;
   isNew?: boolean;
   policy?: DesignPolicy;
+  /** When set, PATCH requests go here instead of /api/cards */
+  saveEndpoint?: string;
 }
 
 const FONT_OPTIONS = [
@@ -56,7 +58,7 @@ function LockedBadge() {
   );
 }
 
-export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY }: CardEditorProps) {
+export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, saveEndpoint }: CardEditorProps) {
   const router = useRouter();
 
   const defaultCard: Partial<CardData> = {
@@ -103,7 +105,8 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY }:
     setSuccess(false);
     try {
       const method = isNew ? "POST" : "PATCH";
-      const res = await fetch("/api/cards", {
+      const endpoint = saveEndpoint ?? "/api/cards";
+      const res = await fetch(endpoint, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(card),
