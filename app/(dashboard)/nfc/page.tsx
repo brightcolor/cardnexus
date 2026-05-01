@@ -6,7 +6,8 @@ import { Smartphone, Nfc, ExternalLink, Copy } from "lucide-react";
 export const metadata = { title: "NFC-Tag einrichten" };
 
 export default async function NfcPage() {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const hdrs = await headers();
+  const session = await auth.api.getSession({ headers: hdrs });
   const user = session!.user as { id: string };
 
   const card = await db.card.findUnique({
@@ -14,9 +15,11 @@ export default async function NfcPage() {
     select: { slug: true },
   });
 
-  const cardUrl = card
-    ? `${process.env.NEXT_PUBLIC_APP_URL ?? "https://cardnexus.app"}/c/${card.slug}`
-    : null;
+  const host  = hdrs.get("x-forwarded-host") ?? hdrs.get("host") ?? "localhost:3000";
+  const proto = hdrs.get("x-forwarded-proto") ?? "http";
+  const baseUrl = `${proto}://${host}`;
+
+  const cardUrl = card ? `${baseUrl}/c/${card.slug}` : null;
 
   return (
     <div className="max-w-2xl space-y-8">
