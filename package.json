@@ -28,6 +28,7 @@
     "lucide-react": "^0.488.0",
     "nanoid": "^5.1.5",
     "next": "^16.2.4",
+    "nodemailer": "^8.0.7",
     "qrcode": "^1.5.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -37,6 +38,7 @@
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/nodemailer": "^8.0.0",
     "@types/qrcode": "^1.5.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",

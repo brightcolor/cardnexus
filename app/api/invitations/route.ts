@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { canManageUsers } from "@/lib/utils";
+import { sendInvitationEmail } from "@/lib/email";
 import { z } from "zod";
 import { nanoid } from "nanoid";
 
@@ -70,8 +71,20 @@ export async function POST(request: NextRequest) {
     include: { sender: { select: { name: true } }, organization: { select: { name: true } } },
   });
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const inviteUrl = `${appUrl}/register?invite=${token}`;
+  // Derive base URL from request so it works on any host
+  const reqHeaders = await headers();
+  const host  = reqHeaders.get("x-forwarded-host") ?? reqHeaders.get("host") ?? "localhost:3000";
+  const proto = reqHeaders.get("x-forwarded-proto") ?? "http";
+  const inviteUrl = `${proto}://${host}/register?invite=${token}`;
+
+  // Send email (fire-and-forget — don't block the response)
+  sendInvitationEmail({
+    to:         invitation.email,
+    senderName: invitation.sender.name,
+    orgName:    invitation.organization.name,
+    role:       invitation.role,
+    inviteUrl,
+  }).catch((e) => console.error("[invite email]", e));
 
   return NextResponse.json({ data: invitation, inviteUrl }, { status: 201 });
 }

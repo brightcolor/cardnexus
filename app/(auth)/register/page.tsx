@@ -34,14 +34,17 @@ function RegisterForm() {
       return;
     }
 
-    // If there's an invite token, accept it after registration
-    if (inviteToken) {
-      await fetch(`/api/invitations/accept`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: inviteToken }),
-      });
-    }
+    // Run in parallel: accept invite (if present) + trigger welcome email
+    await Promise.allSettled([
+      inviteToken
+        ? fetch("/api/invitations/accept", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token: inviteToken }),
+          })
+        : Promise.resolve(),
+      fetch("/api/auth/welcome", { method: "POST" }),
+    ]);
 
     router.push("/dashboard");
   }
