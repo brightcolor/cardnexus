@@ -45,8 +45,10 @@ async function migrate() {
   }
 
   // ── user table ───────────────────────────────────────────────────────────
-  await addColumn("user", "plan",          'TEXT NOT NULL DEFAULT "free"');
-  await addColumn("user", "planExpiresAt", "DATETIME");
+  await addColumn("user", "plan",                 'TEXT NOT NULL DEFAULT "free"');
+  await addColumn("user", "planExpiresAt",        "DATETIME");
+  await addColumn("user", "stripeCustomerId",     "TEXT");
+  await addColumn("user", "stripeSubscriptionId", "TEXT");
 
   // ── Organization table ───────────────────────────────────────────────────
   await addColumn("Organization", "plan",         'TEXT NOT NULL DEFAULT "free"');

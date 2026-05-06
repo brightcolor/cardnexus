@@ -22,8 +22,10 @@ model user {
   role          String    @default("member") // super_admin | company_admin | team_leader | member
 
   // Subscription plan
-  plan          String    @default("free") // free | pro | business
-  planExpiresAt DateTime?
+  plan                 String    @default("free") // free | pro | business
+  planExpiresAt        DateTime?
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?   @unique
 
   // Relations
   organizationId String?

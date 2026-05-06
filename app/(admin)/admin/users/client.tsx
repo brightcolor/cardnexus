@@ -126,13 +126,12 @@ export function AdminUsersClient({ users: initial, currentUserId }: { users: Adm
                 {/* Plan */}
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-1.5">
+                    <div className={`px-1.5 py-0.5 rounded text-xs font-medium shrink-0 ${PLAN_VARIANT[user.plan] ?? ""}`}>
+                      {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)}
+                    </div>
                     <Select value={user.plan} onValueChange={(v) => changePlan(user.id, v)}>
-                      <SelectTrigger className="h-7 w-28 text-xs">
-                        <SelectValue>
-                          <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${PLAN_VARIANT[user.plan] ?? ""}`}>
-                            {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)}
-                          </span>
-                        </SelectValue>
+                      <SelectTrigger className="h-7 w-7 text-xs p-0 border-0 shadow-none bg-transparent focus:ring-0" aria-label="Plan ändern">
+                        <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="free">Free</SelectItem>

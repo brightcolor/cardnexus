@@ -2,17 +2,36 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { PLANS, effectivePlan } from "@/lib/plans";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Check, ArrowLeft, Zap } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { UpgradeButtons } from "./UpgradeButtons";
 
 export const metadata = { title: "Upgrade – CardNexus" };
 
-export default async function UpgradePage() {
+const FEATURE_LABELS: Record<string, string> = {
+  whiteLabel:              "White Label (kein Badge)",
+  customDomain:            "Eigene Domain",
+  allTemplates:            "Alle 9 Templates",
+  pdfExport:               "PDF / Print-Export",
+  appointmentBooking:      "Terminbuchungs-Link",
+  campaigns:               "UTM-Kampagnen",
+  eventInvitations:        "Event-Einladungslinks",
+  milestoneNotifications:  "Meilenstein-Benachrichtigungen",
+  bulkImport:              "Bulk CSV-Import",
+  orgTemplate:             "Karten-Vorlage fur Org",
+};
+
+export default async function UpgradePage({ searchParams }: { searchParams: Promise<{ success?: string; canceled?: string }> }) {
+  const sp = await searchParams;
   const session = await auth.api.getSession({ headers: await headers() });
-  const user = session!.user as { id: string; plan?: string; planExpiresAt?: Date };
-  const currentPlan = effectivePlan(user.plan ?? "free", user.planExpiresAt);
+  const user = session!.user as { id: string; plan?: string; planExpiresAt?: Date; stripeCustomerId?: string; stripeSubscriptionId?: string };
+
+  // Re-fetch from DB to get latest plan after webhook
+  const dbUser = await db.user.findUnique({ where: { id: user.id }, select: { plan: true, planExpiresAt: true, stripeCustomerId: true, stripeSubscriptionId: true } });
+  const currentPlan = effectivePlan(dbUser?.plan ?? "free", dbUser?.planExpiresAt);
+  const hasStripe = !!dbUser?.stripeCustomerId;
+
+  const stripeConfigured = !!(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_PRICE_PRO_MONTHLY);
 
   return (
     <div className="max-w-3xl space-y-8">
@@ -24,8 +43,30 @@ export default async function UpgradePage() {
         <h1 className="text-2xl font-bold">Plan upgraden</h1>
         <p className="text-muted-foreground mt-1">
           Aktuell: <span className="font-semibold capitalize">{currentPlan}</span>
+          {dbUser?.planExpiresAt && (
+            <span className="text-xs ml-2 text-muted-foreground">
+              (bis {new Date(dbUser.planExpiresAt).toLocaleDateString("de-DE")})
+            </span>
+          )}
         </p>
       </div>
+
+      {sp.success && (
+        <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-700">
+          Zahlung erfolgreich! Dein Plan wurde aktualisiert.
+        </div>
+      )}
+      {sp.canceled && (
+        <div className="rounded-xl bg-muted border border-border px-4 py-3 text-sm text-muted-foreground">
+          Vorgang abgebrochen.
+        </div>
+      )}
+
+      {!stripeConfigured && (
+        <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-700">
+          Stripe ist nicht konfiguriert. Bitte setze <code className="font-mono">STRIPE_SECRET_KEY</code> und <code className="font-mono">STRIPE_PRICE_PRO_MONTHLY</code> in der Server-.env.
+        </div>
+      )}
 
       <div className="grid sm:grid-cols-2 gap-4">
         {(["pro", "business"] as const).map((planId) => {
@@ -33,20 +74,13 @@ export default async function UpgradePage() {
           const isCurrent = currentPlan === planId;
 
           return (
-            <div
-              key={planId}
-              className={`bg-card rounded-2xl border p-6 flex flex-col gap-4 ${
-                plan.highlight ? "border-primary" : "border-border"
-              }`}
-            >
+            <div key={planId} className={`bg-card rounded-2xl border-2 p-6 flex flex-col gap-4 ${plan.highlight ? "border-primary" : "border-border"}`}>
               <div>
                 <div className="flex items-center gap-2">
                   <Zap className="h-4 w-4 text-primary" />
-                  <span className="font-bold">{plan.name}</span>
+                  <span className="font-bold text-lg">{plan.name}</span>
                   {isCurrent && (
-                    <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
-                      Aktuell
-                    </span>
+                    <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">Aktuell</span>
                   )}
                 </div>
                 <div className="mt-2">
@@ -59,19 +93,7 @@ export default async function UpgradePage() {
               <ul className="space-y-2 flex-1">
                 {Object.entries(plan.features).map(([k, v]) => {
                   if (!v || v === 0) return null;
-                  const labels: Record<string, string> = {
-                    whiteLabel: "White Label (kein Badge)",
-                    customDomain: "Eigene Domain",
-                    allTemplates: "Alle 9 Templates",
-                    pdfExport: "PDF / Print-Export",
-                    appointmentBooking: "Terminbuchungs-Link",
-                    campaigns: "UTM-Kampagnen",
-                    eventInvitations: "Event-Einladungslinks",
-                    milestoneNotifications: "Meilenstein-Benachrichtigungen",
-                    bulkImport: "Bulk CSV-Import",
-                    orgTemplate: "Karten-Vorlage fur Org",
-                  };
-                  const label = labels[k];
+                  const label = FEATURE_LABELS[k];
                   if (!label) return null;
                   return (
                     <li key={k} className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -82,23 +104,19 @@ export default async function UpgradePage() {
                 })}
               </ul>
 
-              <Button
-                asChild
-                className="w-full"
-                variant={isCurrent ? "outline" : "default"}
-                disabled={isCurrent}
-              >
-                <Link href={`mailto:sales@cardnexus.app?subject=Upgrade zu ${plan.name}`}>
-                  {isCurrent ? "Aktueller Plan" : `Zu ${plan.name} upgraden`}
-                </Link>
-              </Button>
+              <UpgradeButtons
+                planId={planId}
+                isCurrent={isCurrent}
+                hasStripe={hasStripe}
+                stripeConfigured={stripeConfigured}
+              />
             </div>
           );
         })}
       </div>
 
       <p className="text-sm text-muted-foreground text-center">
-        Fragen zum Upgrade?{" "}
+        Fragen?{" "}
         <a href="mailto:sales@cardnexus.app" className="underline hover:text-foreground transition-colors">
           sales@cardnexus.app
         </a>
