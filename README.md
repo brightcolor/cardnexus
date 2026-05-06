@@ -93,15 +93,20 @@ CardNexus is a self-hosted **digital business card platform** that replaces pape
 | Feature | Description |
 |---------|-------------|
 | **Personal card page** | Public profile at `yourdomain.com/c/your-name` |
-| **4 card templates** | Classic, Modern, Minimal, Dark |
+| **9 card templates** | Classic, Modern, Minimal, Dark, Gradient, Glassmorphism, Bold, Elegant, Neon |
 | **Brand customization** | Primary color, accent color, font family, layout style, corner radius |
 | **Avatar & cover photo** | Upload profile picture and cover background |
 | **Full contact block** | Phone, mobile, email, website, address |
-| **Social links** | LinkedIn, Xing, Twitter, Instagram, GitHub, YouTube |
-| **Custom link buttons** | Up to 5 branded CTAs on your card (e.g. "Book a call") |
+| **Social links** | LinkedIn, Xing, Twitter, Instagram, GitHub, YouTube and more |
+| **Custom link buttons** | Branded CTAs on your card (e.g. "Book a call") |
+| **Booking URL** | Link directly to your calendar (Cal.com, Calendly, etc.) |
+| **Email signature** | Auto-generated HTML signature for Gmail, Outlook and co. |
 | **vCard download** | One tap adds all contacts to phone address book |
 | **QR code** | Per-card QR code, color-matched, downloadable as SVG |
 | **Analytics** | See who viewed your card, from where, on which device |
+| **Realtime view counter** | Live updating view count on your dashboard |
+| **NFC setup guide** | Step-by-step instructions to program your NFC tag |
+| **Lead capture form** | Visitors can leave their contact details on your card |
 | **Public / private toggle** | Hide your card from the public at any time |
 
 ### For organization admins
@@ -113,6 +118,8 @@ CardNexus is a self-hosted **digital business card platform** that replaces pape
 | **Permission matrix** | Control per-organization: can members change template, color, font, layout? |
 | **Department policies** | Override permissions per department (e.g. Marketing = free design, Legal = locked) |
 | **Card footer text** | Append a company tagline or disclaimer to every card |
+| **Bulk import template** | Define a card template for CSV bulk imports |
+| **Team directory** | Searchable directory of all org members |
 | **Analytics** | Aggregate view / download / scan stats across the whole organization |
 
 ### For super admins
@@ -121,19 +128,43 @@ CardNexus is a self-hosted **digital business card platform** that replaces pape
 |---------|-------------|
 | **Platform branding** | Set app name, URL, favicon and logo — white-label ready |
 | **Organization management** | Create, configure and assign users to organizations |
-| **User management** | View all users, change roles, assign organizations |
+| **User management** | View all users, change roles, plans and expiry dates |
+| **Plan assignment** | Manually assign Free / Pro / Business plan to any user |
+| **Campaign management** | Create UTM-tracked link campaigns with expiry dates |
 | **Platform analytics** | Global stats: total users, cards, views, downloads |
 
 ### Platform
 
 | Feature | Description |
 |---------|-------------|
+| **Subscription plans** | Free / Pro / Business tiers with Stripe payments |
+| **Stripe integration** | Checkout, billing portal, webhook handling (subscriptions & renewals) |
+| **Email delivery** | Invitation emails and welcome emails via any SMTP provider |
+| **Milestone notifications** | Notify users when their card hits 100, 500, 1 000 … views |
 | **Self-hostable** | Docker image, SQLite by default, Postgres-ready via Prisma |
 | **Multi-tenant** | Unlimited organizations, each with their own settings |
 | **Role system** | `super_admin` → `company_admin` → `team_leader` → `member` |
 | **Invitation flow** | Invite members by email with role-scoped tokens |
-| **Apple & Google Wallet** | Infrastructure ready — enable when you add certificates |
 | **Image uploads** | Local storage by default, swap to S3 by pointing the upload handler |
+
+---
+
+## Subscription plans
+
+| | Free | Pro | Business |
+|---|---|---|---|
+| Cards | 1 | 3 | Unlimited |
+| Templates | 4 basic | All 9 | All 9 |
+| Custom booking URL | — | ✓ | ✓ |
+| Analytics | Basic | Full | Full |
+| Lead capture | — | ✓ | ✓ |
+| Milestone notifications | — | ✓ | ✓ |
+| White-label (no badge) | — | — | ✓ |
+| Campaigns / UTM links | — | — | ✓ |
+| CSV bulk import | — | — | ✓ |
+| Team directory | — | — | ✓ |
+
+Plans can be purchased via Stripe (if configured) or assigned manually by a super admin.
 
 ---
 
@@ -152,13 +183,52 @@ Copy `.env.example` to `.env` and adjust:
 BETTER_AUTH_SECRET=<openssl rand -base64 32>
 BETTER_AUTH_URL=https://yourdomain.com
 APP_URL=https://yourdomain.com
-NEXT_PUBLIC_APP_URL=https://yourdomain.com
 
 # Database (SQLite by default; change to postgres:// for PostgreSQL)
 DATABASE_URL=file:/app/data/app.db
+
+# Stripe (optional — leave empty to disable payments)
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_PRICE_PRO_MONTHLY=price_...
+STRIPE_PRICE_BUSINESS_MONTHLY=price_...
+
+# SMTP / Email (optional — leave SMTP_HOST empty to disable)
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=user@example.com
+SMTP_PASS=yourpassword
+SMTP_FROM=CardNexus <noreply@yourdomain.com>
 ```
 
 All platform settings (app name, logo, favicon, support email, footer) can be changed at runtime from the **Super Admin → Settings** panel — no restart required.
+
+---
+
+## Stripe setup
+
+1. Create a [Stripe](https://stripe.com) account and get your API keys.
+2. Create two recurring products in the Stripe dashboard (Pro Monthly, Business Monthly).
+3. Copy the price IDs (`price_...`) and set `STRIPE_PRICE_PRO_MONTHLY` / `STRIPE_PRICE_BUSINESS_MONTHLY`.
+4. Set up a webhook endpoint pointing to `https://yourdomain.com/api/stripe/webhook`.
+5. Select these events: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_succeeded`.
+6. Copy the webhook signing secret and set `STRIPE_WEBHOOK_SECRET`.
+
+If `STRIPE_SECRET_KEY` is not set, the upgrade page shows an email-based fallback instead of Stripe checkout.
+
+---
+
+## Email / SMTP setup
+
+CardNexus sends emails via any standard SMTP server. Configure your provider credentials in `.env`:
+
+- **Invitation emails** — sent when an admin invites a new member
+- **Welcome email** — sent after successful registration
+
+Supported providers: Gmail (app password), Mailgun, SendGrid, Postmark, Brevo, your own SMTP server, etc.
+
+If `SMTP_HOST` is not set, email sending is silently disabled — the app works normally, just without emails.
 
 ---
 
@@ -170,6 +240,8 @@ All platform settings (app name, logo, favicon, support email, footer) can be ch
 | Language | TypeScript 5 |
 | Auth | [better-auth](https://better-auth.com) |
 | Database | Prisma 6 + SQLite (Postgres-ready) |
+| Payments | [Stripe](https://stripe.com) (optional) |
+| Email | Nodemailer (SMTP, optional) |
 | Styling | Tailwind CSS + Radix UI primitives |
 | Charts | Recharts |
 | QR codes | `qrcode` (SVG output) |
@@ -273,11 +345,10 @@ yourdomain.com {
 - [ ] PostgreSQL first-class documentation
 - [ ] Apple Wallet pass generation
 - [ ] Google Wallet pass generation
-- [ ] Email delivery (invite emails, welcome)
 - [ ] SCIM / LDAP directory sync
 - [ ] Zapier / webhook integration
-- [ ] Lead capture form on public card
 - [ ] CSV export of card analytics
+- [ ] S3 / object storage documentation
 
 ---
 

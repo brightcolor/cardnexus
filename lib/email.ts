@@ -91,7 +91,6 @@ async function send(to: string, subject: string, html: string) {
   }
   try {
     await transport.sendMail({ from: FROM, to, subject, html });
-    console.log(`[email] Sent "${subject}" to ${to}`);
   } catch (err) {
     console.error(`[email] Failed to send "${subject}" to ${to}:`, err);
   }

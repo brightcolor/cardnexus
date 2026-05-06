@@ -20,7 +20,8 @@ const config = [
       "no-unused-vars": "off",
       "no-undef": "off",
       // Basic quality rules
-      "no-console": "warn",
+      // Allow console.error/warn for server-side logging; disallow console.log in production code
+      "no-console": ["warn", { allow: ["warn", "error"] }],
       "prefer-const": "error",
     },
   },

@@ -5,7 +5,8 @@ RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci --frozen-lockfile
+RUN --mount=type=cache,id=npm,target=/root/.npm \
+    npm ci --frozen-lockfile
 
 # ─── Stage 2: Build ──────────────────────────────────────────────────────────
 FROM node:20-alpine AS builder
@@ -35,7 +36,8 @@ RUN mkdir -p /tmp/builddb && \
     cp /tmp/builddb/app.db /app/prisma/base.db
 
 ENV DATABASE_URL="file:/tmp/builddb/app.db"
-RUN npm run build
+RUN --mount=type=cache,id=nextjs,target=/app/.next/cache \
+    npm run build
 
 # ─── Stage 3: Runner ─────────────────────────────────────────────────────────
 FROM node:20-alpine AS runner
