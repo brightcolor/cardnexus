@@ -28,6 +28,7 @@ export default async function AdminUsersPage() {
         users={users.map((u) => ({
           ...u,
           createdAt: u.createdAt.toISOString(),
+          planExpiresAt: u.planExpiresAt?.toISOString() ?? null,
           card: u.card ?? null,
           organization: u.organization ?? null,
         }))}

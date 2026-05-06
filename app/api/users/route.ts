@@ -7,9 +7,11 @@ import { z } from "zod";
 
 const updateSchema = z.object({
   userId: z.string(),
-  role: z.enum(["company_admin", "team_leader", "member"]).optional(),
+  role: z.enum(["super_admin", "company_admin", "team_leader", "member"]).optional(),
   organizationId: z.string().nullable().optional(),
   name: z.string().optional(),
+  plan: z.enum(["free", "pro", "business"]).optional(),
+  planExpiresAt: z.string().datetime().nullable().optional(),
 });
 
 export async function GET(request: NextRequest) {
@@ -58,14 +60,18 @@ export async function PATCH(request: NextRequest) {
 
   const { userId, ...data } = parsed.data;
 
-  // Non-super-admins cannot assign super_admin role
-  if (!isSuperAdmin(role) && data.role === ("super_admin" as string)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  // Only super_admins can change plans or assign super_admin role
+  if (!isSuperAdmin(role)) {
+    if (data.role === "super_admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (data.plan !== undefined) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const updated = await db.user.update({
     where: { id: userId },
-    data,
+    data: {
+      ...data,
+      planExpiresAt: data.planExpiresAt ? new Date(data.planExpiresAt) : data.planExpiresAt,
+    },
   });
 
   return NextResponse.json({ data: updated });

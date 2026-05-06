@@ -1,89 +1,64 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
-  Smartphone, Nfc, QrCode, Users, BarChart2, Wallet,
-  ArrowRight, Check, Shield, Zap,
+  Smartphone, Nfc, QrCode, Users, BarChart2,
+  ArrowRight, Check, Zap, Mail, FileText,
+  Shield, Megaphone, CalendarDays, Download,
 } from "lucide-react";
+import { PLANS } from "@/lib/plans";
+import { FaqSection } from "./FaqSection";
 
 const features = [
-  {
-    icon: Nfc,
-    title: "NFC-Ready",
-    description: "Kontaktdaten per Tippen teilen – einfach das Smartphone halten.",
-  },
-  {
-    icon: QrCode,
-    title: "QR-Code",
-    description: "Automatisch generierter QR-Code zum Scannen und Teilen.",
-  },
-  {
-    icon: Smartphone,
-    title: "Mobile First",
-    description: "Optimiert für den mobilen Abruf – lädt in unter einer Sekunde.",
-  },
-  {
-    icon: Users,
-    title: "Team-Verwaltung",
-    description: "Verwalte ganze Teams und Abteilungen zentral von einem Ort.",
-  },
-  {
-    icon: BarChart2,
-    title: "Analytics",
-    description: "Wer sieht deine Karte? Aufrufe, QR-Scans und Downloads im Blick.",
-  },
-  {
-    icon: Wallet,
-    title: "Wallet-Integration",
-    description: "Apple Wallet & Google Wallet – bald verfügbar.",
-  },
+  { icon: Nfc,          title: "NFC-Ready",           desc: "Kontakt per Antippen teilen – einfach Smartphone halten, fertig." },
+  { icon: QrCode,       title: "QR-Code",             desc: "Automatisch generierter QR-Code, immer aktuell." },
+  { icon: Smartphone,   title: "Mobile First",         desc: "Lädt in unter einer Sekunde. Kein App-Download nötig." },
+  { icon: Users,        title: "Team-Verwaltung",      desc: "Ganze Teams zentral verwalten – Rollen, Abteilungen, Branding." },
+  { icon: BarChart2,    title: "Analytics",            desc: "Aufrufe, Scans und Downloads in Echtzeit im Blick." },
+  { icon: Megaphone,    title: "Kampagnen-Tracking",   desc: "UTM-Links für Messen und Events mit eigener Klick-Statistik." },
+  { icon: Mail,         title: "E-Mail-Signatur",      desc: "Professionelle Signatur für Gmail, Outlook und Apple Mail." },
+  { icon: CalendarDays, title: "Terminbuchung",        desc: "Direkt buchbar per Calendly, Cal.com oder eigenem Link." },
+  { icon: Download,     title: "PDF / Print-Export",   desc: "Karte als PDF exportieren oder druckfertig aufbereiten." },
+  { icon: FileText,     title: "Lead Capture",         desc: "Besucher hinterlassen Kontaktdaten – direkt im Dashboard." },
+  { icon: Shield,       title: "Datenschutz (DSGVO)",  desc: "Server in Deutschland. Keine Tracker. Vollständig DSGVO-konform." },
+  { icon: Zap,          title: "Whitelabel",           desc: "Eigene Domain, eigenes Branding – ohne CardNexus-Badge." },
 ];
 
-const plans = [
-  {
-    name: "Free",
-    price: "0",
-    description: "Für Einzelpersonen",
-    features: ["1 digitale Karte", "QR-Code", "vCard-Download", "Alle Templates"],
-    cta: "Kostenlos starten",
-    href: "/register",
-  },
-  {
-    name: "Pro",
-    price: "5",
-    description: "Für Professionals",
-    features: ["1 digitale Karte", "Analytics", "Custom Links", "Eigene Farben", "NFC-Link"],
-    cta: "Pro testen",
-    href: "/register",
-    featured: true,
-  },
-  {
-    name: "Business",
-    price: "15",
-    description: "Für Teams",
-    features: ["Unbegrenzte Mitglieder", "Team-Verwaltung", "Rollen & Berechtigungen", "Excel-Import/Export", "Organisations-Branding"],
-    cta: "Team starten",
-    href: "/register",
-  },
+const steps = [
+  { n: 1, title: "Account erstellen",       desc: "Registriere dich kostenlos in weniger als 60 Sekunden." },
+  { n: 2, title: "Karte gestalten",         desc: "Wähle ein Template, füge deine Daten ein und passe Farben an." },
+  { n: 3, title: "Teilen & Vernetzen",      desc: "Link verschicken, QR-Code scannen lassen oder NFC-Tag beschreiben." },
 ];
+
+const planList = [PLANS.free, PLANS.pro, PLANS.business];
+
+const PLAN_FEATURES: Record<string, string[]> = {
+  free:     ["1 digitale Visitenkarte", "QR-Code & vCard-Download", "Lead Capture", "4 Templates", `Bis zu ${PLANS.free.features.maxCustomLinks} eigene Links`, `Analytics (${PLANS.free.features.analyticsRetention} Tage)`],
+  pro:      ["Alle 9 Templates", "Whitelabel (kein Badge)", "Eigene Domain", "PDF & Print-Export", "Kampagnen-Tracking", "Terminbuchungs-Link", "Meilenstein-Benachrichtigungen", `Analytics (${PLANS.pro.features.analyticsRetention} Tage)`],
+  business: ["Alles aus Pro", "Team & Abteilungsverwaltung", "Bulk CSV-Import", "Organisations-Vorlage", "Team-Verzeichnis", `Analytics (${PLANS.business.features.analyticsRetention} Tage)`],
+};
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white">
-      {/* Nav */}
+    <div className="min-h-screen bg-white text-gray-900">
+
+      {/* ── Nav ─────────────────────────────────────────────────────────── */}
       <nav className="sticky top-0 z-50 border-b border-gray-100 bg-white/80 backdrop-blur-md">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-900">
-                <span className="text-xs font-bold text-white">FC</span>
+                <span className="text-xs font-bold text-white">CN</span>
               </div>
-              <span className="font-semibold text-gray-900">CardNexus</span>
+              <span className="font-semibold">CardNexus</span>
             </div>
-            <div className="flex items-center gap-3">
-              <Link href="/c/demo" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
-                Demo
-              </Link>
-              <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+            <div className="hidden md:flex items-center gap-6 text-sm text-gray-500">
+              <a href="#features" className="hover:text-gray-900 transition-colors">Features</a>
+              <a href="#how"      className="hover:text-gray-900 transition-colors">So funktioniert es</a>
+              <a href="#pricing"  className="hover:text-gray-900 transition-colors">Preise</a>
+              <a href="#faq"      className="hover:text-gray-900 transition-colors">FAQ</a>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900 transition-colors hidden sm:block">
                 Anmelden
               </Link>
               <Button asChild size="sm">
@@ -94,19 +69,19 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero */}
+      {/* ── Hero ────────────────────────────────────────────────────────── */}
       <section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-24 pb-20 text-center">
         <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-4 py-1.5 text-sm text-gray-600 mb-8">
           <Zap className="h-3.5 w-3.5 text-amber-500" />
           Digitale Visitenkarte der nächsten Generation
         </div>
-        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 tracking-tight leading-tight mb-6">
+        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-tight mb-6">
           Deine Karte.
           <br />
           <span className="text-gray-400">In Sekunden geteilt.</span>
         </h1>
         <p className="mx-auto max-w-2xl text-xl text-gray-500 mb-10 leading-relaxed">
-          Erstelle deine digitale Visitenkarte, teile sie per NFC-Chip, QR-Code oder Link – und behalte den Überblick mit integrierten Analytics.
+          Erstelle deine digitale Visitenkarte, teile sie per NFC, QR-Code oder Link – und behalte den Überblick mit Analytics, Lead Capture und Team-Verwaltung.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <Button asChild size="lg">
@@ -120,119 +95,183 @@ export default function LandingPage() {
           </Button>
         </div>
 
-        {/* Mock card preview */}
-        <div className="mt-20 relative">
-          <div className="mx-auto max-w-sm bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
+        {/* Mock card */}
+        <div className="mt-20 relative max-w-sm mx-auto">
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
             <div className="h-1.5 bg-gray-900" />
             <div className="p-8">
               <div className="flex items-start gap-4 mb-5">
-                <div className="h-16 w-16 rounded-full bg-gray-900 flex items-center justify-center text-white font-bold text-lg shrink-0">
-                  MH
-                </div>
+                <div className="h-16 w-16 rounded-full bg-gray-900 flex items-center justify-center text-white font-bold text-lg shrink-0">MH</div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900">Max Hoffmann</h3>
+                  <h3 className="text-lg font-bold">Max Hoffmann</h3>
                   <p className="text-sm font-medium text-gray-500">Head of Product</p>
                   <p className="text-sm text-gray-400">TechCorp GmbH</p>
                 </div>
               </div>
               <div className="space-y-2 text-sm text-gray-600">
-                <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-full bg-gray-100 flex items-center justify-center">
-                    <Smartphone className="h-3.5 w-3.5 text-gray-500" />
+                {["+49 170 1234567", "max@techcorp.de", "techcorp.de"].map((v) => (
+                  <div key={v} className="flex items-center gap-2">
+                    <div className="h-7 w-7 rounded-full bg-gray-100 flex items-center justify-center">
+                      <div className="h-2 w-2 rounded-full bg-gray-400" />
+                    </div>
+                    {v}
                   </div>
-                  +49 170 1234567
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-full bg-gray-100 flex items-center justify-center">
-                    <Shield className="h-3.5 w-3.5 text-gray-500" />
-                  </div>
-                  max@techcorp.de
-                </div>
+                ))}
               </div>
             </div>
           </div>
-          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white to-transparent" />
         </div>
       </section>
 
-      {/* Features */}
-      <section className="bg-gray-50 py-24">
+      {/* ── How it works ────────────────────────────────────────────────── */}
+      <section id="how" className="bg-gray-50 py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Alles was du brauchst</h2>
-            <p className="text-gray-500 max-w-xl mx-auto">Von der persönlichen Karte bis zur unternehmensweiten Lösung – CardNexus wächst mit dir.</p>
+          <div className="text-center mb-14">
+            <h2 className="text-3xl font-bold mb-3">So funktioniert es</h2>
+            <p className="text-gray-500">In drei Schritten zur fertigen Karte.</p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map(({ icon: Icon, title, description }) => (
+          <div className="grid md:grid-cols-3 gap-8">
+            {steps.map(({ n, title, desc }) => (
+              <div key={n} className="text-center">
+                <div className="h-12 w-12 rounded-full bg-gray-900 text-white flex items-center justify-center text-lg font-bold mx-auto mb-4">{n}</div>
+                <h3 className="font-semibold text-lg mb-2">{title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Features ────────────────────────────────────────────────────── */}
+      <section id="features" className="py-24">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl font-bold mb-3">Alles was du brauchst</h2>
+            <p className="text-gray-500 max-w-xl mx-auto">Von der persönlichen Karte bis zur unternehmensweiten Lösung.</p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {features.map(({ icon: Icon, title, desc }) => (
               <div key={title} className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-md transition-shadow">
                 <div className="h-10 w-10 rounded-xl bg-gray-900 flex items-center justify-center mb-4">
                   <Icon className="h-5 w-5 text-white" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">{title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{description}</p>
+                <h3 className="font-semibold mb-1">{title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Pricing */}
-      <section className="py-24">
+      {/* ── Pricing ─────────────────────────────────────────────────────── */}
+      <section id="pricing" className="bg-gray-50 py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Einfache Preise</h2>
+          <div className="text-center mb-14">
+            <h2 className="text-3xl font-bold mb-3">Einfache Preise</h2>
             <p className="text-gray-500">Kein Kleingedrucktes. Jederzeit kündbar.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {plans.map((plan) => (
-              <div
-                key={plan.name}
-                className={`rounded-2xl p-8 border-2 ${
-                  plan.featured
-                    ? "border-gray-900 bg-gray-900 text-white"
-                    : "border-gray-100 bg-white"
-                }`}
-              >
-                <p className="text-sm font-medium mb-1 opacity-60">{plan.description}</p>
-                <h3 className="text-2xl font-bold mb-1">{plan.name}</h3>
-                <div className="flex items-baseline gap-1 mb-6">
-                  <span className="text-4xl font-bold">€{plan.price}</span>
-                  <span className="text-sm opacity-60">/Monat</span>
-                </div>
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm">
-                      <Check className={`h-4 w-4 shrink-0 ${plan.featured ? "text-white" : "text-emerald-500"}`} />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  asChild
-                  variant={plan.featured ? "secondary" : "default"}
-                  className="w-full"
+            {planList.map((plan) => {
+              const featured = plan.id === "pro";
+              return (
+                <div
+                  key={plan.id}
+                  className={`rounded-2xl p-8 border-2 flex flex-col ${
+                    featured ? "border-gray-900 bg-gray-900 text-white" : "border-gray-100 bg-white"
+                  }`}
                 >
-                  <Link href={plan.href}>{plan.cta}</Link>
-                </Button>
-              </div>
-            ))}
+                  {featured && (
+                    <span className="text-xs font-semibold bg-white/20 text-white px-2.5 py-1 rounded-full self-start mb-3">
+                      Empfohlen
+                    </span>
+                  )}
+                  <p className={`text-sm font-medium mb-1 ${featured ? "opacity-60" : "text-gray-500"}`}>{plan.description}</p>
+                  <h3 className="text-2xl font-bold mb-1">{plan.name}</h3>
+                  <div className="flex items-baseline gap-1 mb-6">
+                    <span className="text-4xl font-bold">€{plan.monthlyPrice}</span>
+                    <span className={`text-sm ${featured ? "opacity-60" : "text-gray-400"}`}>/Monat</span>
+                  </div>
+                  <ul className="space-y-2.5 mb-8 flex-1">
+                    {(PLAN_FEATURES[plan.id] ?? []).map((f) => (
+                      <li key={f} className="flex items-start gap-2 text-sm">
+                        <Check className={`h-4 w-4 shrink-0 mt-0.5 ${featured ? "text-white" : "text-emerald-500"}`} />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                  <Button asChild variant={featured ? "secondary" : "default"} className="w-full">
+                    <Link href="/register">{plan.id === "free" ? "Kostenlos starten" : `${plan.name} testen`}</Link>
+                  </Button>
+                </div>
+              );
+            })}
           </div>
+          <p className="text-center text-sm text-gray-400 mt-8">
+            Alle Pläne inkl. DSGVO-konformer Datenspeicherung in Deutschland.
+          </p>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-100 py-10">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded bg-gray-900">
-              <span className="text-[10px] font-bold text-white">FC</span>
-            </div>
-            <span className="text-sm font-medium text-gray-700">CardNexus</span>
+      {/* ── FAQ ─────────────────────────────────────────────────────────── */}
+      <section id="faq" className="py-24">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl font-bold mb-3">Häufige Fragen</h2>
           </div>
-          <p className="text-sm text-gray-400">© {new Date().getFullYear()} CardNexus. Alle Rechte vorbehalten.</p>
-          <div className="flex gap-4 text-sm text-gray-400">
-            <a href="#" className="hover:text-gray-700 transition-colors">Datenschutz</a>
-            <a href="#" className="hover:text-gray-700 transition-colors">Impressum</a>
+          <FaqSection />
+        </div>
+      </section>
+
+      {/* ── CTA ─────────────────────────────────────────────────────────── */}
+      <section className="bg-gray-900 py-20 text-center text-white">
+        <div className="mx-auto max-w-2xl px-4">
+          <h2 className="text-3xl font-bold mb-4">Bereit loszulegen?</h2>
+          <p className="text-gray-400 mb-8">Kostenlos starten – keine Kreditkarte erforderlich.</p>
+          <Button asChild size="lg" variant="secondary">
+            <Link href="/register">
+              Jetzt kostenlos registrieren
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+      </section>
+
+      {/* ── Footer ──────────────────────────────────────────────────────── */}
+      <footer className="border-t border-gray-100 py-12">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="grid sm:grid-cols-3 gap-8 mb-10">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="flex h-7 w-7 items-center justify-center rounded bg-gray-900">
+                  <span className="text-[10px] font-bold text-white">CN</span>
+                </div>
+                <span className="font-semibold text-gray-900">CardNexus</span>
+              </div>
+              <p className="text-sm text-gray-400 leading-relaxed">
+                Die smarte digitale Visitenkarte für Professionals und Teams.
+              </p>
+            </div>
+            <div>
+              <p className="font-semibold text-sm mb-3 text-gray-700">Produkt</p>
+              <ul className="space-y-2 text-sm text-gray-400">
+                <li><a href="#features"  className="hover:text-gray-700 transition-colors">Features</a></li>
+                <li><a href="#pricing"   className="hover:text-gray-700 transition-colors">Preise</a></li>
+                <li><Link href="/c/demo" className="hover:text-gray-700 transition-colors">Demo</Link></li>
+                <li><Link href="/login"  className="hover:text-gray-700 transition-colors">Anmelden</Link></li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-semibold text-sm mb-3 text-gray-700">Rechtliches</p>
+              <ul className="space-y-2 text-sm text-gray-400">
+                <li><Link href="/impressum"  className="hover:text-gray-700 transition-colors">Impressum</Link></li>
+                <li><Link href="/datenschutz" className="hover:text-gray-700 transition-colors">Datenschutz</Link></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-gray-100 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-gray-400">
+            <p>&copy; {new Date().getFullYear()} CardNexus. Alle Rechte vorbehalten.</p>
+            <p>Made in Germany 🇩🇪</p>
           </div>
         </div>
       </footer>

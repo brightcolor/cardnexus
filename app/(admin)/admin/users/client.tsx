@@ -6,9 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getInitials, getRoleLabel, formatDate } from "@/lib/utils";
-import { Search, Pencil } from "lucide-react";
+import { Search, Pencil, CalendarDays, X } from "lucide-react";
 import Link from "next/link";
-import type { Role } from "@/types";
 
 const ROLE_VARIANT: Record<string, "default" | "secondary" | "outline" | "warning"> = {
   super_admin: "default",
@@ -17,9 +16,15 @@ const ROLE_VARIANT: Record<string, "default" | "secondary" | "outline" | "warnin
   member: "outline",
 };
 
+const PLAN_VARIANT: Record<string, string> = {
+  free:     "bg-gray-100 text-gray-600",
+  pro:      "bg-blue-100 text-blue-700",
+  business: "bg-amber-100 text-amber-700",
+};
+
 interface AdminUser {
   id: string; name: string; email: string; image?: string | null;
-  role: string; createdAt: string;
+  role: string; plan: string; planExpiresAt?: string | null; createdAt: string;
   card?: { slug: string; isPublic: boolean } | null;
   organization?: { name: string } | null;
 }
@@ -27,18 +32,36 @@ interface AdminUser {
 export function AdminUsersClient({ users: initial, currentUserId }: { users: AdminUser[]; currentUserId: string }) {
   const [users, setUsers] = useState(initial);
   const [search, setSearch] = useState("");
+  const [expiryEdit, setExpiryEdit] = useState<string | null>(null); // userId being edited
 
   const filtered = users.filter(
     (u) => u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())
   );
 
-  async function changeRole(userId: string, role: string) {
-    await fetch("/api/users", {
+  async function patch(userId: string, data: Record<string, unknown>) {
+    const res = await fetch("/api/users", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, role }),
+      body: JSON.stringify({ userId, ...data }),
     });
+    return res.ok;
+  }
+
+  async function changeRole(userId: string, role: string) {
+    if (!await patch(userId, { role })) return;
     setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role } : u)));
+  }
+
+  async function changePlan(userId: string, plan: string) {
+    if (!await patch(userId, { plan, planExpiresAt: null })) return;
+    setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, plan, planExpiresAt: null } : u)));
+  }
+
+  async function setExpiry(userId: string, dateStr: string) {
+    const planExpiresAt = dateStr ? new Date(dateStr).toISOString() : null;
+    if (!await patch(userId, { planExpiresAt })) return;
+    setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, planExpiresAt } : u)));
+    setExpiryEdit(null);
   }
 
   return (
@@ -48,13 +71,14 @@ export function AdminUsersClient({ users: initial, currentUserId }: { users: Adm
         <Input placeholder="Suchen…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
       </div>
 
-      <div className="rounded-xl border border-border overflow-hidden bg-white">
+      <div className="rounded-xl border border-border overflow-x-auto bg-white">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/40">
               <th className="text-left px-4 py-3 font-medium text-muted-foreground">Benutzer</th>
               <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">Organisation</th>
               <th className="text-left px-4 py-3 font-medium text-muted-foreground">Rolle</th>
+              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Plan</th>
               <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden lg:table-cell">Karte</th>
               <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden lg:table-cell">Seit</th>
             </tr>
@@ -62,6 +86,7 @@ export function AdminUsersClient({ users: initial, currentUserId }: { users: Adm
           <tbody className="divide-y divide-border">
             {filtered.map((user) => (
               <tr key={user.id} className="hover:bg-muted/20">
+                {/* User */}
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
@@ -69,47 +94,103 @@ export function AdminUsersClient({ users: initial, currentUserId }: { users: Adm
                       <AvatarFallback className="text-xs">{getInitials(user.name)}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-medium">{user.name} {user.id === currentUserId && <span className="text-muted-foreground text-xs">(Ich)</span>}</p>
+                      <p className="font-medium">
+                        {user.name}{" "}
+                        {user.id === currentUserId && <span className="text-muted-foreground text-xs">(Ich)</span>}
+                      </p>
                       <p className="text-xs text-muted-foreground">{user.email}</p>
                     </div>
                   </div>
                 </td>
+
+                {/* Org */}
                 <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
                   {user.organization?.name ?? "—"}
                 </td>
+
+                {/* Role */}
                 <td className="px-4 py-3">
-                  {user.id !== currentUserId ? (
-                    <Select value={user.role} onValueChange={(v) => changeRole(user.id, v)}>
-                      <SelectTrigger className="h-7 w-36 text-xs">
-                        <SelectValue />
+                  <Select value={user.role} onValueChange={(v) => changeRole(user.id, v)}>
+                    <SelectTrigger className="h-7 w-36 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="super_admin">Super Admin</SelectItem>
+                      <SelectItem value="company_admin">Admin</SelectItem>
+                      <SelectItem value="team_leader">Team Leader</SelectItem>
+                      <SelectItem value="member">Mitglied</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </td>
+
+                {/* Plan */}
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-1.5">
+                    <Select value={user.plan} onValueChange={(v) => changePlan(user.id, v)}>
+                      <SelectTrigger className="h-7 w-28 text-xs">
+                        <SelectValue>
+                          <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${PLAN_VARIANT[user.plan] ?? ""}`}>
+                            {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)}
+                          </span>
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="super_admin">Super Admin</SelectItem>
-                        <SelectItem value="company_admin">Admin</SelectItem>
-                        <SelectItem value="team_leader">Team Leader</SelectItem>
-                        <SelectItem value="member">Mitglied</SelectItem>
+                        <SelectItem value="free">Free</SelectItem>
+                        <SelectItem value="pro">Pro</SelectItem>
+                        <SelectItem value="business">Business</SelectItem>
                       </SelectContent>
                     </Select>
-                  ) : (
-                    <Badge variant={ROLE_VARIANT[user.role] ?? "outline"}>{getRoleLabel(user.role)}</Badge>
-                  )}
+
+                    {/* Expiry badge + edit */}
+                    {user.plan !== "free" && (
+                      expiryEdit === user.id ? (
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="date"
+                            className="h-7 text-xs border border-border rounded px-1.5 bg-background"
+                            defaultValue={user.planExpiresAt ? user.planExpiresAt.split("T")[0] : ""}
+                            onBlur={(e) => setExpiry(user.id, e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") setExpiry(user.id, (e.target as HTMLInputElement).value);
+                              if (e.key === "Escape") setExpiryEdit(null);
+                            }}
+                            autoFocus
+                          />
+                          <button onClick={() => setExpiryEdit(null)} className="text-muted-foreground hover:text-foreground">
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setExpiryEdit(user.id)}
+                          className="flex items-center gap-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                          title="Ablaufdatum setzen"
+                        >
+                          <CalendarDays className="h-3 w-3" />
+                          {user.planExpiresAt
+                            ? new Date(user.planExpiresAt).toLocaleDateString("de-DE")
+                            : <span className="opacity-50">&#8734;</span>}
+                        </button>
+                      )
+                    )}
+                  </div>
                 </td>
+
+                {/* Card */}
                 <td className="px-4 py-3 hidden lg:table-cell">
                   {user.card ? (
                     <div className="flex items-center gap-2">
                       <a href={`/c/${user.card.slug}`} target="_blank" className="text-xs text-primary hover:underline">
                         {user.card.slug}
                       </a>
-                      <Link
-                        href={`/admin/cards/${user.card.slug}`}
-                        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                        title="Karte bearbeiten"
-                      >
+                      <Link href={`/admin/cards/${user.card.slug}`} className="text-muted-foreground hover:text-foreground" title="Karte bearbeiten">
                         <Pencil className="h-3 w-3" />
                       </Link>
                     </div>
                   ) : <span className="text-muted-foreground text-xs">—</span>}
                 </td>
+
+                {/* Date */}
                 <td className="px-4 py-3 text-muted-foreground text-xs hidden lg:table-cell">
                   {formatDate(user.createdAt)}
                 </td>
