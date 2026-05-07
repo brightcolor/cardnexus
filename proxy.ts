@@ -3,27 +3,48 @@ import type { NextRequest } from "next/server";
 import { betterFetch } from "@better-fetch/fetch";
 import type { Session } from "./lib/auth";
 
-const PUBLIC_PATHS = ["/", "/login", "/register", "/c/"];
+// ─── Custom domain detection ──────────────────────────────────────────────────
+
+const PLATFORM_HOSTS = [
+  "localhost",
+  process.env.BETTER_AUTH_URL?.replace(/^https?:\/\//, "") ?? "",
+  process.env.APP_URL?.replace(/^https?:\/\//, "") ?? "",
+].filter(Boolean);
+
+function isPlatformHost(host: string) {
+  const hostname = host.split(":")[0];
+  return PLATFORM_HOSTS.some((h) => hostname === h || hostname.endsWith(`.${h}`));
+}
+
+// ─── Auth route constants ─────────────────────────────────────────────────────
+
+const PUBLIC_PATHS = ["/", "/login", "/register", "/c/", "/p/"];
 const AUTH_PATHS = ["/login", "/register"];
 const ADMIN_PATHS = ["/admin"];
 
 export async function proxy(request: NextRequest) {
+  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "";
   const { pathname } = request.nextUrl;
 
-  const isPublic = PUBLIC_PATHS.some(
-    (p) => pathname === p || pathname.startsWith(p)
-  );
+  // ── Custom domain routing ──────────────────────────────────────────────────
+  // If request comes from a non-platform host, rewrite to the domain API route
+  // which looks up the card by cardDomain and redirects to /c/[slug]
+  if (host && !isPlatformHost(host)) {
+    const url = request.nextUrl.clone();
+    const hostname = host.split(":")[0];
+    url.pathname = `/api/domain/${encodeURIComponent(hostname)}${pathname === "/" ? "" : pathname}`;
+    return NextResponse.rewrite(url);
+  }
+
+  // ── Auth / route protection ───────────────────────────────────────────────
+  const isPublic = PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p));
   const isAuth = AUTH_PATHS.some((p) => pathname.startsWith(p));
   const isAdmin = ADMIN_PATHS.some((p) => pathname.startsWith(p));
 
-  // Fetch session from better-auth
-  const { data: session } = await betterFetch<Session>(
-    "/api/auth/get-session",
-    {
-      baseURL: request.nextUrl.origin,
-      headers: { cookie: request.headers.get("cookie") ?? "" },
-    }
-  );
+  const { data: session } = await betterFetch<Session>("/api/auth/get-session", {
+    baseURL: request.nextUrl.origin,
+    headers: { cookie: request.headers.get("cookie") ?? "" },
+  });
 
   const isAuthenticated = !!session?.user;
 
