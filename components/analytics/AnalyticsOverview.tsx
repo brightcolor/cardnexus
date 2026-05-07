@@ -1,13 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, PieChart, Pie, Cell,
+} from "recharts";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { AnalyticsSummary } from "@/types";
-import { Eye, Download, QrCode, MousePointer } from "lucide-react";
+import {
+  Eye, Download, QrCode, MousePointer, Megaphone, Link as LinkIcon,
+} from "lucide-react";
 
 const DEVICE_COLORS = ["#0F172A", "#64748B", "#94A3B8"];
-const SOURCE_COLORS = ["#6366F1", "#8B5CF6", "#EC4899", "#F43F5E"];
+const SOURCE_COLORS = ["#6366F1", "#8B5CF6", "#EC4899", "#F43F5E", "#F59E0B", "#10B981"];
+
+interface CardOption { id: string; name: string }
+
+interface Props {
+  cards?: CardOption[];
+}
 
 function StatCard({ label, value, icon: Icon }: { label: string; value: number; icon: React.ElementType }) {
   return (
@@ -27,25 +38,31 @@ function StatCard({ label, value, icon: Icon }: { label: string; value: number; 
   );
 }
 
-export function AnalyticsOverview() {
+export function AnalyticsOverview({ cards = [] }: Props) {
   const [data, setData] = useState<AnalyticsSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(30);
+  const [cardId, setCardId] = useState<string>(cards[0]?.id ?? "");
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/analytics?days=${days}`)
+    const params = new URLSearchParams({ days: String(days) });
+    if (cardId) params.set("cardId", cardId);
+    fetch(`/api/analytics?${params}`)
       .then((r) => r.json())
       .then((j) => setData(j.data))
       .finally(() => setLoading(false));
-  }, [days]);
+  }, [days, cardId]);
 
-  if (loading) {
+  if (loading && !data) {
     return (
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-32 rounded-xl bg-muted animate-pulse" />
-        ))}
+      <div className="space-y-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-32 rounded-xl bg-muted animate-pulse" />
+          ))}
+        </div>
+        <div className="h-72 rounded-xl bg-muted animate-pulse" />
       </div>
     );
   }
@@ -60,19 +77,33 @@ export function AnalyticsOverview() {
 
   return (
     <div className="space-y-6">
-      {/* Period selector */}
-      <div className="flex items-center gap-2">
-        {[7, 30, 90].map((d) => (
-          <button
-            key={d}
-            onClick={() => setDays(d)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              days === d ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
-            }`}
+      {/* Filter row: card + period */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-2">
+          {[7, 30, 90, 365].map((d) => (
+            <button
+              key={d}
+              onClick={() => setDays(d)}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                days === d ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              {d === 365 ? "1 Jahr" : `${d} Tage`}
+            </button>
+          ))}
+        </div>
+        {cards.length > 1 && (
+          <select
+            value={cardId}
+            onChange={(e) => setCardId(e.target.value)}
+            className="rounded-md border border-input bg-background px-3 py-1.5 text-sm"
+            aria-label="Karte auswählen"
           >
-            {d} Tage
-          </button>
-        ))}
+            {cards.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+        )}
       </div>
 
       {/* Stat cards */}
@@ -86,7 +117,7 @@ export function AnalyticsOverview() {
       {/* Views chart */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Aufrufe ({days} Tage)</CardTitle>
+          <CardTitle className="text-base">Aufrufe ({days === 365 ? "1 Jahr" : `${days} Tage`})</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={220}>
@@ -159,7 +190,7 @@ export function AnalyticsOverview() {
                       <div
                         className="h-full rounded-full"
                         style={{
-                          width: `${(s.count / data.totalViews) * 100}%`,
+                          width: `${data.totalViews ? (s.count / data.totalViews) * 100 : 0}%`,
                           backgroundColor: SOURCE_COLORS[i % SOURCE_COLORS.length],
                         }}
                       />
@@ -172,6 +203,91 @@ export function AnalyticsOverview() {
           </CardContent>
         </Card>
       </div>
+
+      {/* UTM campaign breakdown */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-start gap-3">
+            <Megaphone className="h-5 w-5 text-muted-foreground mt-0.5" />
+            <div>
+              <CardTitle className="text-base">UTM-Kampagnen</CardTitle>
+              <CardDescription>
+                Aufrufe gruppiert nach <code className="text-xs">utm_campaign</code>,
+                <code className="text-xs ml-1">utm_source</code> und
+                <code className="text-xs ml-1">utm_medium</code>. Jeder Link mit
+                UTM-Parametern erscheint hier — auch ohne eigenen Kampagnen-Eintrag.
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {data.utmCampaigns.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Noch keine UTM-getaggten Aufrufe in diesem Zeitraum.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
+                    <th className="pb-2 font-medium">Kampagne</th>
+                    <th className="pb-2 font-medium">Quelle</th>
+                    <th className="pb-2 font-medium">Medium</th>
+                    <th className="pb-2 font-medium text-right">Aufrufe</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.utmCampaigns.map((c, i) => (
+                    <tr key={i} className="border-b border-border last:border-0">
+                      <td className="py-2 font-medium">{c.campaign}</td>
+                      <td className="py-2 text-muted-foreground">{c.source ?? "—"}</td>
+                      <td className="py-2 text-muted-foreground">{c.medium ?? "—"}</td>
+                      <td className="py-2 text-right tabular-nums">{c.count.toLocaleString("de-DE")}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Named campaigns (custom) */}
+      {data.namedCampaigns.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-start gap-3">
+              <LinkIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
+              <div>
+                <CardTitle className="text-base">Benutzerdefinierte Kampagnen</CardTitle>
+                <CardDescription>
+                  Friendly-URLs unter <code className="text-xs">/p/&lt;slug&gt;</code>, hier mit
+                  Klicks aus dem Redirect-Counter.
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ul className="divide-y divide-border rounded-lg border border-border">
+              {data.namedCampaigns.map((c) => {
+                const expired = c.expiresAt && new Date(c.expiresAt) < new Date();
+                return (
+                  <li key={c.id} className="flex items-center gap-3 px-4 py-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium truncate">{c.name}</p>
+                      <p className="text-xs text-muted-foreground font-mono truncate">/p/{c.urlSlug}</p>
+                    </div>
+                    {expired && (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">abgelaufen</span>
+                    )}
+                    <span className="tabular-nums font-semibold">{c.views.toLocaleString("de-DE")}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

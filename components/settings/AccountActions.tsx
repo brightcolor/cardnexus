@@ -6,6 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
+import { toast } from "@/components/ui/sonner";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Lock, Download, Trash2, Loader2 } from "lucide-react";
 
 export function AccountActions() {
@@ -24,12 +30,10 @@ function PasswordCard() {
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
-    setMsg(null);
 
     const res = await authClient.changePassword({
       currentPassword: current,
@@ -38,9 +42,13 @@ function PasswordCard() {
     });
 
     if (res.error) {
-      setMsg({ type: "err", text: "Aktuelles Passwort falsch oder neues Passwort zu schwach." });
+      toast.error("Passwort konnte nicht geändert werden", {
+        description: "Aktuelles Passwort falsch oder neues Passwort zu schwach.",
+      });
     } else {
-      setMsg({ type: "ok", text: "Passwort wurde geändert." });
+      toast.success("Passwort geändert", {
+        description: "Andere Sessions wurden abgemeldet.",
+      });
       setCurrent("");
       setNext("");
     }
@@ -85,11 +93,6 @@ function PasswordCard() {
               onChange={(e) => setNext(e.target.value)}
             />
           </div>
-          {msg && (
-            <p className={`text-sm ${msg.type === "ok" ? "text-emerald-600" : "text-destructive"}`}>
-              {msg.text}
-            </p>
-          )}
           <Button type="submit" size="sm" disabled={busy || !current || next.length < 8}>
             {busy && <Loader2 className="h-4 w-4 animate-spin" />}
             Passwort ändern
@@ -119,6 +122,9 @@ function DataExportCard() {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+      toast.success("Export gestartet");
+    } catch {
+      toast.error("Export fehlgeschlagen");
     } finally {
       setBusy(false);
     }
@@ -152,19 +158,14 @@ function DataExportCard() {
 function DeleteAccountCard() {
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState("");
   const REQUIRED = "LÖSCHEN";
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    if (confirm !== REQUIRED) return;
+  async function performDelete() {
     setBusy(true);
-    setErr("");
-
     const res = await fetch("/api/account", { method: "DELETE" });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setErr(data.error ?? "Löschen fehlgeschlagen.");
+      toast.error("Löschen fehlgeschlagen", { description: data.error });
       setBusy(false);
       return;
     }
@@ -181,36 +182,53 @@ function DeleteAccountCard() {
             <CardTitle className="text-base text-destructive">Account löschen</CardTitle>
             <CardDescription>
               Entfernt deinen Account und alle zugehörigen Daten unwiderruflich
-              (Karten, Leads, Webhooks, API-Keys). Diese Aktion kann nicht rückgängig
-              gemacht werden.
+              (Karten, Leads, Webhooks, API-Keys).
             </CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <form onSubmit={submit} className="space-y-3 max-w-sm">
-          <div className="space-y-1.5">
-            <Label htmlFor="confirm">
-              Tippe <code className="px-1 py-0.5 rounded bg-muted text-xs">{REQUIRED}</code> zur Bestätigung
-            </Label>
-            <Input
-              id="confirm"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              autoComplete="off"
-            />
-          </div>
-          {err && <p className="text-sm text-destructive">{err}</p>}
-          <Button
-            type="submit"
-            variant="destructive"
-            size="sm"
-            disabled={busy || confirm !== REQUIRED}
-          >
-            {busy && <Loader2 className="h-4 w-4 animate-spin" />}
-            Account endgültig löschen
-          </Button>
-        </form>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" size="sm">
+              <Trash2 className="h-4 w-4" />
+              Account endgültig löschen
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Account wirklich löschen?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Diese Aktion kann <strong>nicht rückgängig</strong> gemacht werden. Alle
+                deine Karten, Leads, Analytics, Webhooks und API-Keys werden
+                unwiderruflich gelöscht.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="space-y-1.5">
+              <Label htmlFor="confirm">
+                Tippe <code className="px-1 py-0.5 rounded bg-muted text-xs">{REQUIRED}</code> zur Bestätigung
+              </Label>
+              <Input
+                id="confirm"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                autoComplete="off"
+                autoFocus
+              />
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setConfirm("")}>Abbrechen</AlertDialogCancel>
+              <AlertDialogAction
+                disabled={busy || confirm !== REQUIRED}
+                onClick={(e) => { e.preventDefault(); void performDelete(); }}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {busy && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
+                Endgültig löschen
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );

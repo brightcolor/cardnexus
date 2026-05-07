@@ -75,6 +75,12 @@ export default function LoginPage() {
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Anmelden…" : "Anmelden"}
           </Button>
+          <Link
+            href="/forgot-password"
+            className="text-xs text-muted-foreground hover:text-foreground hover:underline text-center"
+          >
+            Passwort vergessen?
+          </Link>
           <p className="text-sm text-muted-foreground text-center">
             Noch kein Account?{" "}
             <Link href="/register" className="text-foreground font-medium hover:underline">

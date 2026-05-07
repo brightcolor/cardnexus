@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { fireWebhooks } from "@/lib/webhooks";
+import { rateLimit } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/client-ip";
 import { z } from "zod";
 
 const schema = z.object({
@@ -26,9 +28,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Karte nicht gefunden" }, { status: 404 });
     }
 
-    // Simple rate limit: max 3 leads from same IP per hour per card
-    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-    // (Skipping full rate-limit implementation — rely on DB constraint for now)
+    // Rate limit: 3 leads per IP per card per hour. Simple anti-spam.
+    const ip = clientIp(req);
+    if (!rateLimit({ key: `lead:${ip}:${data.cardId}`, max: 3, windowMs: 60 * 60_000 })) {
+      return NextResponse.json(
+        { error: "Zu viele Anfragen — bitte später erneut versuchen." },
+        { status: 429 }
+      );
+    }
 
     const lead = await db.lead.create({
       data: {

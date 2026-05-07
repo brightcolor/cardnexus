@@ -11,7 +11,8 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { CardPreview } from "./CardPreview";
 import { DesignTab } from "./editor/DesignTab";
 import type { CardData, CustomLink, DesignPolicy } from "@/types";
-import { Plus, Trash2, Save, Eye } from "lucide-react";
+import { Plus, Trash2, Save, Eye, GripVertical } from "lucide-react";
+import { toast } from "@/components/ui/sonner";
 
 interface CardEditorProps {
   initialCard?: Partial<CardData>;
@@ -83,6 +84,13 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
   function removeLink(i: number) {
     update("customLinks", (card.customLinks ?? []).filter((_, idx) => idx !== i));
   }
+  function moveLink(from: number, to: number) {
+    const links = [...(card.customLinks ?? [])];
+    if (to < 0 || to >= links.length || from === to) return;
+    const [moved] = links.splice(from, 1);
+    links.splice(to, 0, moved);
+    update("customLinks", links);
+  }
 
   async function save() {
     setSaving(true); setError(""); setSuccess(false);
@@ -103,6 +111,7 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
         router.push(`/card?card=${json.id}`);
       }
       setSuccess(true);
+      toast.success("Karte gespeichert");
       setTimeout(() => setSuccess(false), 3000);
       router.refresh();
     } catch (e) {
@@ -223,18 +232,78 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
             <DesignTab card={card} update={update} policy={policy} allTemplates={allTemplates} allowedDomains={allowedDomains} canCustomDomain={canCustomDomain} />
           </TabsContent>
 
-          {/* Custom Links */}
+          {/* Custom Links — reorderable via drag handle */}
           <TabsContent value="links" className="space-y-4">
-            <p className="text-sm text-muted-foreground">Eigene Links werden als Buttons auf der Karte angezeigt (max. 5).</p>
-            {(card.customLinks ?? []).map((link, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <Input placeholder="Label" value={link.label} onChange={(e) => updateLink(i, "label", e.target.value)} className="w-32" />
-                <Input placeholder="https://…" value={link.url} onChange={(e) => updateLink(i, "url", e.target.value)} type="url" />
-                <Button type="button" variant="ghost" size="icon" onClick={() => removeLink(i)}>
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-              </div>
-            ))}
+            <p className="text-sm text-muted-foreground">
+              Eigene Links werden als Buttons auf der Karte angezeigt (max. 5).
+              Ziehe am Griff <GripVertical className="inline h-3.5 w-3.5 align-text-bottom" />, um die Reihenfolge zu ändern.
+            </p>
+            <ul className="space-y-2">
+              {(card.customLinks ?? []).map((link, i) => (
+                <li
+                  key={i}
+                  draggable
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData("text/plain", String(i));
+                    e.dataTransfer.effectAllowed = "move";
+                  }}
+                  onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const from = parseInt(e.dataTransfer.getData("text/plain"));
+                    if (Number.isFinite(from)) moveLink(from, i);
+                  }}
+                  className="group flex items-center gap-2 rounded-lg border border-transparent hover:border-border hover:bg-muted/30 px-1 py-1 transition-colors"
+                >
+                  <button
+                    type="button"
+                    aria-label={`Link ${i + 1} verschieben`}
+                    className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-1 -ml-1"
+                    title="Ziehen zum Sortieren"
+                    tabIndex={-1}
+                  >
+                    <GripVertical className="h-4 w-4" />
+                  </button>
+                  <Input
+                    placeholder="Label"
+                    value={link.label}
+                    onChange={(e) => updateLink(i, "label", e.target.value)}
+                    className="w-32"
+                    aria-label={`Link ${i + 1} Label`}
+                  />
+                  <Input
+                    placeholder="https://…"
+                    value={link.url}
+                    onChange={(e) => updateLink(i, "url", e.target.value)}
+                    type="url"
+                    aria-label={`Link ${i + 1} URL`}
+                  />
+                  <div className="flex flex-col">
+                    <button
+                      type="button"
+                      onClick={() => moveLink(i, i - 1)}
+                      disabled={i === 0}
+                      className="text-xs text-muted-foreground hover:text-foreground disabled:opacity-30 px-1 leading-3"
+                      aria-label="Nach oben"
+                    >▲</button>
+                    <button
+                      type="button"
+                      onClick={() => moveLink(i, i + 1)}
+                      disabled={i === (card.customLinks?.length ?? 0) - 1}
+                      className="text-xs text-muted-foreground hover:text-foreground disabled:opacity-30 px-1 leading-3"
+                      aria-label="Nach unten"
+                    >▼</button>
+                  </div>
+                  <Button
+                    type="button" variant="ghost" size="icon"
+                    onClick={() => removeLink(i)}
+                    aria-label={`Link ${i + 1} entfernen`}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
             {(card.customLinks ?? []).length < 5 && (
               <Button type="button" variant="outline" size="sm" onClick={addLink}>
                 <Plus className="h-4 w-4" /> Link hinzufügen

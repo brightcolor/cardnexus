@@ -15,12 +15,30 @@ interface Props {
   showBadge?: boolean;
 }
 
-function track(slug: string, event: string, source?: string) {
+interface TrackOpts {
+  source?: string;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+}
+function track(slug: string, event: string, opts: TrackOpts = {}) {
   fetch("/api/analytics", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ cardSlug: slug, event, source }),
+    body: JSON.stringify({ cardSlug: slug, event, ...opts }),
   }).catch(() => {});
+}
+
+/** Read UTM-style params from the current URL (client-side only). */
+function readUtmFromUrl(): { utmSource?: string; utmMedium?: string; utmCampaign?: string } {
+  if (typeof window === "undefined") return {};
+  const sp = new URLSearchParams(window.location.search);
+  const get = (k: string) => sp.get(k)?.slice(0, 80) || undefined;
+  return {
+    utmSource:   get("utm_source"),
+    utmMedium:   get("utm_medium"),
+    utmCampaign: get("utm_campaign"),
+  };
 }
 
 export function PublicCardView({ card, source, showBadge = true }: Props) {
@@ -31,7 +49,11 @@ export function PublicCardView({ card, source, showBadge = true }: Props) {
 
   // Track view once on mount
   useEffect(() => {
-    track(card.slug, "view", source ?? "direct");
+    const utm = readUtmFromUrl();
+    // If there's a utm_campaign or any utm_*, source is implicitly "campaign".
+    const inferredSource =
+      utm.utmCampaign || utm.utmSource || utm.utmMedium ? "campaign" : (source ?? "direct");
+    track(card.slug, "view", { source: inferredSource, ...utm });
   }, [card.slug, source]);
 
   async function downloadVCard() {
@@ -54,7 +76,7 @@ export function PublicCardView({ card, source, showBadge = true }: Props) {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      track(card.slug, "vcard_download");
+      track(card.slug, "vcard_download", { source });
     } catch {
       // silent
     } finally {
@@ -70,7 +92,7 @@ export function PublicCardView({ card, source, showBadge = true }: Props) {
     if (navigator.share) {
       try {
         await navigator.share({ title: name, url });
-        track(card.slug, "view", "share");
+        track(card.slug, "view", { source: "share" });
       } catch { /* user cancelled */ }
       return;
     }

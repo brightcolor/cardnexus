@@ -202,6 +202,27 @@ async function migrate() {
     console.error(`[migrate] ! Webhook table: ${e.message}`);
   }
 
+  // ── ProcessedWebhookEvent (Stripe/PayPal idempotency) ───────────────────
+  try {
+    const exists = await tableExists(db, "ProcessedWebhookEvent");
+    if (!exists) {
+      await db.$executeRawUnsafe(`
+        CREATE TABLE "ProcessedWebhookEvent" (
+          "id"        TEXT     NOT NULL PRIMARY KEY,
+          "provider"  TEXT     NOT NULL,
+          "eventId"   TEXT     NOT NULL,
+          "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          CONSTRAINT "ProcessedWebhookEvent_provider_eventId_key" UNIQUE ("provider", "eventId")
+        )
+      `);
+      await createIndex("ProcessedWebhookEvent_provider_idx", "ProcessedWebhookEvent", "provider");
+      console.log("[migrate] + table ProcessedWebhookEvent");
+      ok++;
+    } else { skip++; }
+  } catch (e) {
+    console.error(`[migrate] ! ProcessedWebhookEvent: ${e.message}`);
+  }
+
   // ── ApiKey table ─────────────────────────────────────────────────────────
   try {
     const apiKeyExists = await tableExists(db, "ApiKey");
@@ -226,6 +247,12 @@ async function migrate() {
   } catch (e) {
     console.error(`[migrate] ! ApiKey table: ${e.message}`);
   }
+
+  // ── CardAnalytic UTM columns ────────────────────────────────────────────
+  await addColumn("CardAnalytic", "utmSource",   "TEXT");
+  await addColumn("CardAnalytic", "utmMedium",   "TEXT");
+  await addColumn("CardAnalytic", "utmCampaign", "TEXT");
+  await createIndex("CardAnalytic_utmCampaign_idx", "CardAnalytic", "utmCampaign");
 
   // ── twoFactor table (better-auth twoFactor plugin) ───────────────────────
   try {

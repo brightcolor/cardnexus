@@ -175,3 +175,24 @@ export async function sendWelcomeEmail({
 
   await send(to, `Willkommen bei ${APP_NAME}!`, html);
 }
+
+// ── Password reset email ───────────────────────────────────────────────────
+export async function sendPasswordResetEmail({
+  to, url,
+}: {
+  to: string;
+  url: string;
+}) {
+  const html = layout(
+    esc(`Passwort zurücksetzen – ${APP_NAME}`),
+    `
+    ${h1("Passwort zurücksetzen")}
+    ${p(`Du hast einen Passwort-Reset für deinen ${esc(APP_NAME)}-Account angefordert. Klicke auf den Button, um ein neues Passwort zu setzen.`)}
+    <div style="text-align:center;">
+      ${btn("Passwort zurücksetzen", esc(url))}
+    </div>
+    ${muted(`Dieser Link ist 1 Stunde gültig. Falls du diese Anfrage nicht gestellt hast, kannst du diese E-Mail ignorieren.<br/>Link: ${esc(url)}`)}
+    `
+  );
+  await send(to, `Passwort zurücksetzen – ${APP_NAME}`, html);
+}

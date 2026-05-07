@@ -40,6 +40,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
+  // SECURITY: Stripe retries can deliver the same event multiple times.
+  // De-dupe on event.id so we don't double-credit subscriptions.
+  try {
+    await db.processedWebhookEvent.create({
+      data: { provider: "stripe", eventId: event.id },
+    });
+  } catch {
+    // unique-constraint violation → already processed
+    return NextResponse.json({ received: true, deduped: true });
+  }
+
   switch (event.type) {
 
     case "checkout.session.completed": {

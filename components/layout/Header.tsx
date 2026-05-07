@@ -11,6 +11,7 @@ import { signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
+import { MobileNav } from "./MobileNav";
 
 interface HeaderProps {
   user: {
@@ -18,11 +19,15 @@ interface HeaderProps {
     email: string;
     image?: string | null;
     role?: string;
+    organizationId?: string;
   };
   cardSlug?: string;
+  appName?: string;
+  orgName?: string;
+  logoUrl?: string | null;
 }
 
-export function Header({ user, cardSlug }: HeaderProps) {
+export function Header({ user, cardSlug, appName, orgName, logoUrl }: HeaderProps) {
   const router = useRouter();
 
   async function handleSignOut() {
@@ -31,15 +36,23 @@ export function Header({ user, cardSlug }: HeaderProps) {
   }
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-border bg-background px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/80 backdrop-blur px-4 lg:px-6">
+      {/* Mobile hamburger (lg:hidden inside MobileNav) */}
+      <MobileNav
+        userRole={user.role}
+        orgName={orgName}
+        appName={appName}
+        logoUrl={logoUrl}
+      />
+
       <div className="flex-1" />
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 sm:gap-4">
         {cardSlug && (
           <Link
             href={`/c/${cardSlug}`}
             target="_blank"
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="hidden sm:flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ExternalLink className="h-4 w-4" />
             Karte ansehen
@@ -47,7 +60,10 @@ export function Header({ user, cardSlug }: HeaderProps) {
         )}
 
         <DropdownMenu>
-          <DropdownMenuTrigger className="focus:outline-none">
+          <DropdownMenuTrigger
+            aria-label="Benutzermenü"
+            className="rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
             <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8">
                 <AvatarImage src={user.image ?? undefined} />

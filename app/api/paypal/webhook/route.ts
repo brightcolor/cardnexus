@@ -26,11 +26,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  let event: { event_type: string; resource: Record<string, unknown> };
+  let event: { id?: string; event_type: string; resource: Record<string, unknown> };
   try {
     event = JSON.parse(body);
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  // SECURITY: idempotent processing — PayPal retries deliveries until 200.
+  if (event.id) {
+    try {
+      await db.processedWebhookEvent.create({
+        data: { provider: "paypal", eventId: event.id },
+      });
+    } catch {
+      return NextResponse.json({ received: true, deduped: true });
+    }
   }
 
   const resource = event.resource;

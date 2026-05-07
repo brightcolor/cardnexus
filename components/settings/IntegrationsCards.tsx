@@ -10,6 +10,7 @@ import {
   Webhook as WebhookIcon, KeyRound, Users, Copy, Check, Trash2, Loader2,
   Plus, Eye, EyeOff,
 } from "lucide-react";
+import { toast } from "@/components/ui/sonner";
 
 /* ─── Webhooks ─────────────────────────────────────────────────────────── */
 
@@ -49,9 +50,12 @@ export function WebhooksCard() {
     });
     if (!res.ok) {
       const d = await res.json().catch(() => ({}));
-      setErr(typeof d.error === "string" ? d.error : "URL muss mit https:// beginnen");
+      const msg = typeof d.error === "string" ? d.error : "URL muss mit https:// beginnen";
+      setErr(msg);
+      toast.error("Webhook konnte nicht angelegt werden", { description: msg });
     } else {
       setShowForm(false); setName(""); setUrl("");
+      toast.success("Webhook angelegt");
       await load();
     }
     setBusy(false);
@@ -68,11 +72,12 @@ export function WebhooksCard() {
 
   async function remove(id: string) {
     if (!confirm("Webhook wirklich löschen?")) return;
-    await fetch("/api/webhooks", {
+    const res = await fetch("/api/webhooks", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
+    if (res.ok) toast.success("Webhook gelöscht");
     await load();
   }
 
@@ -193,18 +198,22 @@ export function ApiKeysCard() {
       setRevealed(data.data);
       setName("");
       setShowForm(false);
+      toast.success("API-Key erstellt", { description: "Notiere ihn — er wird nicht erneut angezeigt." });
       await load();
+    } else {
+      toast.error("Konnte API-Key nicht erstellen");
     }
     setBusy(false);
   }
 
   async function remove(id: string) {
     if (!confirm("API-Key wirklich widerrufen?")) return;
-    await fetch("/api/api-keys", {
+    const res = await fetch("/api/api-keys", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
+    if (res.ok) toast.success("API-Key widerrufen");
     await load();
   }
 

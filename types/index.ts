@@ -171,6 +171,9 @@ export const TEMPLATES: Template[] = [
 ];
 
 export interface AnalyticsSummary {
+  cardId: string;
+  cardSlug: string;
+  cardName: string;
   totalViews: number;
   vcardDownloads: number;
   qrScans: number;
@@ -178,6 +181,16 @@ export interface AnalyticsSummary {
   viewsLast30Days: { date: string; count: number }[];
   topSources: { source: string; count: number }[];
   deviceSplit: { device: string; count: number }[];
+  utmCampaigns: {
+    campaign: string;
+    source: string | null;
+    medium: string | null;
+    count: number;
+  }[];
+  namedCampaigns: {
+    id: string; name: string; urlSlug: string;
+    views: number; expiresAt: string | null; createdAt: string;
+  }[];
 }
 
 export interface InvitationData {

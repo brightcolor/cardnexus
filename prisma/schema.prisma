@@ -295,10 +295,18 @@ model CardAnalytic {
   country   String?
   device    String?  // mobile | desktop | tablet
 
+  // UTM/campaign attribution. Captured on `view` events whenever the visitor
+  // hits the page with utm_* params. Independent of the Campaign model so
+  // ad-hoc share links also show up in analytics.
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+
   createdAt DateTime @default(now())
 
   @@index([cardSlug])
   @@index([createdAt])
+  @@index([utmCampaign])
 }
 
 // ─── Platform-wide settings (singleton row, id = "main") ─────────────────────
@@ -341,6 +349,18 @@ model Webhook {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+model ProcessedWebhookEvent {
+  // Idempotency store for inbound provider webhooks (Stripe, PayPal, ...).
+  // Composite key prevents accidentally processing a retry twice.
+  id        String   @id @default(cuid())
+  provider  String   // "stripe" | "paypal"
+  eventId   String
+  createdAt DateTime @default(now())
+
+  @@unique([provider, eventId])
+  @@index([provider])
 }
 
 model ApiKey {
