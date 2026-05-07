@@ -58,7 +58,7 @@ export function CardSwitcher({ cards, activeCardId }: CardSwitcherProps) {
     if (!activeCardId) return;
     setLoading("clone");
     try {
-      const res = await fetch(`/api/cards/${activeCardId}/clone`, { method: "POST" });
+      const res = await fetch(`/api/cards/clone/${activeCardId}`, { method: "POST" });
       if (!res.ok) throw new Error("Fehler beim Klonen");
       const card = await res.json();
       router.push(`/card?card=${card.id}`);
