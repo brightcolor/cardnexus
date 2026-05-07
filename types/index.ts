@@ -67,6 +67,7 @@ export interface CardData {
   cardBackground?: string | null;
   logoUrl?: string | null;
   cardDomain?: string | null;
+  hideShareButton?: boolean;
   totalViews: number;
 
   createdAt: Date;
@@ -81,7 +82,7 @@ export interface CustomLink {
   icon?: string;
 }
 
-export type TemplateId = "classic" | "modern" | "minimal" | "dark" | "bold" | "glass" | "retro" | "neon" | "corporate";
+export type TemplateId = "classic" | "modern" | "minimal" | "dark" | "bold" | "glass" | "retro" | "neon" | "corporate" | "elegant" | "gradient" | "wave";
 
 export interface Template {
   id: TemplateId;
@@ -144,6 +145,24 @@ export const TEMPLATES: Template[] = [
     name: "Corporate",
     description: "Formell und strukturiert für Unternehmen",
     preview: "#1e3a5f",
+  },
+  {
+    id: "elegant",
+    name: "Elegant",
+    description: "Fein und Premium mit dekorativen Linien",
+    preview: "#f5f0eb",
+  },
+  {
+    id: "gradient",
+    name: "Gradient",
+    description: "Vollfarbig mit weißem Text auf Farbverlauf",
+    preview: "#7c3aed",
+  },
+  {
+    id: "wave",
+    name: "Wave",
+    description: "Organische Wellenform als Hintergrundelement",
+    preview: "#0ea5e9",
   },
 ];
 

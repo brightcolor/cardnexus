@@ -276,6 +276,7 @@ export function DesignTab({ card, update, policy, allTemplates, allowedDomains, 
         { key: "showQrOnCard" as const,        label: "QR-Code auf Karte zeigen",         desc: "Kleiner QR-Code direkt auf der Visitenkarte" },
         { key: "isPublic" as const,            label: "Karte öffentlich",                 desc: "Karte für alle sichtbar" },
         { key: "showInTeamDirectory" as const, label: "Im Team-Verzeichnis anzeigen",     desc: "Profil im öffentlichen Verzeichnis deiner Organisation sichtbar" },
+        { key: "hideShareButton" as const,     label: "Teilen-Button ausblenden",         desc: "Kein Teilen-Button auf der öffentlichen Kartenansicht" },
       ].map(({ key, label, desc }) => (
         <div key={key} className="flex items-center justify-between rounded-lg border border-border p-4">
           <div>
@@ -283,7 +284,7 @@ export function DesignTab({ card, update, policy, allTemplates, allowedDomains, 
             <p className="text-xs text-muted-foreground">{desc}</p>
           </div>
           <Switch
-            checked={card[key] as boolean ?? (key === "isPublic" || key === "showInTeamDirectory")}
+            checked={card[key] as boolean ?? (key !== "showQrOnCard" && key !== "hideShareButton")}
             onCheckedChange={(v) => update(key, v)}
           />
         </div>

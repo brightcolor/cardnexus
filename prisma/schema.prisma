@@ -199,6 +199,9 @@ model Card {
   // Booking
   bookingUrl  String?  // appointment booking URL (Cal.com, Calendly, etc.)
 
+  // Visibility
+  hideShareButton Boolean @default(false)
+
   // Custom domain
   cardDomain  String?
 

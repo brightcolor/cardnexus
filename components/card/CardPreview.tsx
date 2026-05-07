@@ -8,6 +8,9 @@ import { GlassTemplate } from "./templates/Glass";
 import { RetroTemplate } from "./templates/Retro";
 import { NeonTemplate } from "./templates/Neon";
 import { CorporateTemplate } from "./templates/Corporate";
+import { ElegantTemplate } from "./templates/Elegant";
+import { GradientTemplate } from "./templates/Gradient";
+import { WaveTemplate } from "./templates/Wave";
 
 interface CardPreviewProps {
   card: Partial<CardData>;
@@ -33,6 +36,9 @@ export function CardPreview({ card, scale = 1 }: CardPreviewProps) {
       {template === "retro"     && <RetroTemplate     card={card} />}
       {template === "neon"      && <NeonTemplate      card={card} />}
       {template === "corporate" && <CorporateTemplate card={card} />}
+      {template === "elegant"   && <ElegantTemplate   card={card} />}
+      {template === "gradient"  && <GradientTemplate  card={card} />}
+      {template === "wave"      && <WaveTemplate      card={card} />}
     </div>
   );
 }

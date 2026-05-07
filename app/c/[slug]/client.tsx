@@ -130,11 +130,13 @@ export function PublicCardView({ card, source, showBadge = true }: Props) {
           Kontakt hinterlassen
         </Button>
 
-        <div className="grid grid-cols-2 gap-2">
-          <Button variant="outline" onClick={handleShare}>
-            <Share2 className="h-4 w-4" />
-            {shared ? "Kopiert!" : "Teilen"}
-          </Button>
+        <div className={`grid gap-2 ${card.hideShareButton ? "grid-cols-1" : "grid-cols-2"}`}>
+          {!card.hideShareButton && (
+            <Button variant="outline" onClick={handleShare}>
+              <Share2 className="h-4 w-4" />
+              {shared ? "Kopiert!" : "Teilen"}
+            </Button>
+          )}
           <Button variant="outline" onClick={() => setShowQR(!showQR)}>
             <QrCode className="h-4 w-4" />
             QR-Code

@@ -71,6 +71,7 @@ async function migrate() {
 
   // ── Card table new columns ───────────────────────────────────────────────
   await addColumn("Card", "cardDomain",           "TEXT");
+  await addColumn("Card", "hideShareButton",      "INTEGER NOT NULL DEFAULT 0");
   await addColumn("Card", "shadowStyle",          'TEXT NOT NULL DEFAULT "md"');
   await addColumn("Card", "socialStyle",          'TEXT NOT NULL DEFAULT "icons"');
   await addColumn("Card", "avatarBorder",         'TEXT NOT NULL DEFAULT "none"');
