@@ -65,16 +65,39 @@ export function PublicCardView({ card, source, showBadge = true }: Props) {
   async function handleShare() {
     const url = window.location.origin + `/c/${card.slug}`;
     const name = [card.firstName, card.lastName].filter(Boolean).join(" ") || "Visitenkarte";
+
+    // Native share sheet (mobile / supported browsers)
     if (navigator.share) {
       try {
         await navigator.share({ title: name, url });
         track(card.slug, "view", "share");
-      } catch { /* cancelled */ }
-    } else {
-      await navigator.clipboard.writeText(url);
+      } catch { /* user cancelled */ }
+      return;
+    }
+
+    // Clipboard API — requires HTTPS or localhost
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(url);
+        setShared(true);
+        setTimeout(() => setShared(false), 2000);
+        return;
+      } catch { /* fall through to legacy */ }
+    }
+
+    // Legacy fallback (works over plain HTTP)
+    try {
+      const el = document.createElement("textarea");
+      el.value = url;
+      el.style.cssText = "position:fixed;opacity:0;pointer-events:none";
+      document.body.appendChild(el);
+      el.focus();
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
       setShared(true);
       setTimeout(() => setShared(false), 2000);
-    }
+    } catch { /* silent */ }
   }
 
   return (
