@@ -21,8 +21,9 @@ export async function GET(
   const color = url.searchParams.get("color") ?? card.primaryColor;
   const bg = url.searchParams.get("bg") ?? "#ffffff";
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const cardUrl = `${appUrl}/c/${slug}?source=qr`;
+  const host  = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "localhost:3000";
+  const proto = request.headers.get("x-forwarded-proto") ?? "http";
+  const cardUrl = `${proto}://${host}/c/${slug}?source=qr`;
 
   const svg = await generateQRCodeSVG(cardUrl, { color, backgroundColor: bg });
 

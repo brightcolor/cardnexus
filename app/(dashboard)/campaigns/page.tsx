@@ -30,7 +30,10 @@ export default async function CampaignsPage() {
       }))
     : [];
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const hdrs = await headers();
+  const host  = hdrs.get("x-forwarded-host") ?? hdrs.get("host") ?? "localhost:3000";
+  const proto = hdrs.get("x-forwarded-proto") ?? "http";
+  const baseUrl = `${proto}://${host}`;
 
   return (
     <div className="max-w-4xl space-y-8">

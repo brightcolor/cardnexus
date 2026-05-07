@@ -94,15 +94,19 @@ export const PLANS: Record<Plan, PlanDefinition> = {
 
 export const FREE_TEMPLATES = ["classic", "modern", "minimal", "dark"];
 
-/** Returns the effective plan for a user — checks expiry. */
-export function effectivePlan(plan: string, expiresAt?: Date | null): Plan {
+/** Returns the effective plan for a user — checks expiry.
+ *  Accepts Date or ISO string (better-auth may serialize dates in session JWT). */
+export function effectivePlan(plan: string, expiresAt?: Date | string | null): Plan {
   if (plan === "free") return "free";
-  if (expiresAt && expiresAt < new Date()) return "free"; // expired → downgrade
+  if (expiresAt) {
+    const d = expiresAt instanceof Date ? expiresAt : new Date(expiresAt);
+    if (!isNaN(d.getTime()) && d < new Date()) return "free";
+  }
   return plan as Plan;
 }
 
 /** Returns the plan features for a given plan string. */
-export function getPlanFeatures(plan: string, expiresAt?: Date | null): PlanFeatures {
+export function getPlanFeatures(plan: string, expiresAt?: Date | string | null): PlanFeatures {
   return PLANS[effectivePlan(plan, expiresAt)].features;
 }
 
