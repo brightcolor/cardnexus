@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { twoFactor } from "better-auth/plugins";
 import { db } from "./db";
 
 export const auth = betterAuth({
@@ -63,6 +64,16 @@ export const auth = betterAuth({
       },
     },
   },
+  plugins: [
+    // TOTP-based 2FA. The plugin manages /two-factor/* endpoints,
+    // a `twoFactor` table and the `user.twoFactorEnabled` field.
+    twoFactor({
+      issuer: process.env.APP_NAME ?? "FreddieCard",
+      // Force the user to verify a TOTP code before enabling 2FA —
+      // protects against typos in the authenticator setup.
+      skipVerificationOnEnable: false,
+    }),
+  ],
 });
 
 export type Session = typeof auth.$Infer.Session;

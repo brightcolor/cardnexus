@@ -77,7 +77,7 @@ export interface CardData {
   createdAt: Date;
   updatedAt: Date;
 
-  user?: { name: string; email: string };
+  user?: { name: string };
 }
 
 export interface CustomLink {

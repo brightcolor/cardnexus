@@ -18,6 +18,20 @@ function createTransport() {
 const FROM = process.env.SMTP_FROM ?? "CardNexus <noreply@cardnexus.app>";
 const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME ?? "CardNexus";
 
+/**
+ * HTML-escape user-supplied strings so they can't break out of attribute or
+ * tag context in our email templates. Closes the XSS / HTML-injection vector
+ * in invitation, welcome and similar templates.
+ */
+function esc(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 // ── Base layout ────────────────────────────────────────────────────────────
 function layout(title: string, body: string) {
   return `<!DOCTYPE html>
@@ -113,15 +127,15 @@ export async function sendInvitationEmail({
   };
 
   const html = layout(
-    `Einladung zu ${orgName}`,
+    esc(`Einladung zu ${orgName}`),
     `
     ${h1(`Du wurdest eingeladen`)}
-    ${p(`<strong>${senderName}</strong> hat dich eingeladen, ${APP_NAME} als <strong>${roleLabel[role] ?? role}</strong> der Organisation <strong>${orgName}</strong> beizutreten.`)}
+    ${p(`<strong>${esc(senderName)}</strong> hat dich eingeladen, ${esc(APP_NAME)} als <strong>${esc(roleLabel[role] ?? role)}</strong> der Organisation <strong>${esc(orgName)}</strong> beizutreten.`)}
     ${p("Erstelle deinen kostenlosen Account und gestalte sofort deine digitale Visitenkarte.")}
     <div style="text-align:center;">
-      ${btn("Einladung annehmen", inviteUrl)}
+      ${btn("Einladung annehmen", esc(inviteUrl))}
     </div>
-    ${muted(`Dieser Link ist 7 Tage gültig. Falls du diese E-Mail nicht erwartet hast, kannst du sie ignorieren.<br/>Link: ${inviteUrl}`)}
+    ${muted(`Dieser Link ist 7 Tage gültig. Falls du diese E-Mail nicht erwartet hast, kannst du sie ignorieren.<br/>Link: ${esc(inviteUrl)}`)}
     `
   );
 
@@ -137,13 +151,13 @@ export async function sendWelcomeEmail({
   dashboardUrl: string;
 }) {
   const html = layout(
-    `Willkommen bei ${APP_NAME}`,
+    esc(`Willkommen bei ${APP_NAME}`),
     `
-    ${h1(`Hallo ${name.split(" ")[0]} 👋`)}
-    ${p(`Schön, dass du dabei bist! Dein ${APP_NAME}-Account ist bereit.`)}
+    ${h1(`Hallo ${esc(name.split(" ")[0])} 👋`)}
+    ${p(`Schön, dass du dabei bist! Dein ${esc(APP_NAME)}-Account ist bereit.`)}
     ${p("Erstelle jetzt deine digitale Visitenkarte, füge deine Kontaktdaten ein und teile sie per Link, QR-Code oder NFC-Chip.")}
     <div style="text-align:center;">
-      ${btn("Zum Dashboard", dashboardUrl)}
+      ${btn("Zum Dashboard", esc(dashboardUrl))}
     </div>
     <table width="100%" cellpadding="0" cellspacing="0" style="margin:28px 0;border-top:1px solid #f3f4f6;padding-top:20px;">
       <tr>

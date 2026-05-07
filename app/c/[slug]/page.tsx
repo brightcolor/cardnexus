@@ -1,26 +1,46 @@
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import type { CardData } from "@/types";
 import { PublicCardView } from "./client";
+import { CardPasswordGate } from "./PasswordGate";
 import { canUseFeature } from "@/lib/plans";
 import type { Metadata } from "next";
 
 interface Props {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ source?: string }>;
+  searchParams: Promise<{ source?: string; expired?: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const card = await db.card.findUnique({ where: { slug }, select: { firstName: true, lastName: true, title: true, company: true } });
+  const card = await db.card.findUnique({
+    where: { slug },
+    select: { firstName: true, lastName: true, title: true, company: true, isPublic: true, expiresAt: true, passwordHash: true },
+  });
   if (!card) return { title: "Karte nicht gefunden" };
 
-  const name = `${card.firstName} ${card.lastName}`.trim();
+  // Don't leak names of expired or non-public cards in metadata.
+  if (!card.isPublic) return { title: "Karte nicht verfügbar" };
+  if (card.expiresAt && card.expiresAt < new Date()) return { title: "Karte abgelaufen" };
+  if (card.passwordHash) return { title: "Geschützte Karte" };
+
+  const name = `${card.firstName ?? ""} ${card.lastName ?? ""}`.trim();
   return {
     title: `${name}${card.title ? ` – ${card.title}` : ""}`,
     description: card.company ?? undefined,
     openGraph: { title: name, type: "profile" },
   };
+}
+
+/**
+ * Cookie name for an unlocked password-protected card.
+ * Format: `card_unlocked_<slug>`. The cookie value is the bcrypt-style
+ * hash to prevent forgery — only valid hashes (matching the current
+ * passwordHash) unlock the card.
+ */
+function unlockCookieName(slug: string): string {
+  return `card_unlocked_${slug}`;
 }
 
 export default async function PublicCardPage({ params, searchParams }: Props) {
@@ -29,12 +49,43 @@ export default async function PublicCardPage({ params, searchParams }: Props) {
 
   const raw = await db.card.findUnique({
     where: { slug },
-    include: { user: { select: { name: true, email: true, plan: true, planExpiresAt: true } } },
+    include: {
+      user: {
+        select: {
+          name: true,
+          // SECURITY: do NOT expose owner email to the public card page.
+          plan: true,
+          planExpiresAt: true,
+        },
+      },
+    },
   });
 
   if (!raw || !raw.isPublic) notFound();
 
-  const card = { ...raw, customLinks: JSON.parse(raw.customLinks) } as CardData;
+  // SECURITY: enforce expiry — abgelaufene Karten dürfen nicht mehr aufgerufen werden.
+  if (raw.expiresAt && raw.expiresAt < new Date()) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50">
+        <div className="max-w-sm text-center space-y-2">
+          <h1 className="text-2xl font-semibold">Karte abgelaufen</h1>
+          <p className="text-muted-foreground">Diese Karte ist nicht mehr verfügbar.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // SECURITY: enforce password-protection.
+  if (raw.passwordHash) {
+    const cookie = (await cookies()).get(unlockCookieName(slug))?.value;
+    const unlocked = !!cookie && cookie === raw.passwordHash;
+    if (!unlocked) {
+      return <CardPasswordGate slug={slug} />;
+    }
+  }
+
+  const { passwordHash: _ph, ...safe } = raw;
+  const card = { ...safe, customLinks: JSON.parse(raw.customLinks) } as CardData;
   const whiteLabel = canUseFeature("whiteLabel", raw.user?.plan ?? "free", raw.user?.planExpiresAt);
 
   return <PublicCardView card={card} source={source} showBadge={!whiteLabel} />;

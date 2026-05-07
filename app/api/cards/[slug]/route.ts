@@ -9,14 +9,28 @@ export async function GET(
 
   const card = await db.card.findUnique({
     where: { slug },
-    include: { user: { select: { name: true, email: true } } },
+    include: {
+      // SECURITY: do NOT expose the owner's email or other PII via the public
+      // card API. Only the display name is needed for rendering.
+      user: { select: { name: true } },
+    },
   });
 
   if (!card || !card.isPublic) {
     return NextResponse.json({ error: "Nicht gefunden" }, { status: 404 });
   }
 
+  // Hide expiry-elapsed and password-protected cards from the public endpoint.
+  if (card.expiresAt && card.expiresAt < new Date()) {
+    return NextResponse.json({ error: "Karte abgelaufen" }, { status: 410 });
+  }
+  if (card.passwordHash) {
+    return NextResponse.json({ error: "Karte ist passwortgeschützt" }, { status: 401 });
+  }
+
+  // Strip server-only fields before returning.
+  const { passwordHash: _ph, ...safe } = card;
   return NextResponse.json({
-    data: { ...card, customLinks: JSON.parse(card.customLinks) },
+    data: { ...safe, customLinks: JSON.parse(card.customLinks) },
   });
 }

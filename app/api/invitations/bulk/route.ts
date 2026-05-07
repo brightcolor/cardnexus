@@ -94,6 +94,14 @@ export async function POST(request: NextRequest) {
     inviteRole = parsed.data.role;
   }
 
+  // SECURITY: team_leader may only invite members.
+  if (role === "team_leader" && inviteRole !== "member") {
+    return NextResponse.json(
+      { error: "Team-Leader können nur Mitglieder einladen" },
+      { status: 403 }
+    );
+  }
+
   let sent = 0;
   let skipped = 0;
 

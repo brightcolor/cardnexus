@@ -3,7 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Plus, Copy, ChevronDown } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  Plus, Copy, ChevronDown, Star, Trash2, Pencil, Check, X,
+} from "lucide-react";
 import type { CardData } from "@/types";
 
 interface CardSwitcherProps {
@@ -14,13 +17,24 @@ interface CardSwitcherProps {
 export function CardSwitcher({ cards, activeCardId }: CardSwitcherProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState<"new" | "clone" | null>(null);
+  const [loading, setLoading] = useState<string | null>(null);
+  const [renameId, setRenameId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
 
   const activeCard = cards.find((c) => c.id === activeCardId);
 
   function selectCard(id: string) {
     setOpen(false);
     router.push(`/card?card=${id}`);
+  }
+
+  async function patch(id: string, body: Record<string, unknown>) {
+    const res = await fetch("/api/cards", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, ...body }),
+    });
+    return res.ok;
   }
 
   async function createCard() {
@@ -35,8 +49,6 @@ export function CardSwitcher({ cards, activeCardId }: CardSwitcherProps) {
       const card = await res.json();
       router.push(`/card?card=${card.id}`);
       router.refresh();
-    } catch (e) {
-      console.error(e);
     } finally {
       setLoading(null);
     }
@@ -51,8 +63,55 @@ export function CardSwitcher({ cards, activeCardId }: CardSwitcherProps) {
       const card = await res.json();
       router.push(`/card?card=${card.id}`);
       router.refresh();
-    } catch (e) {
-      console.error(e);
+    } finally {
+      setLoading(null);
+    }
+  }
+
+  async function deleteCard(id: string) {
+    if (cards.length <= 1) {
+      alert("Letzte Karte kann nicht gelöscht werden.");
+      return;
+    }
+    if (!confirm("Karte wirklich unwiderruflich löschen?")) return;
+    setLoading(`del-${id}`);
+    try {
+      const res = await fetch("/api/cards", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      if (!res.ok) throw new Error("Fehler");
+      // If we deleted the active card, route to remaining default
+      const remaining = cards.find((c) => c.id !== id);
+      if (id === activeCardId && remaining) {
+        router.push(`/card?card=${remaining.id}`);
+      }
+      router.refresh();
+    } finally {
+      setLoading(null);
+      setOpen(false);
+    }
+  }
+
+  async function setDefault(id: string) {
+    setLoading(`def-${id}`);
+    try {
+      await patch(id, { isDefault: true });
+      router.refresh();
+    } finally {
+      setLoading(null);
+    }
+  }
+
+  async function rename(id: string) {
+    const value = renameValue.trim();
+    if (!value) return;
+    setLoading(`name-${id}`);
+    try {
+      await patch(id, { name: value });
+      setRenameId(null);
+      router.refresh();
     } finally {
       setLoading(null);
     }
@@ -61,7 +120,7 @@ export function CardSwitcher({ cards, activeCardId }: CardSwitcherProps) {
   return (
     <div className="flex items-center gap-2 flex-wrap">
       {/* Card picker */}
-      {cards.length > 1 && (
+      {cards.length > 0 && (
         <div className="relative">
           <Button
             variant="outline"
@@ -73,20 +132,75 @@ export function CardSwitcher({ cards, activeCardId }: CardSwitcherProps) {
             <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
           </Button>
           {open && (
-            <div className="absolute right-0 top-full mt-1 z-50 bg-popover border border-border rounded-lg shadow-md min-w-44 py-1">
+            <div className="absolute right-0 top-full mt-1 z-[200] bg-popover border border-border rounded-lg shadow-md min-w-72 py-1">
               {cards.map((c) => (
-                <button
+                <div
                   key={c.id}
-                  onClick={() => selectCard(c.id)}
-                  className={`w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors ${
-                    c.id === activeCardId ? "font-medium text-primary" : ""
+                  className={`flex items-center gap-1 px-2 py-1.5 text-sm hover:bg-accent rounded mx-1 ${
+                    c.id === activeCardId ? "bg-accent" : ""
                   }`}
                 >
-                  {c.name}
-                  {c.isDefault && (
-                    <span className="ml-1.5 text-xs text-muted-foreground">(Standard)</span>
+                  {renameId === c.id ? (
+                    <>
+                      <Input
+                        value={renameValue}
+                        onChange={(e) => setRenameValue(e.target.value)}
+                        className="h-7 text-sm flex-1"
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") rename(c.id);
+                          if (e.key === "Escape") setRenameId(null);
+                        }}
+                      />
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => rename(c.id)}>
+                        <Check className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setRenameId(null)}>
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => selectCard(c.id)}
+                        className="flex-1 text-left flex items-center gap-1.5"
+                      >
+                        <span className={c.id === activeCardId ? "font-medium" : ""}>{c.name}</span>
+                        {c.isDefault && (
+                          <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                        )}
+                      </button>
+                      <Button
+                        size="sm" variant="ghost" className="h-7 w-7 p-0"
+                        onClick={() => { setRenameId(c.id); setRenameValue(c.name ?? ""); }}
+                        title="Umbenennen"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      {!c.isDefault && (
+                        <Button
+                          size="sm" variant="ghost" className="h-7 w-7 p-0"
+                          onClick={() => setDefault(c.id)}
+                          disabled={loading === `def-${c.id}`}
+                          title="Als Standard"
+                        >
+                          <Star className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                      {cards.length > 1 && (
+                        <Button
+                          size="sm" variant="ghost" className="h-7 w-7 p-0"
+                          onClick={() => deleteCard(c.id)}
+                          disabled={loading === `del-${c.id}`}
+                          title="Löschen"
+                        >
+                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                        </Button>
+                      )}
+                    </>
                   )}
-                </button>
+                </div>
               ))}
             </div>
           )}
@@ -115,7 +229,7 @@ export function CardSwitcher({ cards, activeCardId }: CardSwitcherProps) {
           className="gap-1.5"
         >
           <Copy className="h-3.5 w-3.5" />
-          {loading === "clone" ? "Wird geklont…" : "Karte klonen"}
+          {loading === "clone" ? "Wird geklont…" : "Klonen"}
         </Button>
       )}
     </div>

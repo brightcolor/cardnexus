@@ -35,6 +35,21 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(`${base}/upgrade?canceled=1`);
     }
 
+    // SECURITY: bind the subscription to the calling user. Without this check,
+    // an attacker could pass an arbitrary ACTIVE subscription_id from another
+    // PayPal account and upgrade their own plan for free.
+    const [customUserId, customPlan] = (sub.custom_id ?? "").split("|");
+    if (customUserId !== session.user.id) {
+      console.warn("[paypal capture] custom_id mismatch", {
+        expected: session.user.id, got: customUserId,
+      });
+      return NextResponse.redirect(`${base}/upgrade?canceled=1`);
+    }
+    // The plan in the URL must also match the plan encoded server-side.
+    if (customPlan !== plan) {
+      return NextResponse.redirect(`${base}/upgrade?canceled=1`);
+    }
+
     // Calculate plan expiry: next billing date or +31 days
     const nextBilling = sub.billing_info?.next_billing_time;
     const expiresAt = nextBilling ? new Date(nextBilling) : new Date(Date.now() + 31 * 24 * 60 * 60 * 1000);

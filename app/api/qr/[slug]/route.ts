@@ -18,8 +18,12 @@ export async function GET(
   }
 
   const url = new URL(request.url);
-  const color = url.searchParams.get("color") ?? card.primaryColor;
-  const bg = url.searchParams.get("bg") ?? "#ffffff";
+  const HEX = /^#[0-9a-fA-F]{6}$/;
+  // SECURITY: don't pass un-validated query params into an SVG buffer.
+  const colorRaw = url.searchParams.get("color");
+  const bgRaw = url.searchParams.get("bg");
+  const color = colorRaw && HEX.test(colorRaw) ? colorRaw : card.primaryColor;
+  const bg    = bgRaw    && HEX.test(bgRaw)    ? bgRaw    : "#ffffff";
 
   const host  = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "localhost:3000";
   const proto = request.headers.get("x-forwarded-proto") ?? "http";

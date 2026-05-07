@@ -29,6 +29,12 @@ export default function LoginPage() {
       return;
     }
 
+    // If 2FA is enabled, the twoFactorClient plugin redirects via
+    // window.location.href = "/login/2fa" — don't navigate to /dashboard.
+    if ((result.data as { twoFactorRedirect?: boolean } | undefined)?.twoFactorRedirect) {
+      return;
+    }
+
     router.push("/dashboard");
   }
 

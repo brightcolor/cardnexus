@@ -18,6 +18,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Einladung ungültig oder abgelaufen" }, { status: 410 });
   }
 
+  // SECURITY: an invitation token is bound to a specific email address.
+  // Without this check, anybody who obtains the token could attach themselves
+  // to the org with the granted role.
+  if (
+    invitation.email.toLowerCase().trim() !==
+    (session.user.email ?? "").toLowerCase().trim()
+  ) {
+    return NextResponse.json(
+      { error: "Diese Einladung ist an eine andere E-Mail-Adresse gerichtet." },
+      { status: 403 }
+    );
+  }
+
   await db.$transaction([
     db.user.update({
       where: { id: session.user.id },

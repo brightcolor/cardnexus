@@ -64,6 +64,30 @@ export async function PATCH(request: NextRequest) {
   if (!isSuperAdmin(role)) {
     if (data.role === "super_admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     if (data.plan !== undefined) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    // company_admin must not be able to grant company_admin to others (only super_admin can).
+    if (data.role === "company_admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    // company_admin cannot move users between orgs.
+    if (data.organizationId !== undefined) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+  }
+
+  // SECURITY: company_admin must only be able to mutate users from THEIR org.
+  // Without this check, anybody with company_admin role could update arbitrary users.
+  if (!isSuperAdmin(role)) {
+    const orgId = (session.user as { organizationId?: string }).organizationId;
+    const target = await db.user.findUnique({
+      where: { id: userId },
+      select: { organizationId: true, role: true },
+    });
+    if (!target) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (target.organizationId !== orgId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    // Cannot demote/modify a super_admin.
+    if (target.role === "super_admin") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
   }
 
   const updated = await db.user.update({
@@ -89,6 +113,22 @@ export async function DELETE(request: NextRequest) {
   const { userId } = await request.json();
   if (userId === session.user.id) {
     return NextResponse.json({ error: "Cannot delete yourself" }, { status: 400 });
+  }
+
+  // SECURITY: company_admin only allowed to delete users from THEIR org.
+  if (!isSuperAdmin(role)) {
+    const orgId = (session.user as { organizationId?: string }).organizationId;
+    const target = await db.user.findUnique({
+      where: { id: userId },
+      select: { organizationId: true, role: true },
+    });
+    if (!target) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (target.organizationId !== orgId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    if (target.role === "super_admin") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
   }
 
   await db.user.delete({ where: { id: userId } });

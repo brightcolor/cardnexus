@@ -7,21 +7,31 @@ export const metadata = { title: "Einstellungen" };
 
 export default async function SettingsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
-  const user = session!.user as { id: string; name: string; email: string; role?: string; organizationId?: string };
+  const user = session!.user as {
+    id: string; name: string; email: string;
+    role?: string; organizationId?: string;
+  };
 
-  const [org, orgSettings] = await Promise.all([
+  const [dbUser, org] = await Promise.all([
+    db.user.findUnique({
+      where: { id: user.id },
+      select: { twoFactorEnabled: true },
+    }),
     user.organizationId
       ? db.organization.findUnique({
           where: { id: user.organizationId },
           include: { settings: true },
         })
       : null,
-    null,
   ]);
 
   return (
     <SettingsClientPage
-      user={{ ...user, role: user.role ?? "member" }}
+      user={{
+        ...user,
+        role: user.role ?? "member",
+        twoFactorEnabled: dbUser?.twoFactorEnabled ?? false,
+      }}
       org={org ? { ...org, settings: org.settings } : null}
     />
   );

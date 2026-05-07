@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { canManageOrganization } from "@/lib/utils";
+import { buildCsv } from "@/lib/csv";
 
 export async function GET(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -40,33 +41,20 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
-    const escape = (v: string | null | undefined) => {
-      const s = v ?? "";
-      return s.includes(",") || s.includes('"') || s.includes("\n")
-        ? `"${s.replace(/"/g, '""')}"`
-        : s;
-    };
-
-    const rows = [
-      "Datum,Name,E-Mail,Telefon,Nachricht,Karte,Mitglied",
-      ...leads.map((l) => {
+    const csv = buildCsv(
+      ["Datum", "Name", "E-Mail", "Telefon", "Nachricht", "Karte", "Mitglied"],
+      leads.map((l) => {
         const card = cardMap.get(l.cardId);
         const memberName = card ? (userNameMap.get(card.userId) ?? "") : "";
         return [
           l.createdAt.toLocaleDateString("de-DE"),
-          l.name,
-          l.email,
-          l.phone,
-          l.message,
-          card?.name,
-          memberName,
-        ]
-          .map(escape)
-          .join(",");
-      }),
-    ].join("\n");
+          l.name, l.email, l.phone, l.message,
+          card?.name ?? "", memberName,
+        ];
+      })
+    );
 
-    return new NextResponse(rows, {
+    return new NextResponse(csv, {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
         "Content-Disposition": 'attachment; filename="org-leads.csv"',

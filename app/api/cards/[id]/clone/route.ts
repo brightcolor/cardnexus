@@ -17,11 +17,21 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   let slug = `${base}-${nanoid(6)}`;
   while (await db.card.findUnique({ where: { slug } })) slug = `${base}-${nanoid(6)}`;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id: _id, slug: _slug, createdAt: _ca, updatedAt: _ua, isDefault: _def, totalViews: _tv, ...data } = source;
+  // Strip DB-managed fields; keep all content fields
+  const omit = new Set(["id", "slug", "createdAt", "updatedAt"]);
+  const data = Object.fromEntries(
+    Object.entries(source).filter(([k]) => !omit.has(k))
+  ) as typeof source;
 
+  // Use unchecked input so we can pass userId directly (no `user.connect`).
   const cloned = await db.card.create({
-    data: { ...data, slug, name: `${source.name} (Kopie)`, isDefault: false, totalViews: 0 },
+    data: {
+      ...data,
+      slug,
+      name: `${source.name} (Kopie)`,
+      isDefault: false,
+      totalViews: 0,
+    } as Parameters<typeof db.card.create>[0]["data"],
   });
 
   return NextResponse.json(

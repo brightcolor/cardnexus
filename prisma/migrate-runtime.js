@@ -52,6 +52,7 @@ async function migrate() {
   await addColumn("user", "paypalSubscriptionId", "TEXT");
   await addColumn("user", "referralCode",         "TEXT");
   await addColumn("user", "referredById",         "TEXT");
+  await addColumn("user", "twoFactorEnabled",     "INTEGER NOT NULL DEFAULT 0");
 
   // ── Organization table ───────────────────────────────────────────────────
   await addColumn("Organization", "plan",         'TEXT NOT NULL DEFAULT "free"');
@@ -224,6 +225,30 @@ async function migrate() {
     } else { skip++; }
   } catch (e) {
     console.error(`[migrate] ! ApiKey table: ${e.message}`);
+  }
+
+  // ── twoFactor table (better-auth twoFactor plugin) ───────────────────────
+  try {
+    const twoFactorExists = await tableExists(db, "twoFactor");
+    if (!twoFactorExists) {
+      await db.$executeRawUnsafe(`
+        CREATE TABLE "twoFactor" (
+          "id"          TEXT    NOT NULL PRIMARY KEY,
+          "userId"      TEXT    NOT NULL,
+          "secret"      TEXT    NOT NULL,
+          "backupCodes" TEXT    NOT NULL,
+          "verified"    INTEGER NOT NULL DEFAULT 1,
+          CONSTRAINT "twoFactor_userId_fkey" FOREIGN KEY ("userId")
+            REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+        )
+      `);
+      await createIndex("twoFactor_userId_idx", "twoFactor", "userId");
+      await createIndex("twoFactor_secret_idx", "twoFactor", "secret");
+      console.log("[migrate] + table twoFactor");
+      ok++;
+    } else { skip++; }
+  } catch (e) {
+    console.error(`[migrate] ! twoFactor table: ${e.message}`);
   }
 
   await db.$disconnect();

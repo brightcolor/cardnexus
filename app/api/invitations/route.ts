@@ -49,6 +49,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
+  // SECURITY: a team_leader (canManageUsers=true) must NOT be able to grant
+  // company_admin or team_leader roles — only company_admin/super_admin may.
+  if (role === "team_leader" && parsed.data.role !== "member") {
+    return NextResponse.json(
+      { error: "Team-Leader können nur Mitglieder einladen" },
+      { status: 403 }
+    );
+  }
+
   const existing = await db.invitation.findFirst({
     where: { email: parsed.data.email, organizationId: orgId, acceptedAt: null },
   });
@@ -94,11 +103,19 @@ export async function DELETE(request: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const role = (session.user as { role?: string }).role ?? "member";
-  if (!canManageUsers(role)) {
+  const orgId = (session.user as { organizationId?: string }).organizationId;
+  if (!canManageUsers(role) || !orgId) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const { id } = await request.json();
-  await db.invitation.delete({ where: { id } });
+  // SECURITY: scope deletion to the caller's org so admins can't tear down
+  // invitations from other organizations they happen to know the ID of.
+  const result = await db.invitation.deleteMany({
+    where: { id, organizationId: orgId },
+  });
+  if (result.count === 0) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
   return NextResponse.json({ ok: true });
 }

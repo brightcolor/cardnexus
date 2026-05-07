@@ -84,8 +84,11 @@ export async function POST(req: NextRequest) {
 
   for (const row of rows) {
     try {
-      const existing = await db.user.findUnique({
-        where: { email: row.email },
+      // SECURITY: bulk-import must only touch users INSIDE the caller's org.
+      // findUnique by email matches globally and would let an org-admin from
+      // org A overwrite the cards of users in org B.
+      const existing = await db.user.findFirst({
+        where: { email: row.email, organizationId: user.organizationId },
         include: { cards: { orderBy: [{ isDefault: "desc" }], take: 1, select: { id: true } } },
       });
 

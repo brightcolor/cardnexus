@@ -50,6 +50,7 @@ async function getAccessToken(): Promise<string> {
 export interface PayPalSubscription {
   id:     string;
   status: string; // APPROVAL_PENDING | APPROVED | ACTIVE | SUSPENDED | CANCELLED | EXPIRED
+  custom_id?: string; // we encode `${userId}|${plan}` in createSubscription
   links:  { href: string; rel: string; method: string }[];
   billing_info?: {
     next_billing_time?: string;

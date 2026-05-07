@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { buildCsv } from "@/lib/csv";
 
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -20,24 +21,19 @@ export async function GET() {
     orderBy: { createdAt: "desc" },
   });
 
-  const rows = [
-    "Datum,Name,E-Mail,Telefon,Nachricht,Karte",
-    ...leads.map((l) => {
-      const date = l.createdAt.toLocaleDateString("de-DE");
-      const cardName = cardNameMap.get(l.cardId) ?? "";
-      const escape = (v: string | null | undefined) => {
-        const s = v ?? "";
-        return s.includes(",") || s.includes('"') || s.includes("\n")
-          ? `"${s.replace(/"/g, '""')}"`
-          : s;
-      };
-      return [date, l.name, l.email, l.phone, l.message, cardName]
-        .map(escape)
-        .join(",");
-    }),
-  ].join("\n");
+  const csv = buildCsv(
+    ["Datum", "Name", "E-Mail", "Telefon", "Nachricht", "Karte"],
+    leads.map((l) => [
+      l.createdAt.toLocaleDateString("de-DE"),
+      l.name,
+      l.email,
+      l.phone,
+      l.message,
+      cardNameMap.get(l.cardId) ?? "",
+    ])
+  );
 
-  return new NextResponse(rows, {
+  return new NextResponse(csv, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
       "Content-Disposition": 'attachment; filename="leads.csv"',

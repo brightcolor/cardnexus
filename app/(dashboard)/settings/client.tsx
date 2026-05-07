@@ -12,6 +12,9 @@ import {
   OrgInfoCard, DesignDefaultsCard, BrandColorsCard,
   PermissionsCard, DeptPoliciesCard, TemplateCardSection,
 } from "./OrgSettingsCards";
+import { SecurityCard } from "@/components/settings/SecurityCard";
+import { AccountActions } from "@/components/settings/AccountActions";
+import { WebhooksCard, ApiKeysCard, ReferralsCard } from "@/components/settings/IntegrationsCards";
 
 interface OrgSettings {
   defaultTemplate: string; defaultFontFamily: string; defaultLayoutStyle: string;
@@ -23,7 +26,10 @@ interface OrgSettings {
 }
 
 interface Props {
-  user: { id: string; name: string; email: string; role: string; organizationId?: string | null };
+  user: {
+    id: string; name: string; email: string; role: string;
+    organizationId?: string | null; twoFactorEnabled: boolean;
+  };
   org: { id: string; name: string; slug: string; primaryColor: string; settings?: OrgSettings | null } | null;
 }
 
@@ -151,6 +157,17 @@ export function SettingsClientPage({ user, org }: Props) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Security */}
+      <SecurityCard twoFactorEnabled={user.twoFactorEnabled} />
+
+      {/* Account actions (password, delete, export) */}
+      <AccountActions />
+
+      {/* Integrations */}
+      <WebhooksCard />
+      <ApiKeysCard />
+      <ReferralsCard />
 
       {/* Organisation */}
       {org && canManageOrg && (

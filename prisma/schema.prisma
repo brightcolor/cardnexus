@@ -21,6 +21,9 @@ model user {
   // Role system
   role          String    @default("member") // super_admin | company_admin | team_leader | member
 
+  // Two-factor authentication (TOTP)
+  twoFactorEnabled Boolean @default(false)
+
   // Subscription plan
   plan                 String    @default("free") // free | pro | business
   planExpiresAt        DateTime?
@@ -46,8 +49,22 @@ model user {
 
   sessions       session[]
   accounts       account[]
+  twoFactor      twoFactor[]
 
   @@map("user")
+}
+
+model twoFactor {
+  id          String @id
+  userId      String
+  user        user   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  secret      String
+  backupCodes String
+  verified    Boolean @default(true)
+
+  @@index([secret])
+  @@index([userId])
+  @@map("twoFactor")
 }
 
 model session {
