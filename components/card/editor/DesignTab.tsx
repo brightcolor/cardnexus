@@ -13,12 +13,15 @@ import {
   FONT_OPTIONS, LAYOUT_OPTIONS, ROUNDED_OPTIONS, SHADOW_OPTIONS,
   SOCIAL_STYLE_OPTIONS, AVATAR_BORDER_OPTIONS, BG_OPTIONS,
 } from "./editorConstants";
+import { DomainSection } from "./DomainSection";
 
 interface Props {
   card: Partial<CardData>;
   update: <K extends keyof CardData>(key: K, value: CardData[K] | null) => void;
   policy: DesignPolicy;
   allTemplates: boolean;
+  allowedDomains?: string[];
+  canCustomDomain?: boolean;
 }
 
 function LockedBadge() {
@@ -29,7 +32,7 @@ function LockedBadge() {
   );
 }
 
-export function DesignTab({ card, update, policy, allTemplates }: Props) {
+export function DesignTab({ card, update, policy, allTemplates, allowedDomains, canCustomDomain }: Props) {
   const hasBrandColors = policy.brandColors.length > 0;
 
   return (
@@ -285,6 +288,9 @@ export function DesignTab({ card, update, policy, allTemplates }: Props) {
           />
         </div>
       ))}
+
+      {/* Domain */}
+      <DomainSection card={card} update={update} allowedDomains={allowedDomains} canCustomDomain={canCustomDomain} />
     </div>
   );
 }

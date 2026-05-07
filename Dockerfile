@@ -22,6 +22,11 @@ RUN npx prisma generate
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
+ARG BUILD_TIME="dev"
+ARG VERSION="dev"
+ENV NEXT_PUBLIC_BUILD_TIME=$BUILD_TIME
+ENV NEXT_PUBLIC_APP_VERSION=$VERSION
+
 # Build-time env placeholders — overridden at runtime via docker-compose
 ENV BETTER_AUTH_SECRET="build-placeholder"
 ENV BETTER_AUTH_URL="http://localhost:3000"

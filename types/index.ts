@@ -66,6 +66,7 @@ export interface CardData {
   avatarBorder?: string | null;
   cardBackground?: string | null;
   logoUrl?: string | null;
+  cardDomain?: string | null;
   totalViews: number;
 
   createdAt: Date;

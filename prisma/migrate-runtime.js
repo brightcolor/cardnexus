@@ -66,7 +66,11 @@ async function migrate() {
     console.error(`[migrate] ! OrganizationSettings: ${e.message}`);
   }
 
+  // ── PlatformSettings new columns ────────────────────────────────────────
+  await addColumn("PlatformSettings", "allowedDomains", "TEXT");
+
   // ── Card table new columns ───────────────────────────────────────────────
+  await addColumn("Card", "cardDomain",           "TEXT");
   await addColumn("Card", "shadowStyle",          'TEXT NOT NULL DEFAULT "md"');
   await addColumn("Card", "socialStyle",          'TEXT NOT NULL DEFAULT "icons"');
   await addColumn("Card", "avatarBorder",         'TEXT NOT NULL DEFAULT "none"');

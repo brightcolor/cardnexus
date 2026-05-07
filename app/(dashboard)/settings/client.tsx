@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { getRoleLabel, canManageOrganization } from "@/lib/utils";
 import { Save, Wallet } from "lucide-react";
@@ -64,7 +65,26 @@ export function SettingsClientPage({ user, org }: Props) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved]   = useState(false);
 
+  const [newEmail, setNewEmail]     = useState("");
+  const [emailSaving, setEmailSaving] = useState(false);
+  const [emailError, setEmailError]   = useState("");
+  const [emailSaved, setEmailSaved]   = useState(false);
+
   const canManageOrg = canManageOrganization(user.role);
+
+  async function saveEmail() {
+    if (!newEmail || newEmail === user.email) return;
+    setEmailSaving(true); setEmailError("");
+    const res = await fetch("/api/account", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: newEmail }),
+    });
+    const data = await res.json();
+    if (!res.ok) { setEmailError(data.error ?? "Fehler"); }
+    else { setEmailSaved(true); setTimeout(() => setEmailSaved(false), 3000); setNewEmail(""); }
+    setEmailSaving(false);
+  }
 
   async function saveOrgSettings() {
     setSaving(true);
@@ -112,6 +132,22 @@ export function SettingsClientPage({ user, org }: Props) {
               <p className="text-sm text-muted-foreground">{user.email}</p>
             </div>
             <Badge className="ml-auto" variant="secondary">{getRoleLabel(user.role)}</Badge>
+          </div>
+          <div className="border-t border-border pt-4 mt-4 space-y-3">
+            <p className="text-sm font-medium">E-Mail-Adresse ändern</p>
+            <div className="flex gap-2">
+              <Input
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder={user.email}
+                className="flex-1"
+              />
+              <Button size="sm" onClick={saveEmail} disabled={emailSaving || !newEmail}>
+                {emailSaving ? "…" : emailSaved ? "✓" : "Speichern"}
+              </Button>
+            </div>
+            {emailError && <p className="text-xs text-destructive">{emailError}</p>}
           </div>
         </CardContent>
       </Card>

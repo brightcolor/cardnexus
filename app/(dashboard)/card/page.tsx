@@ -2,6 +2,8 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { resolveDesignPolicy } from "@/lib/design-policy";
+import { getPlatformSettings } from "@/lib/platform";
+import { canUseFeature } from "@/lib/plans";
 import { CardEditor } from "@/components/card/CardEditor";
 import { QRCodeDisplay } from "@/components/card/QRCodeDisplay";
 import type { CardData } from "@/types";
@@ -12,12 +14,16 @@ export default async function CardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   const user = session!.user as { id: string; organizationId?: string; role?: string; plan?: string; planExpiresAt?: Date };
 
-  const [raw, orgSettings] = await Promise.all([
+  const [raw, orgSettings, platformSettings] = await Promise.all([
     db.card.findUnique({ where: { userId: user.id } }),
     user.organizationId
       ? db.organizationSettings.findUnique({ where: { organizationId: user.organizationId } })
       : null,
+    getPlatformSettings(),
   ]);
+
+  let allowedDomains: string[] = [];
+  try { allowedDomains = platformSettings.allowedDomains ? JSON.parse(platformSettings.allowedDomains) : []; } catch { /* ignore */ }
 
   const card = raw
     ? ({ ...raw, customLinks: JSON.parse(raw.customLinks) } as CardData)
@@ -40,7 +46,14 @@ export default async function CardPage() {
         </p>
       </div>
 
-      <CardEditor initialCard={card ?? undefined} isNew={!card} policy={policy} userPlan={user.plan ?? "free"} />
+      <CardEditor
+        initialCard={card ?? undefined}
+        isNew={!card}
+        policy={policy}
+        userPlan={user.plan ?? "free"}
+        allowedDomains={allowedDomains}
+        canCustomDomain={canUseFeature("customDomain", user.plan ?? "free")}
+      />
 
       {card && (
         <div className="border-t border-border pt-8">

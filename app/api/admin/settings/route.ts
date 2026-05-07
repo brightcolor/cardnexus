@@ -13,6 +13,7 @@ const schema = z.object({
   primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
   supportEmail: z.string().email().nullable().optional(),
   footerText: z.string().nullable().optional(),
+  allowedDomains: z.string().nullable().optional(),
 });
 
 export async function GET() {

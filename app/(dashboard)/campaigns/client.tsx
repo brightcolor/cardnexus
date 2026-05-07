@@ -22,7 +22,7 @@ export function CampaignsClient({ campaigns: init, cardSlug, baseUrl, hasCard }:
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   function campaignUrl(urlSlug: string) {
-    return `${baseUrl}/c/campaign/${urlSlug}`;
+    return `${baseUrl}/p/${urlSlug}`;
   }
 
   async function create() {

@@ -199,6 +199,9 @@ model Card {
   // Booking
   bookingUrl  String?  // appointment booking URL (Cal.com, Calendly, etc.)
 
+  // Custom domain
+  cardDomain  String?
+
   // Stats (denormalized for fast reads)
   totalViews Int @default(0)
 
@@ -261,14 +264,15 @@ model CardAnalytic {
 // ─── Platform-wide settings (singleton row, id = "main") ─────────────────────
 
 model PlatformSettings {
-  id         String  @id @default("main")
-  appName    String  @default("FreddieCard")
-  appUrl     String  @default("http://localhost:3000")
-  faviconUrl String?
-  logoUrl    String?
-  primaryColor String @default("#0F172A")
-  supportEmail String?
-  footerText String?
+  id             String  @id @default("main")
+  appName        String  @default("FreddieCard")
+  appUrl         String  @default("http://localhost:3000")
+  faviconUrl     String?
+  logoUrl        String?
+  primaryColor   String  @default("#0F172A")
+  supportEmail   String?
+  footerText     String?
+  allowedDomains String? // JSON array of allowed domain strings
 }
 
 model Notification {

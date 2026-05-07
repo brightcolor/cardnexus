@@ -19,6 +19,8 @@ interface CardEditorProps {
   policy?: DesignPolicy;
   saveEndpoint?: string;
   userPlan?: string;
+  allowedDomains?: string[];
+  canCustomDomain?: boolean;
 }
 
 const OPEN_POLICY: DesignPolicy = {
@@ -40,7 +42,7 @@ const SOCIAL_FIELDS = [
   { key: "youtube",   label: "YouTube",     ph: "https://youtube.com/@..." },
 ];
 
-export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, saveEndpoint, userPlan = "free" }: CardEditorProps) {
+export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, saveEndpoint, userPlan = "free", allowedDomains, canCustomDomain }: CardEditorProps) {
   const router = useRouter();
   const allTemplates = userPlan !== "free";
 
@@ -211,7 +213,7 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
 
           {/* Design — extracted component */}
           <TabsContent value="design">
-            <DesignTab card={card} update={update} policy={policy} allTemplates={allTemplates} />
+            <DesignTab card={card} update={update} policy={policy} allTemplates={allTemplates} allowedDomains={allowedDomains} canCustomDomain={canCustomDomain} />
           </TabsContent>
 
           {/* Custom Links */}

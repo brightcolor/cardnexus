@@ -7,8 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ImageUpload } from "@/components/ui/image-upload";
-import { Save, Check, Globe, Type, Image, Palette } from "lucide-react";
+import { Save, Check, Globe, Type, Image, Palette, X, Plus } from "lucide-react";
 import type { PlatformSettings } from "@/lib/platform";
+
+function parseAllowedDomains(val: string | null): string[] {
+  try { return val ? JSON.parse(val) : []; } catch { return []; }
+}
 
 export function AdminSettingsClient({ settings: initial }: { settings: PlatformSettings }) {
   const router = useRouter();
@@ -16,9 +20,18 @@ export function AdminSettingsClient({ settings: initial }: { settings: PlatformS
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+  const [domains, setDomains] = useState<string[]>(() => parseAllowedDomains(initial.allowedDomains));
+  const [newDomain, setNewDomain] = useState("");
 
   function update<K extends keyof PlatformSettings>(key: K, value: PlatformSettings[K]) {
     setS((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function addDomain() {
+    const d = newDomain.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/.*$/, "");
+    if (!d || domains.includes(d)) return;
+    setDomains([...domains, d]);
+    setNewDomain("");
   }
 
   async function save() {
@@ -26,10 +39,11 @@ export function AdminSettingsClient({ settings: initial }: { settings: PlatformS
     setError("");
     setSaved(false);
     try {
+      const payload = { ...s, allowedDomains: domains.length > 0 ? JSON.stringify(domains) : null };
       const res = await fetch("/api/admin/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(s),
+        body: JSON.stringify(payload),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(typeof json.error === "string" ? json.error : "Fehler");
@@ -189,6 +203,47 @@ export function AdminSettingsClient({ settings: initial }: { settings: PlatformS
               placeholder="© 2025 Meine Firma. Alle Rechte vorbehalten."
               maxLength={200}
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Custom Domains */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Globe className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-base">Custom Domains</CardTitle>
+          </div>
+          <CardDescription>
+            Diese Domains können Nutzer und Organisationen für ihre Karten auswählen.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            {domains.map((d) => (
+              <span key={d} className="flex items-center gap-1 bg-muted px-2.5 py-1 rounded-full text-sm">
+                {d}
+                <button type="button" onClick={() => setDomains(domains.filter((x) => x !== d))}
+                  className="text-muted-foreground hover:text-destructive transition-colors ml-1">
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </span>
+            ))}
+            {domains.length === 0 && (
+              <p className="text-sm text-muted-foreground">Noch keine Domains hinzugefügt.</p>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Input
+              value={newDomain}
+              onChange={(e) => setNewDomain(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addDomain()}
+              placeholder="karte.meinefirma.de"
+              className="flex-1"
+            />
+            <Button type="button" variant="outline" size="sm" onClick={addDomain}>
+              <Plus className="h-4 w-4" /> Hinzufügen
+            </Button>
           </div>
         </CardContent>
       </Card>

@@ -40,16 +40,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Upgrade erforderlich" }, { status: 403 });
   }
 
-  const card = await db.card.findUnique({ where: { userId: user.id }, select: { id: true, slug: true } });
+  const card = await db.card.findUnique({ where: { userId: user.id }, select: { id: true, slug: true, firstName: true, lastName: true } });
   if (!card) return NextResponse.json({ error: "Keine Karte" }, { status: 400 });
 
   const body = createSchema.parse(await req.json());
+
+  // Generate friendly slug: firstname-lastname-randomid
+  const namePart = [card.firstName, card.lastName]
+    .filter(Boolean)
+    .join("-")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    || "link";
 
   const campaign = await db.campaign.create({
     data: {
       cardId: card.id,
       name: body.name,
-      urlSlug: nanoid(8),
+      urlSlug: `${namePart}-${nanoid(6)}`,
       expiresAt: body.expiresAt ? new Date(body.expiresAt) : null,
     },
   });

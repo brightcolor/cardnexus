@@ -51,6 +51,7 @@ const updateSchema = z.object({
   cardBackground: z.enum(["white", "tinted", "gradient"]).optional(),
   logoUrl: urlOrPath.optional().nullable(),
   bookingUrl: z.string().url().optional().nullable(),
+  cardDomain: z.string().nullable().optional(),
 });
 
 function emptyToNull<T extends Record<string, unknown>>(obj: T): T {

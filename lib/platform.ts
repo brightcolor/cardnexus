@@ -9,6 +9,7 @@ export interface PlatformSettings {
   primaryColor: string;
   supportEmail: string | null;
   footerText: string | null;
+  allowedDomains: string | null;
 }
 
 const DEFAULTS: Omit<PlatformSettings, "id"> = {
@@ -19,6 +20,7 @@ const DEFAULTS: Omit<PlatformSettings, "id"> = {
   primaryColor: "#0F172A",
   supportEmail: null,
   footerText: null,
+  allowedDomains: null,
 };
 
 // Cache for 60s in production to avoid DB hit on every request
