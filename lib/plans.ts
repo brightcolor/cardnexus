@@ -50,8 +50,8 @@ export const PLANS: Record<Plan, PlanDefinition> = {
   pro: {
     id: "pro",
     name: "Pro",
-    monthlyPrice: 9,
-    yearlyPrice: 7,
+    monthlyPrice: 5,
+    yearlyPrice: 4,
     description: "Für Profis & Freelancer",
     highlight: true,
     features: {
@@ -72,8 +72,8 @@ export const PLANS: Record<Plan, PlanDefinition> = {
   business: {
     id: "business",
     name: "Business",
-    monthlyPrice: 29,
-    yearlyPrice: 23,
+    monthlyPrice: 19,
+    yearlyPrice: 15,
     description: "Für Teams & Unternehmen",
     features: {
       whiteLabel: true,
