@@ -34,6 +34,33 @@ export const auth = betterAuth({
         type: "string",
         required: false,
       },
+      // Subscription plan — set by server/webhooks only, never by client
+      plan: {
+        type: "string",
+        defaultValue: "free",
+        required: false,
+        input: false,
+      },
+      planExpiresAt: {
+        type: "date",
+        required: false,
+        input: false,
+      },
+      stripeCustomerId: {
+        type: "string",
+        required: false,
+        input: false,
+      },
+      stripeSubscriptionId: {
+        type: "string",
+        required: false,
+        input: false,
+      },
+      paypalSubscriptionId: {
+        type: "string",
+        required: false,
+        input: false,
+      },
     },
   },
 });

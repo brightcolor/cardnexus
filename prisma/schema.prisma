@@ -26,6 +26,7 @@ model user {
   planExpiresAt        DateTime?
   stripeCustomerId     String?   @unique
   stripeSubscriptionId String?   @unique
+  paypalSubscriptionId String?   @unique
 
   // Relations
   organizationId String?

@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { PLANS, effectivePlan } from "@/lib/plans";
+import { paypalConfigured } from "@/lib/paypal";
 import Link from "next/link";
 import { Check, ArrowLeft, Zap } from "lucide-react";
 import { UpgradeButtons } from "./UpgradeButtons";
@@ -9,40 +10,53 @@ import { UpgradeButtons } from "./UpgradeButtons";
 export const metadata = { title: "Upgrade – CardNexus" };
 
 const FEATURE_LABELS: Record<string, string> = {
-  whiteLabel:              "White Label (kein Badge)",
-  customDomain:            "Eigene Domain",
-  allTemplates:            "Alle 9 Templates",
-  pdfExport:               "PDF / Print-Export",
-  appointmentBooking:      "Terminbuchungs-Link",
-  campaigns:               "UTM-Kampagnen",
-  eventInvitations:        "Event-Einladungslinks",
-  milestoneNotifications:  "Meilenstein-Benachrichtigungen",
-  bulkImport:              "Bulk CSV-Import",
-  orgTemplate:             "Karten-Vorlage fur Org",
+  whiteLabel:             "White Label (kein Badge)",
+  customDomain:           "Eigene Domain",
+  allTemplates:           "Alle 9 Templates",
+  pdfExport:              "PDF / Print-Export",
+  appointmentBooking:     "Terminbuchungs-Link",
+  campaigns:              "UTM-Kampagnen",
+  eventInvitations:       "Event-Einladungslinks",
+  milestoneNotifications: "Meilenstein-Benachrichtigungen",
+  bulkImport:             "Bulk CSV-Import",
+  orgTemplate:            "Karten-Vorlage für Org",
 };
 
-export default async function UpgradePage({ searchParams }: { searchParams: Promise<{ success?: string; canceled?: string }> }) {
-  const sp = await searchParams;
+export default async function UpgradePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ success?: string; canceled?: string }>;
+}) {
+  const sp      = await searchParams;
   const session = await auth.api.getSession({ headers: await headers() });
-  const user = session!.user as { id: string; plan?: string; planExpiresAt?: Date; stripeCustomerId?: string; stripeSubscriptionId?: string };
+  const user    = session!.user as { id: string };
 
-  // Re-fetch from DB to get latest plan after webhook
-  const dbUser = await db.user.findUnique({ where: { id: user.id }, select: { plan: true, planExpiresAt: true, stripeCustomerId: true, stripeSubscriptionId: true } });
-  const currentPlan = effectivePlan(dbUser?.plan ?? "free", dbUser?.planExpiresAt);
-  const hasStripe = !!dbUser?.stripeCustomerId;
+  // Always re-fetch from DB — webhooks update the DB, not the session cookie
+  const dbUser = await db.user.findUnique({
+    where:  { id: user.id },
+    select: { plan: true, planExpiresAt: true, stripeCustomerId: true, stripeSubscriptionId: true, paypalSubscriptionId: true },
+  });
 
-  const stripeConfigured = !!(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_PRICE_PRO_MONTHLY);
+  const currentPlan      = effectivePlan(dbUser?.plan ?? "free", dbUser?.planExpiresAt);
+  const hasStripe        = !!dbUser?.stripeCustomerId;
+  const hasPaypal        = !!dbUser?.paypalSubscriptionId;
+  const stripeReady      = !!(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_PRICE_PRO_MONTHLY);
+  const paypalReady      = paypalConfigured();
 
   return (
     <div className="max-w-3xl space-y-8">
       <div>
-        <Link href="/dashboard" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+        >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Zuruck zum Dashboard
+          Zurück zum Dashboard
         </Link>
         <h1 className="text-2xl font-bold">Plan upgraden</h1>
         <p className="text-muted-foreground mt-1">
-          Aktuell: <span className="font-semibold capitalize">{currentPlan}</span>
+          Aktuell:{" "}
+          <span className="font-semibold capitalize">{currentPlan}</span>
           {dbUser?.planExpiresAt && (
             <span className="text-xs ml-2 text-muted-foreground">
               (bis {new Date(dbUser.planExpiresAt).toLocaleDateString("de-DE")})
@@ -53,7 +67,7 @@ export default async function UpgradePage({ searchParams }: { searchParams: Prom
 
       {sp.success && (
         <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-700">
-          Zahlung erfolgreich! Dein Plan wurde aktualisiert.
+          ✓ Zahlung erfolgreich! Dein Plan wurde aktualisiert.
         </div>
       )}
       {sp.canceled && (
@@ -62,25 +76,32 @@ export default async function UpgradePage({ searchParams }: { searchParams: Prom
         </div>
       )}
 
-      {!stripeConfigured && (
+      {!stripeReady && !paypalReady && (
         <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-700">
-          Stripe ist nicht konfiguriert. Bitte setze <code className="font-mono">STRIPE_SECRET_KEY</code> und <code className="font-mono">STRIPE_PRICE_PRO_MONTHLY</code> in der Server-.env.
+          Kein Zahlungsanbieter konfiguriert. Bitte Stripe- oder PayPal-Umgebungsvariablen setzen.
         </div>
       )}
 
       <div className="grid sm:grid-cols-2 gap-4">
         {(["pro", "business"] as const).map((planId) => {
-          const plan = PLANS[planId];
+          const plan      = PLANS[planId];
           const isCurrent = currentPlan === planId;
 
           return (
-            <div key={planId} className={`bg-card rounded-2xl border-2 p-6 flex flex-col gap-4 ${plan.highlight ? "border-primary" : "border-border"}`}>
+            <div
+              key={planId}
+              className={`bg-card rounded-2xl border-2 p-6 flex flex-col gap-4 ${
+                plan.highlight ? "border-primary" : "border-border"
+              }`}
+            >
               <div>
                 <div className="flex items-center gap-2">
                   <Zap className="h-4 w-4 text-primary" />
                   <span className="font-bold text-lg">{plan.name}</span>
                   {isCurrent && (
-                    <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">Aktuell</span>
+                    <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
+                      Aktuell
+                    </span>
                   )}
                 </div>
                 <div className="mt-2">
@@ -108,7 +129,9 @@ export default async function UpgradePage({ searchParams }: { searchParams: Prom
                 planId={planId}
                 isCurrent={isCurrent}
                 hasStripe={hasStripe}
-                stripeConfigured={stripeConfigured}
+                hasPaypal={hasPaypal}
+                stripeConfigured={stripeReady}
+                paypalConfigured={paypalReady}
               />
             </div>
           );
@@ -117,7 +140,10 @@ export default async function UpgradePage({ searchParams }: { searchParams: Prom
 
       <p className="text-sm text-muted-foreground text-center">
         Fragen?{" "}
-        <a href="mailto:sales@cardnexus.app" className="underline hover:text-foreground transition-colors">
+        <a
+          href="mailto:sales@cardnexus.app"
+          className="underline hover:text-foreground transition-colors"
+        >
           sales@cardnexus.app
         </a>
       </p>

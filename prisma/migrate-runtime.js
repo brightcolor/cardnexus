@@ -49,6 +49,7 @@ async function migrate() {
   await addColumn("user", "planExpiresAt",        "DATETIME");
   await addColumn("user", "stripeCustomerId",     "TEXT");
   await addColumn("user", "stripeSubscriptionId", "TEXT");
+  await addColumn("user", "paypalSubscriptionId", "TEXT");
 
   // ── Organization table ───────────────────────────────────────────────────
   await addColumn("Organization", "plan",         'TEXT NOT NULL DEFAULT "free"');
