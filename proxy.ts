@@ -5,15 +5,31 @@ import type { Session } from "./lib/auth";
 
 // ─── Custom domain detection ──────────────────────────────────────────────────
 
-const PLATFORM_HOSTS = [
+// Strip protocol and port from a URL/host string to get just the hostname
+function toHostname(val: string) {
+  return val.replace(/^https?:\/\//, "").split(":")[0].split("/")[0];
+}
+
+const PLATFORM_HOSTNAMES = [
   "localhost",
-  process.env.BETTER_AUTH_URL?.replace(/^https?:\/\//, "") ?? "",
-  process.env.APP_URL?.replace(/^https?:\/\//, "") ?? "",
+  "0.0.0.0",
+  process.env.BETTER_AUTH_URL ? toHostname(process.env.BETTER_AUTH_URL) : "",
+  process.env.APP_URL ? toHostname(process.env.APP_URL) : "",
 ].filter(Boolean);
 
-function isPlatformHost(host: string) {
-  const hostname = host.split(":")[0];
-  return PLATFORM_HOSTS.some((h) => hostname === h || hostname.endsWith(`.${h}`));
+/**
+ * Returns true only for real external domain names that could be custom domains.
+ * Excludes: localhost, 0.0.0.0, IPv4 addresses, hostnames without a dot.
+ */
+function isLikelyCustomDomain(host: string): boolean {
+  const hostname = toHostname(host);
+  if (!hostname) return false;
+  if (PLATFORM_HOSTNAMES.includes(hostname)) return false;
+  // Reject plain IPs (v4) — they are never valid custom domains
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) return false;
+  // Must look like a real domain (has at least one dot)
+  if (!hostname.includes(".")) return false;
+  return true;
 }
 
 // ─── Auth route constants ─────────────────────────────────────────────────────
@@ -27,12 +43,11 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // ── Custom domain routing ──────────────────────────────────────────────────
-  // If request comes from a non-platform host, rewrite to the domain API route
-  // which looks up the card by cardDomain and redirects to /c/[slug]
-  if (host && !isPlatformHost(host)) {
+  // Only activate for real external domains (not IPs, not localhost, not 0.0.0.0)
+  if (isLikelyCustomDomain(host)) {
     const url = request.nextUrl.clone();
-    const hostname = host.split(":")[0];
-    url.pathname = `/api/domain/${encodeURIComponent(hostname)}${pathname === "/" ? "" : pathname}`;
+    const hostname = toHostname(host);
+    url.pathname = `/api/domain/${encodeURIComponent(hostname)}`;
     return NextResponse.rewrite(url);
   }
 
