@@ -40,6 +40,8 @@ const ADMIN_PATHS = ["/admin"];
 
 export async function proxy(request: NextRequest) {
   const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "";
+  const proto = request.headers.get("x-forwarded-proto") ?? "http";
+  const base = `${proto}://${host}`;
   const { pathname } = request.nextUrl;
 
   // ── Custom domain routing ──────────────────────────────────────────────────
@@ -65,19 +67,19 @@ export async function proxy(request: NextRequest) {
 
   // Redirect logged-in users away from auth pages
   if (isAuthenticated && isAuth) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(`${base}/dashboard`);
   }
 
   // Protect dashboard and admin routes
   if (!isAuthenticated && !isPublic) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(`${base}/login`);
   }
 
   // Admin routes: only super_admin
   if (isAdmin && session?.user) {
     const role = (session.user as { role?: string }).role;
     if (role !== "super_admin") {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return NextResponse.redirect(`${base}/dashboard`);
     }
   }
 

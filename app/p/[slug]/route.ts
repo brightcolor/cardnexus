@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requestBaseUrl } from "@/lib/request-base-url";
 
 // /p/[slug] → redirect to card with tracking (friendly URL)
 export async function GET(
@@ -7,6 +8,7 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
+  const base = requestBaseUrl(req);
 
   const campaign = await db.campaign.findUnique({
     where: { urlSlug: slug },
@@ -14,11 +16,11 @@ export async function GET(
   });
 
   if (!campaign || !campaign.card.isPublic) {
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(`${base}/`, { status: 302 });
   }
 
   if (campaign.expiresAt && campaign.expiresAt < new Date()) {
-    return NextResponse.redirect(new URL("/", req.url), { status: 302 });
+    return NextResponse.redirect(`${base}/`, { status: 302 });
   }
 
   await db.campaign.update({
@@ -26,9 +28,9 @@ export async function GET(
     data: { views: { increment: 1 } },
   });
 
-  const dest = new URL(`/c/${campaign.card.slug}`, req.url);
+  const dest = new URL(`/c/${campaign.card.slug}`, base);
   dest.searchParams.set("src", "campaign");
   dest.searchParams.set("cid", campaign.id);
 
-  return NextResponse.redirect(dest, { status: 302 });
+  return NextResponse.redirect(dest.toString(), { status: 302 });
 }

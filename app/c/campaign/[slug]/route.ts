@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requestBaseUrl } from "@/lib/request-base-url";
 
-// /c/campaign/[slug] → redirect to card with tracking
+// /c/campaign/[slug] → redirect to card with tracking (legacy URL, kept for compatibility)
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
+  const base = requestBaseUrl(req);
 
   const campaign = await db.campaign.findUnique({
     where: { urlSlug: slug },
@@ -14,23 +16,21 @@ export async function GET(
   });
 
   if (!campaign || !campaign.card.isPublic) {
-    return NextResponse.redirect(new URL("/", _req.url));
+    return NextResponse.redirect(`${base}/`, { status: 302 });
   }
 
-  // Check expiry
   if (campaign.expiresAt && campaign.expiresAt < new Date()) {
-    return NextResponse.redirect(new URL("/", _req.url), { status: 302 });
+    return NextResponse.redirect(`${base}/`, { status: 302 });
   }
 
-  // Increment campaign views
   await db.campaign.update({
     where: { id: campaign.id },
     data: { views: { increment: 1 } },
   });
 
-  const dest = new URL(`/c/${campaign.card.slug}`, _req.url);
+  const dest = new URL(`/c/${campaign.card.slug}`, base);
   dest.searchParams.set("src", "campaign");
   dest.searchParams.set("cid", campaign.id);
 
-  return NextResponse.redirect(dest, { status: 302 });
+  return NextResponse.redirect(dest.toString(), { status: 302 });
 }
