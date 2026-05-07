@@ -10,8 +10,9 @@ export default async function NfcPage() {
   const session = await auth.api.getSession({ headers: hdrs });
   const user = session!.user as { id: string };
 
-  const card = await db.card.findUnique({
+  const card = await db.card.findFirst({
     where: { userId: user.id },
+    orderBy: [{ isDefault: "desc" }],
     select: { slug: true },
   });
 

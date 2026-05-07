@@ -7,8 +7,9 @@ export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const card = await db.card.findUnique({
+  const card = await db.card.findFirst({
     where: { userId: session.user.id },
+    orderBy: [{ isDefault: "desc" }],
     select: { id: true },
   });
 
@@ -29,8 +30,9 @@ export async function DELETE(req: Request) {
 
   const { id } = await req.json() as { id: string };
 
-  const card = await db.card.findUnique({
+  const card = await db.card.findFirst({
     where: { userId: session.user.id },
+    orderBy: [{ isDefault: "desc" }],
     select: { id: true },
   });
 

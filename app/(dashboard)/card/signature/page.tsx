@@ -11,7 +11,7 @@ export default async function SignaturePage() {
   const session = await auth.api.getSession({ headers: await headers() });
   const user = session!.user as { id: string };
 
-  const raw = await db.card.findUnique({ where: { userId: user.id } });
+  const raw = await db.card.findFirst({ where: { userId: user.id }, orderBy: [{ isDefault: "desc" }] });
   if (!raw) redirect("/card");
 
   const card = { ...raw, customLinks: JSON.parse(raw.customLinks) } as CardData;

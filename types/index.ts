@@ -68,6 +68,10 @@ export interface CardData {
   logoUrl?: string | null;
   cardDomain?: string | null;
   hideShareButton?: boolean;
+  name?: string;
+  isDefault?: boolean;
+  expiresAt?: string | null;
+  passwordHash?: string | null;
   totalViews: number;
 
   createdAt: Date;
@@ -233,4 +237,22 @@ export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
   message?: string;
+}
+
+export interface WebhookData {
+  id: string;
+  name: string;
+  url: string;
+  events: string[];
+  secret?: string | null;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface ApiKeyData {
+  id: string;
+  name: string;
+  prefix: string;
+  lastUsedAt?: string | null;
+  createdAt: string;
 }

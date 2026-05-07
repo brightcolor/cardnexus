@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { fireWebhooks } from "@/lib/webhooks";
 import { z } from "zod";
 
 const schema = z.object({
@@ -38,6 +39,9 @@ export async function POST(req: NextRequest) {
         message: data.message || null,
       },
     });
+
+    // Fire webhooks (non-blocking)
+    fireWebhooks(data.cardId, "lead", lead).catch(() => {});
 
     return NextResponse.json({ success: true, id: lead.id });
   } catch (err) {

@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const card = await db.card.findUnique({ where: { userId: session.user.id } });
+  const card = await db.card.findFirst({ where: { userId: session.user.id }, orderBy: [{ isDefault: "desc" }] });
   if (!card) return NextResponse.json({ data: null });
 
   const url = new URL(request.url);

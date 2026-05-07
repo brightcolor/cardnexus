@@ -86,18 +86,19 @@ export async function POST(req: NextRequest) {
     try {
       const existing = await db.user.findUnique({
         where: { email: row.email },
-        include: { card: { select: { id: true } } },
+        include: { cards: { orderBy: [{ isDefault: "desc" }], take: 1, select: { id: true } } },
       });
 
       if (existing) {
         // Update or create card for existing user
-        const slug = existing.card
+        const existingCard = existing.cards[0] ?? null;
+        const slug = existingCard
           ? undefined
           : `${slugify(row.firstName + "-" + row.lastName)}-${nanoid(4)}`;
 
-        if (existing.card) {
+        if (existingCard) {
           await db.card.update({
-            where: { id: existing.card.id },
+            where: { id: existingCard.id },
             data: {
               firstName:  row.firstName,
               lastName:   row.lastName,
@@ -109,7 +110,7 @@ export async function POST(req: NextRequest) {
             },
           });
           results.push({ email: row.email, status: "updated" });
-        } else if (slug) {
+        } else if (!existingCard && slug) {
           await db.card.create({
             data: {
               userId:      existing.id,

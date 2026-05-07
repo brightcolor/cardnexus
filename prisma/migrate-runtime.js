@@ -50,6 +50,8 @@ async function migrate() {
   await addColumn("user", "stripeCustomerId",     "TEXT");
   await addColumn("user", "stripeSubscriptionId", "TEXT");
   await addColumn("user", "paypalSubscriptionId", "TEXT");
+  await addColumn("user", "referralCode",         "TEXT");
+  await addColumn("user", "referredById",         "TEXT");
 
   // ── Organization table ───────────────────────────────────────────────────
   await addColumn("Organization", "plan",         'TEXT NOT NULL DEFAULT "free"');
@@ -61,6 +63,8 @@ async function migrate() {
     if (settingsExists) {
       await addColumn("OrganizationSettings", "teamDirectoryEnabled", "INTEGER NOT NULL DEFAULT 1");
       await addColumn("OrganizationSettings", "templateCardData",     "TEXT");
+      await addColumn("OrganizationSettings", "webhookUrl",           "TEXT");
+      await addColumn("OrganizationSettings", "managerApproval",      "INTEGER NOT NULL DEFAULT 0");
     }
   } catch (e) {
     console.error(`[migrate] ! OrganizationSettings: ${e.message}`);
@@ -79,6 +83,15 @@ async function migrate() {
   await addColumn("Card", "logoUrl",              "TEXT");
   await addColumn("Card", "showInTeamDirectory",  "INTEGER NOT NULL DEFAULT 1");
   await addColumn("Card", "bookingUrl",           "TEXT");
+  await addColumn("Card", "name",                 'TEXT NOT NULL DEFAULT "Meine Karte"');
+  await addColumn("Card", "isDefault",            "INTEGER NOT NULL DEFAULT 1");
+  await addColumn("Card", "expiresAt",            "DATETIME");
+  await addColumn("Card", "passwordHash",         "TEXT");
+  // Drop the unique constraint on userId to allow multiple cards per user
+  try {
+    await db.$executeRawUnsafe(`DROP INDEX IF EXISTS "Card_userId_key"`);
+  } catch (e) { /* already dropped */ }
+  await createIndex("Card_userId_idx", "Card", "userId");
 
   // ── Lead table ───────────────────────────────────────────────────────────
   try {
@@ -160,6 +173,57 @@ async function migrate() {
     }
   } catch (e) {
     console.error(`[migrate] ! Notification table: ${e.message}`);
+  }
+
+  // ── Webhook table ────────────────────────────────────────────────────────
+  try {
+    const webhookExists = await tableExists(db, "Webhook");
+    if (!webhookExists) {
+      await db.$executeRawUnsafe(`
+        CREATE TABLE "Webhook" (
+          "id"        TEXT     NOT NULL PRIMARY KEY,
+          "userId"    TEXT     NOT NULL,
+          "name"      TEXT     NOT NULL,
+          "url"       TEXT     NOT NULL,
+          "events"    TEXT     NOT NULL DEFAULT '["lead"]',
+          "secret"    TEXT,
+          "active"    INTEGER  NOT NULL DEFAULT 1,
+          "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          CONSTRAINT "Webhook_userId_fkey" FOREIGN KEY ("userId")
+            REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+        )
+      `);
+      await createIndex("Webhook_userId_idx", "Webhook", "userId");
+      console.log("[migrate] + table Webhook");
+      ok++;
+    } else { skip++; }
+  } catch (e) {
+    console.error(`[migrate] ! Webhook table: ${e.message}`);
+  }
+
+  // ── ApiKey table ─────────────────────────────────────────────────────────
+  try {
+    const apiKeyExists = await tableExists(db, "ApiKey");
+    if (!apiKeyExists) {
+      await db.$executeRawUnsafe(`
+        CREATE TABLE "ApiKey" (
+          "id"         TEXT     NOT NULL PRIMARY KEY,
+          "userId"     TEXT     NOT NULL,
+          "name"       TEXT     NOT NULL,
+          "keyHash"    TEXT     NOT NULL UNIQUE,
+          "prefix"     TEXT     NOT NULL,
+          "lastUsedAt" DATETIME,
+          "createdAt"  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          CONSTRAINT "ApiKey_userId_fkey" FOREIGN KEY ("userId")
+            REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+        )
+      `);
+      await createIndex("ApiKey_userId_idx", "ApiKey", "userId");
+      console.log("[migrate] + table ApiKey");
+      ok++;
+    } else { skip++; }
+  } catch (e) {
+    console.error(`[migrate] ! ApiKey table: ${e.message}`);
   }
 
   await db.$disconnect();

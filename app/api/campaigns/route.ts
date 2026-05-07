@@ -20,7 +20,7 @@ export async function GET() {
     return NextResponse.json({ campaigns: [], locked: true });
   }
 
-  const card = await db.card.findUnique({ where: { userId: user.id }, select: { id: true } });
+  const card = await db.card.findFirst({ where: { userId: user.id }, orderBy: [{ isDefault: "desc" }], select: { id: true } });
   if (!card) return NextResponse.json({ campaigns: [] });
 
   const campaigns = await db.campaign.findMany({
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Upgrade erforderlich" }, { status: 403 });
   }
 
-  const card = await db.card.findUnique({ where: { userId: user.id }, select: { id: true, slug: true, firstName: true, lastName: true } });
+  const card = await db.card.findFirst({ where: { userId: user.id }, orderBy: [{ isDefault: "desc" }], select: { id: true, slug: true, firstName: true, lastName: true } });
   if (!card) return NextResponse.json({ error: "Keine Karte" }, { status: 400 });
 
   const body = createSchema.parse(await req.json());
@@ -73,7 +73,7 @@ export async function DELETE(req: NextRequest) {
   const { id } = await req.json() as { id: string };
   const user = session.user as { id: string };
 
-  const card = await db.card.findUnique({ where: { userId: user.id }, select: { id: true } });
+  const card = await db.card.findFirst({ where: { userId: user.id }, orderBy: [{ isDefault: "desc" }], select: { id: true } });
   if (!card) return NextResponse.json({ error: "Keine Karte" }, { status: 400 });
 
   const campaign = await db.campaign.findUnique({ where: { id }, select: { cardId: true } });

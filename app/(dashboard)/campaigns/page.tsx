@@ -14,8 +14,9 @@ export default async function CampaignsPage() {
 
   const hasCampaigns = canUseFeature("campaigns", user.plan ?? "free", user.planExpiresAt);
 
-  const card = await db.card.findUnique({
+  const card = await db.card.findFirst({
     where: { userId: user.id },
+    orderBy: [{ isDefault: "desc" }],
     select: { id: true, slug: true },
   });
 

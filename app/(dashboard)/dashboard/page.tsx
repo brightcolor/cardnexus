@@ -12,16 +12,15 @@ export default async function DashboardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   const user = session!.user as { id: string; name: string; role?: string };
 
-  const [card, recentAnalytics] = await Promise.all([
-    db.card.findUnique({ where: { userId: user.id } }),
-    db.cardAnalytic.findMany({
-      where: {
-        cardSlug: (await db.card.findUnique({ where: { userId: user.id }, select: { slug: true } }))?.slug ?? "",
-      },
-      take: 5,
-      orderBy: { createdAt: "desc" },
-    }),
-  ]);
+  const card = await db.card.findFirst({
+    where: { userId: user.id },
+    orderBy: [{ isDefault: "desc" }],
+  });
+  const recentAnalytics = await db.cardAnalytic.findMany({
+    where: { cardSlug: card?.slug ?? "" },
+    take: 5,
+    orderBy: { createdAt: "desc" },
+  });
 
   const firstName = user.name.split(" ")[0];
 

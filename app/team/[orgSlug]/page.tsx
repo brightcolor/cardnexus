@@ -18,37 +18,43 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PublicTeamPage({ params }: Props) {
   const { orgSlug } = await params;
 
-  const org = await db.organization.findUnique({
-    where: { slug: orgSlug },
-    select: {
-      id: true, name: true, slug: true, logo: true, primaryColor: true,
-      settings: { select: { teamDirectoryEnabled: true } },
-      users: {
-        select: {
-          id: true, name: true,
-          card: {
-            where: { isPublic: true, showInTeamDirectory: true },
-            select: {
-              slug: true, firstName: true, lastName: true, title: true,
-              department: true, avatarUrl: true, email: true, phone: true,
-              website: true, address: true, primaryColor: true,
+  const [org, orgUsers] = await Promise.all([
+    db.organization.findUnique({
+      where: { slug: orgSlug },
+      select: { id: true, name: true, slug: true, logo: true, primaryColor: true },
+    }),
+    db.organization.findUnique({
+      where: { slug: orgSlug },
+      select: {
+        settings: { select: { teamDirectoryEnabled: true } },
+        users: {
+          select: {
+            id: true, name: true,
+            cards: {
+              where: { isPublic: true, showInTeamDirectory: true, isDefault: true },
+              select: {
+                slug: true, firstName: true, lastName: true, title: true,
+                department: true, avatarUrl: true, email: true, phone: true,
+                website: true, address: true, primaryColor: true,
+              },
+              take: 1,
             },
           },
+          orderBy: { name: "asc" },
         },
-        orderBy: { name: "asc" },
       },
-    },
-  });
+    }),
+  ]);
 
   if (!org) notFound();
 
   // Directory disabled by org admin → 404
-  if (org.settings && org.settings.teamDirectoryEnabled === false) notFound();
+  if (orgUsers?.settings && orgUsers.settings.teamDirectoryEnabled === false) notFound();
 
   // Only show members who have a public card and opted in
-  const members = org.users
-    .filter((u) => u.card)
-    .map((u) => ({ ...u.card! }));
+  const members = (orgUsers?.users ?? [])
+    .filter((u) => u.cards.length > 0)
+    .map((u) => ({ ...u.cards[0]! }));
 
   const color = org.primaryColor ?? "#0F172A";
 

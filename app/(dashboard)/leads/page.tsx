@@ -10,8 +10,8 @@ export default async function LeadsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   const user = session!.user as { id: string };
 
-  const card = await db.card.findUnique({
-    where: { userId: user.id },
+  const card = await db.card.findFirst({
+    where: { userId: user.id, isDefault: true },
     select: { id: true, slug: true },
   });
 

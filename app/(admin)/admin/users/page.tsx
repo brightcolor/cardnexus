@@ -11,7 +11,7 @@ export default async function AdminUsersPage() {
 
   const users = await db.user.findMany({
     include: {
-      card: { select: { slug: true, isPublic: true } },
+      cards: { orderBy: [{ isDefault: "desc" }], take: 1, select: { slug: true, isPublic: true } },
       organization: { select: { name: true } },
     },
     orderBy: { createdAt: "desc" },
@@ -29,7 +29,7 @@ export default async function AdminUsersPage() {
           ...u,
           createdAt: u.createdAt.toISOString(),
           planExpiresAt: u.planExpiresAt?.toISOString() ?? null,
-          card: u.card ?? null,
+          cards: u.cards ?? [],
           organization: u.organization ?? null,
         }))}
         currentUserId={currentUser.id}

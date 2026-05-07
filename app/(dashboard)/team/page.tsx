@@ -18,7 +18,7 @@ export default async function TeamPage() {
     db.user.findMany({
       where: orgId ? { organizationId: orgId } : {},
       include: {
-        card: { select: { slug: true, isPublic: true, showInTeamDirectory: true } },
+        cards: { orderBy: [{ isDefault: "desc" }], take: 1, select: { slug: true, isPublic: true, showInTeamDirectory: true } },
       },
       orderBy: { createdAt: "desc" },
     }),
@@ -46,7 +46,7 @@ export default async function TeamPage() {
       users={users.map((u) => ({
         ...u,
         createdAt: u.createdAt.toISOString(),
-        card: u.card ?? null,
+        card: u.cards[0] ?? null,
       }))}
       invitations={invitations.map((i) => ({
         ...i,

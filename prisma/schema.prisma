@@ -28,13 +28,21 @@ model user {
   stripeSubscriptionId String?   @unique
   paypalSubscriptionId String?   @unique
 
+  // Referral
+  referralCode  String?  @unique
+  referredById  String?
+  referredBy    user?    @relation("Referrals", fields: [referredById], references: [id])
+  referrals     user[]   @relation("Referrals")
+
   // Relations
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id])
-  card           Card?
+  cards          Card[]
   sentInvitations Invitation[] @relation("InvitationSender")
   analytics      CardAnalytic[]
   notifications  Notification[]
+  webhooks       Webhook[]
+  apiKeys        ApiKey[]
 
   sessions       session[]
   accounts       account[]
@@ -138,11 +146,15 @@ model OrganizationSettings {
   leadCaptureEnabled     Boolean @default(false)
   teamDirectoryEnabled   Boolean @default(true)
   templateCardData       String? // JSON: default card values for new members
+
+  // Integrations
+  webhookUrl             String?  // legacy single webhook URL (kept for simplicity)
+  managerApproval        Boolean  @default(false)
 }
 
 model Card {
   id     String @id @default(cuid())
-  userId String @unique
+  userId String
   user   user   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Identity
@@ -205,6 +217,12 @@ model Card {
   // Custom domain
   cardDomain  String?
 
+  // Card management
+  name          String   @default("Meine Karte")
+  isDefault     Boolean  @default(true)
+  expiresAt     DateTime?
+  passwordHash  String?
+
   // Stats (denormalized for fast reads)
   totalViews Int @default(0)
 
@@ -214,6 +232,8 @@ model Card {
   analytics  CardAnalytic[]
   leads      Lead[]
   campaigns  Campaign[]
+
+  @@index([userId])
 }
 
 model Campaign {
@@ -289,6 +309,33 @@ model Notification {
   createdAt DateTime @default(now())
 
   @@unique([userId, type, value], name: "userId_type_value")
+  @@index([userId])
+}
+
+model Webhook {
+  id        String   @id @default(cuid())
+  userId    String
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  url       String
+  events    String   @default("[\"lead\"]") // JSON: ["lead"]
+  secret    String?  // HMAC-SHA256 signing secret
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model ApiKey {
+  id         String    @id @default(cuid())
+  userId     String
+  user       user      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  keyHash    String    @unique // SHA-256 hash of the key
+  prefix     String    // first 8 chars shown to user e.g. "fk_abc123"
+  lastUsedAt DateTime?
+  createdAt  DateTime  @default(now())
+
   @@index([userId])
 }
 

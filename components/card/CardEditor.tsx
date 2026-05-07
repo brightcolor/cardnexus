@@ -87,17 +87,24 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
   async function save() {
     setSaving(true); setError(""); setSuccess(false);
     try {
+      const method = isNew ? "POST" : "PATCH";
+      // For PATCH the route reads `id` from the body — card state already contains it
+      // when initialCard was provided. Ensure it's always present.
+      const payload = isNew ? card : { ...card, id: card.id };
       const res = await fetch(saveEndpoint ?? "/api/cards", {
-        method: isNew ? "POST" : "PATCH",
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(card),
+        body: JSON.stringify(payload),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(typeof json.error === "string" ? json.error : "Fehler beim Speichern");
+      // On new card creation, navigate to the card page with the new card selected
+      if (isNew && json.id) {
+        router.push(`/card?card=${json.id}`);
+      }
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
       router.refresh();
-      if (isNew) router.push("/card");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unbekannter Fehler");
     } finally {

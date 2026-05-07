@@ -25,7 +25,7 @@ const PLAN_VARIANT: Record<string, string> = {
 interface AdminUser {
   id: string; name: string; email: string; image?: string | null;
   role: string; plan: string; planExpiresAt?: string | null; createdAt: string;
-  card?: { slug: string; isPublic: boolean } | null;
+  cards?: { slug: string; isPublic: boolean }[] | null;
   organization?: { name: string } | null;
 }
 
@@ -177,12 +177,12 @@ export function AdminUsersClient({ users: initial, currentUserId }: { users: Adm
 
                 {/* Card */}
                 <td className="px-4 py-3 hidden lg:table-cell">
-                  {user.card ? (
+                  {user.cards?.[0] ? (
                     <div className="flex items-center gap-2">
-                      <a href={`/c/${user.card.slug}`} target="_blank" className="text-xs text-primary hover:underline">
-                        {user.card.slug}
+                      <a href={`/c/${user.cards[0].slug}`} target="_blank" className="text-xs text-primary hover:underline">
+                        {user.cards[0].slug}
                       </a>
-                      <Link href={`/admin/cards/${user.card.slug}`} className="text-muted-foreground hover:text-foreground" title="Karte bearbeiten">
+                      <Link href={`/admin/cards/${user.cards[0].slug}`} className="text-muted-foreground hover:text-foreground" title="Karte bearbeiten">
                         <Pencil className="h-3 w-3" />
                       </Link>
                     </div>

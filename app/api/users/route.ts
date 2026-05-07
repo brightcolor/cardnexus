@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
   const [users, total] = await Promise.all([
     db.user.findMany({
       where,
-      include: { card: { select: { slug: true, isPublic: true } } },
+      include: { cards: { orderBy: [{ isDefault: "desc" }], take: 1, select: { slug: true, isPublic: true } } },
       skip: (page - 1) * limit,
       take: limit,
       orderBy: { createdAt: "desc" },

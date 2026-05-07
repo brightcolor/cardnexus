@@ -16,7 +16,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   };
 
   const [card, org, settings] = await Promise.all([
-    db.card.findUnique({ where: { userId: user.id }, select: { slug: true } }),
+    db.card.findFirst({ where: { userId: user.id }, orderBy: [{ isDefault: "desc" }], select: { slug: true } }),
     user.organizationId
       ? db.organization.findUnique({ where: { id: user.organizationId }, select: { name: true } })
       : null,
