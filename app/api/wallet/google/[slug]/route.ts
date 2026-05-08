@@ -22,8 +22,16 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ slu
 
   try {
     const saveUrl = await generateGoogleWalletPassUrl({
-      ...card,
-      cardUrl: `${proto}://${host}/c/${card.slug}`,
+      slug:         card.slug,
+      firstName:    card.firstName  ?? "",
+      lastName:     card.lastName   ?? "",
+      title:        card.title,
+      company:      card.company,
+      email:        card.email,
+      phone:        card.phone,
+      primaryColor: card.primaryColor,
+      avatarUrl:    card.avatarUrl,
+      cardUrl:      `${proto}://${host}/c/${card.slug}`,
     });
 
     return NextResponse.json({ url: saveUrl });
