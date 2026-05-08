@@ -161,17 +161,27 @@ export async function PATCH(req: NextRequest) {
   const existing = await db.card.findFirst({ where: { id, userId: session.user.id } });
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+  // Load user once for permission checks
+  const dbUser = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      organizationId: true, role: true,
+      organization: { select: { settings: { select: { managerApproval: true } } } },
+    },
+  });
+  const inOrg    = !!dbUser?.organizationId;
+  const isAdmin  = dbUser?.role === "company_admin" || dbUser?.role === "super_admin" || dbUser?.role === "super_admin";
+  const isMember = dbUser?.role === "member";
+
   // Logo permission: org members (non-admin) may not change the logo
-  if ("logoUrl" in rest) {
-    const dbUser = await db.user.findUnique({
-      where: { id: session.user.id },
-      select: { organizationId: true, role: true },
-    });
-    const inOrg = !!dbUser?.organizationId;
-    const isAdmin = dbUser?.role === "company_admin" || dbUser?.role === "super_admin";
-    if (inOrg && !isAdmin) {
-      delete (rest as Record<string, unknown>).logoUrl;
-    }
+  if ("logoUrl" in rest && inOrg && !isAdmin) {
+    delete (rest as Record<string, unknown>).logoUrl;
+  }
+
+  // Approval: if org has managerApproval=true and user is a member, set pending
+  let approvalUpdate: { approvalStatus: string } | undefined;
+  if (inOrg && isMember && dbUser?.organization?.settings?.managerApproval) {
+    approvalUpdate = { approvalStatus: "pending" };
   }
 
   // If setting as default, unset others
@@ -199,6 +209,7 @@ export async function PATCH(req: NextRequest) {
         : {}),
       ...(customLinks !== undefined ? { customLinks: JSON.stringify(customLinks) } : {}),
       ...(passwordHashUpdate !== undefined ? { passwordHash: passwordHashUpdate } : {}),
+      ...approvalUpdate,
     },
   });
 

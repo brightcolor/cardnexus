@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { fireWebhooks } from "@/lib/webhooks";
+import { sendLeadNotificationEmail } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
 import { clientIp } from "@/lib/client-ip";
 import { z } from "zod";
@@ -18,17 +19,18 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const data = schema.parse(body);
 
-    // Verify card exists and is public
     const card = await db.card.findUnique({
       where: { id: data.cardId },
-      select: { id: true, isPublic: true },
+      select: {
+        id: true, isPublic: true, name: true, slug: true,
+        user: { select: { id: true, email: true, name: true, leadNotification: true } },
+      },
     });
 
     if (!card || !card.isPublic) {
       return NextResponse.json({ error: "Karte nicht gefunden" }, { status: 404 });
     }
 
-    // Rate limit: 3 leads per IP per card per hour. Simple anti-spam.
     const ip = clientIp(req);
     if (!rateLimit({ key: `lead:${ip}:${data.cardId}`, max: 3, windowMs: 60 * 60_000 })) {
       return NextResponse.json(
@@ -49,6 +51,21 @@ export async function POST(req: NextRequest) {
 
     // Fire webhooks (non-blocking)
     fireWebhooks(data.cardId, "lead", lead).catch(() => {});
+
+    // Send instant email notification if enabled (non-blocking)
+    if (card.user.leadNotification === "instant" && card.user.email) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+      sendLeadNotificationEmail({
+        to: card.user.email,
+        ownerName: card.user.name ?? "",
+        leadName: data.name,
+        leadEmail: data.email || null,
+        leadPhone: data.phone || null,
+        leadMessage: data.message || null,
+        cardName: card.name,
+        dashboardUrl: `${appUrl}/leads`,
+      }).catch(() => {});
+    }
 
     return NextResponse.json({ success: true, id: lead.id });
   } catch (err) {

@@ -45,6 +45,7 @@ async function migrate() {
   }
 
   // ── user table ───────────────────────────────────────────────────────────
+  await addColumn("user", "leadNotification",     'TEXT NOT NULL DEFAULT "off"');
   await addColumn("user", "plan",                 'TEXT NOT NULL DEFAULT "free"');
   await addColumn("user", "planExpiresAt",        "DATETIME");
   await addColumn("user", "stripeCustomerId",     "TEXT");
@@ -75,6 +76,8 @@ async function migrate() {
   await addColumn("PlatformSettings", "allowedDomains", "TEXT");
 
   // ── Card table new columns ───────────────────────────────────────────────
+  await addColumn("Card", "approvalStatus",       'TEXT NOT NULL DEFAULT "approved"');
+  await addColumn("Card", "approvalNote",         "TEXT");
   await addColumn("Card", "cardDomain",           "TEXT");
   await addColumn("Card", "hideShareButton",      "INTEGER NOT NULL DEFAULT 0");
   await addColumn("Card", "shadowStyle",          'TEXT NOT NULL DEFAULT "md"');

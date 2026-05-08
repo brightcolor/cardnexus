@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, CreditCard, Users, BarChart2,
   Settings, LogOut, Shield, UserCheck, Mail,
-  Megaphone, Nfc, Zap,
+  Megaphone, Nfc, Zap, Code2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOut } from "@/lib/auth-client";
@@ -35,8 +35,9 @@ const sections: NavSection[] = [
   {
     label: "Organisation",
     items: [
-      { href: "/team",      label: "Team",         icon: Users },
-      { href: "/nfc",       label: "NFC",          icon: Nfc },
+      { href: "/team",      label: "Team",          icon: Users },
+      { href: "/nfc",       label: "NFC",           icon: Nfc },
+      { href: "/widget",    label: "Widget",        icon: Code2 },
       { href: "/settings",  label: "Einstellungen", icon: Settings },
     ],
   },

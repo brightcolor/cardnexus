@@ -93,7 +93,7 @@ CardNexus is a self-hosted **digital business card platform** that replaces pape
 | Feature | Description |
 |---------|-------------|
 | **Personal card page** | Public profile at `yourdomain.com/c/your-name` |
-| **9 card templates** | Classic, Modern, Minimal, Dark, Gradient, Glassmorphism, Bold, Elegant, Neon |
+| **12 card templates** | Classic, Modern, Minimal, Dark, Gradient, Glassmorphism, Bold, Elegant, Neon, Corporate, Retro, Wave |
 | **Brand customization** | Primary color, accent color, font family, layout style, corner radius |
 | **Avatar & cover photo** | Upload profile picture and cover background |
 | **Full contact block** | Phone, mobile, email, website, address |
@@ -103,10 +103,14 @@ CardNexus is a self-hosted **digital business card platform** that replaces pape
 | **Email signature** | Auto-generated HTML signature for Gmail, Outlook and co. |
 | **vCard download** | One tap adds all contacts to phone address book |
 | **QR code** | Per-card QR code, color-matched, downloadable as SVG |
-| **Analytics** | See who viewed your card, from where, on which device |
+| **Analytics** | Views, sources, devices, top clicked links — with UTM campaign breakdown |
 | **Realtime view counter** | Live updating view count on your dashboard |
 | **NFC setup guide** | Step-by-step instructions to program your NFC tag |
 | **Lead capture form** | Visitors can leave their contact details on your card |
+| **Lead notifications** | Get notified instantly or via daily digest when a new lead comes in |
+| **Share via WhatsApp / Email** | One-tap share buttons in addition to native share and clipboard copy |
+| **Wallet integration** | Save card to Apple Wallet (.pkpass) or Google Wallet (admin-configured) |
+| **Widget / iFrame embed** | Embed your card on any website with auto-generated iFrame code |
 | **Public / private toggle** | Hide your card from the public at any time |
 
 ### For organization admins
@@ -120,6 +124,7 @@ CardNexus is a self-hosted **digital business card platform** that replaces pape
 | **Card footer text** | Append a company tagline or disclaimer to every card |
 | **Bulk import template** | Define a card template for CSV bulk imports |
 | **Team directory** | Searchable directory of all org members |
+| **Card approval workflow** | Require admin / team-leader sign-off before member card changes go live |
 | **Analytics** | Aggregate view / download / scan stats across the whole organization |
 
 ### For super admins
@@ -200,6 +205,17 @@ SMTP_SECURE=false
 SMTP_USER=user@example.com
 SMTP_PASS=yourpassword
 SMTP_FROM=CardNexus <noreply@yourdomain.com>
+
+# Apple Wallet (optional — all 5 required to enable)
+# APPLE_WALLET_CERT=<base64-encoded PEM certificate from Apple Developer>
+# APPLE_WALLET_KEY=<base64-encoded PEM private key>
+# APPLE_WALLET_WWDR=<base64-encoded Apple WWDR certificate>
+# APPLE_TEAM_ID=<your 10-char Apple Team ID>
+# APPLE_PASS_TYPE_ID=<pass.com.yourcompany.cardnexus>
+
+# Google Wallet (optional — both required to enable)
+# GOOGLE_WALLET_ISSUER_ID=<issuer ID from Google Pay & Wallet Console>
+# GOOGLE_WALLET_SERVICE_ACCOUNT=<base64-encoded service account JSON>
 ```
 
 All platform settings (app name, logo, favicon, support email, footer) can be changed at runtime from the **Super Admin → Settings** panel — no restart required.
@@ -219,12 +235,35 @@ If `STRIPE_SECRET_KEY` is not set, the upgrade page shows an email-based fallbac
 
 ---
 
+## Wallet setup
+
+CardNexus supports saving cards to **Apple Wallet** and **Google Wallet**. Both are disabled by default and activate automatically once the required env vars are set.
+
+### Apple Wallet
+1. Enroll in the [Apple Developer Program](https://developer.apple.com/programs/)
+2. Create a **Pass Type ID** in your developer account (e.g. `pass.com.yourcompany.cardnexus`)
+3. Generate a signing certificate, download it, and export key + cert as PEM
+4. Download the Apple WWDR certificate
+5. Base64-encode each PEM file: `base64 -w0 cert.pem`
+6. Set `APPLE_WALLET_CERT`, `APPLE_WALLET_KEY`, `APPLE_WALLET_WWDR`, `APPLE_TEAM_ID`, `APPLE_PASS_TYPE_ID`
+
+### Google Wallet
+1. Create a project in [Google Pay & Wallet Console](https://pay.google.com/business/console)
+2. Create a **Generic Pass class** and note your Issuer ID
+3. Create a service account with the **Google Wallet Object Issuer** role
+4. Download the service account JSON key and base64-encode it: `base64 -w0 service-account.json`
+5. Set `GOOGLE_WALLET_ISSUER_ID` and `GOOGLE_WALLET_SERVICE_ACCOUNT`
+
+---
+
 ## Email / SMTP setup
 
 CardNexus sends emails via any standard SMTP server. Configure your provider credentials in `.env`:
 
 - **Invitation emails** — sent when an admin invites a new member
 - **Welcome email** — sent after successful registration
+- **Lead notifications** — instant or daily digest when a visitor leaves their contact details
+- **Password reset** — triggered from the login page
 
 Supported providers: Gmail (app password), Mailgun, SendGrid, Postmark, Brevo, your own SMTP server, etc.
 
@@ -343,10 +382,7 @@ yourdomain.com {
 ## Roadmap
 
 - [ ] PostgreSQL first-class documentation
-- [ ] Apple Wallet pass generation
-- [ ] Google Wallet pass generation
 - [ ] SCIM / LDAP directory sync
-- [ ] Zapier / webhook integration
 - [ ] CSV export of card analytics
 - [ ] S3 / object storage documentation
 

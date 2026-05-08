@@ -14,7 +14,9 @@ export default async function TeamPage() {
 
   const orgId = user.organizationId;
 
-  const [users, invitations, org] = await Promise.all([
+  const isApprover = role === "super_admin" || role === "company_admin" || role === "team_leader";
+
+  const [users, invitations, org, pendingCards] = await Promise.all([
     db.user.findMany({
       where: orgId ? { organizationId: orgId } : {},
       include: {
@@ -39,6 +41,16 @@ export default async function TeamPage() {
           },
         })
       : null,
+    isApprover && orgId
+      ? db.card.findMany({
+          where: { approvalStatus: "pending", user: { organizationId: orgId } },
+          select: {
+            id: true, slug: true, name: true, approvalNote: true, updatedAt: true,
+            user: { select: { name: true, email: true } },
+          },
+          orderBy: { updatedAt: "desc" },
+        })
+      : [],
   ]);
 
   return (
@@ -60,6 +72,10 @@ export default async function TeamPage() {
       memberCount={org?._count.users ?? users.length}
       canManage={canManageUsers(role)}
       teamDirectoryEnabled={org?.settings?.teamDirectoryEnabled ?? true}
+      pendingCards={(pendingCards as typeof pendingCards).map((c) => ({
+        ...c,
+        updatedAt: c.updatedAt.toISOString(),
+      }))}
     />
   );
 }

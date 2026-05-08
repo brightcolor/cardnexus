@@ -176,6 +176,44 @@ export async function sendWelcomeEmail({
   await send(to, `Willkommen bei ${APP_NAME}!`, html);
 }
 
+// ── Lead notification email ────────────────────────────────────────────────
+export async function sendLeadNotificationEmail({
+  to, ownerName, leadName, leadEmail, leadPhone, leadMessage, cardName, dashboardUrl,
+}: {
+  to: string;
+  ownerName: string;
+  leadName: string;
+  leadEmail?: string | null;
+  leadPhone?: string | null;
+  leadMessage?: string | null;
+  cardName: string;
+  dashboardUrl: string;
+}) {
+  const rows = [
+    leadEmail ? `<tr><td style="color:#6b7280;padding:4px 0;width:80px;">E-Mail</td><td style="padding:4px 0;"><a href="mailto:${esc(leadEmail)}" style="color:#0f172a;">${esc(leadEmail)}</a></td></tr>` : "",
+    leadPhone ? `<tr><td style="color:#6b7280;padding:4px 0;">Telefon</td><td style="padding:4px 0;">${esc(leadPhone)}</td></tr>` : "",
+    leadMessage ? `<tr><td style="color:#6b7280;padding:4px 0;vertical-align:top;">Nachricht</td><td style="padding:4px 0;">${esc(leadMessage)}</td></tr>` : "",
+  ].filter(Boolean).join("");
+
+  const html = layout(
+    `Neuer Lead – ${cardName}`,
+    `
+    ${h1("Neuer Kontakt auf deiner Karte")}
+    ${p(`<strong>${esc(leadName)}</strong> hat auf deiner Karte <strong>${esc(cardName)}</strong> Kontakt hinterlassen.`)}
+    <table style="margin:16px 0;font-size:14px;line-height:1.6;width:100%;">
+      <tr><td style="color:#6b7280;padding:4px 0;width:80px;">Name</td><td style="padding:4px 0;font-weight:600;">${esc(leadName)}</td></tr>
+      ${rows}
+    </table>
+    <div style="text-align:center;">
+      ${btn("Leads ansehen", esc(dashboardUrl))}
+    </div>
+    ${muted("Du erhältst diese E-Mail, weil du sofortige Lead-Benachrichtigungen aktiviert hast. Du kannst dies in deinen Einstellungen ändern.")}
+    `
+  );
+
+  await send(to, `Neuer Lead: ${leadName} (${cardName})`, html);
+}
+
 // ── Password reset email ───────────────────────────────────────────────────
 export async function sendPasswordResetEmail({
   to, url,

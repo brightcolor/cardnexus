@@ -4,28 +4,38 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { z } from "zod";
 
-const emailSchema = z.object({ email: z.string().email() });
+const patchSchema = z.object({
+  email:            z.string().email().optional(),
+  leadNotification: z.enum(["off", "instant", "daily"]).optional(),
+});
 
 export async function PATCH(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = emailSchema.safeParse(await req.json());
-  if (!body.success) return NextResponse.json({ error: "Ungültige E-Mail" }, { status: 400 });
+  const body = patchSchema.safeParse(await req.json());
+  if (!body.success) return NextResponse.json({ error: "Ungültige Eingabe" }, { status: 400 });
 
-  const { email } = body.data;
-  if (email === session.user.email) {
-    return NextResponse.json({ success: true });
+  const { email, leadNotification } = body.data;
+  const updates: Record<string, unknown> = {};
+
+  if (leadNotification !== undefined) {
+    updates.leadNotification = leadNotification;
   }
 
-  // Don't reveal whether the email is already taken — return success either way
-  // and only update if the address is free. This prevents email enumeration.
-  const existing = await db.user.findUnique({ where: { email }, select: { id: true } });
-  if (existing && existing.id !== session.user.id) {
-    return NextResponse.json({ success: true });
+  if (email !== undefined && email !== session.user.email) {
+    // Don't reveal whether the email is already taken — return success either way
+    // and only update if the address is free. This prevents email enumeration.
+    const existing = await db.user.findUnique({ where: { email }, select: { id: true } });
+    if (!existing || existing.id === session.user.id) {
+      updates.email = email;
+    }
   }
 
-  await db.user.update({ where: { id: session.user.id }, data: { email } });
+  if (Object.keys(updates).length > 0) {
+    await db.user.update({ where: { id: session.user.id }, data: updates });
+  }
+
   return NextResponse.json({ success: true });
 }
 
@@ -38,7 +48,6 @@ export async function DELETE() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  // super_admin must remove role first to delete (safety net).
   const me = await db.user.findUnique({
     where: { id: session.user.id },
     select: { role: true },
@@ -50,7 +59,6 @@ export async function DELETE() {
     );
   }
 
-  // Cascade deletes via Prisma onDelete:Cascade on user relations.
   await db.user.delete({ where: { id: session.user.id } });
   return NextResponse.json({ success: true });
 }

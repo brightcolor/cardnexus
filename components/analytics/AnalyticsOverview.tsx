@@ -8,7 +8,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { AnalyticsSummary } from "@/types";
 import {
-  Eye, Download, QrCode, MousePointer, Megaphone, Link as LinkIcon,
+  Eye, Download, QrCode, MousePointer, Megaphone, Link as LinkIcon, ExternalLink,
 } from "lucide-react";
 
 const DEVICE_COLORS = ["#0F172A", "#64748B", "#94A3B8"];
@@ -203,6 +203,41 @@ export function AnalyticsOverview({ cards = [] }: Props) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Top clicked links */}
+      {data.topLinks.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-start gap-3">
+              <ExternalLink className="h-5 w-5 text-muted-foreground mt-0.5" />
+              <div>
+                <CardTitle className="text-base">Meistgeklickte Links</CardTitle>
+                <CardDescription>Top-10 Custom-Links und Social-Links nach Klickzahl.</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {data.topLinks.map((l, i) => {
+                const max = data.topLinks[0]?.count ?? 1;
+                return (
+                  <div key={l.label} className="flex items-center gap-3">
+                    <span className="text-xs text-muted-foreground w-4 text-right tabular-nums">{i + 1}</span>
+                    <span className="text-sm flex-1 truncate">{l.label}</span>
+                    <div className="w-24 bg-muted rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-primary"
+                        style={{ width: `${(l.count / max) * 100}%` }}
+                      />
+                    </div>
+                    <span className="text-sm text-muted-foreground w-8 text-right tabular-nums">{l.count}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* UTM campaign breakdown */}
       <Card>

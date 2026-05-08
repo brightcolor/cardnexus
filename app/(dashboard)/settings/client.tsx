@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { getRoleLabel, canManageOrganization } from "@/lib/utils";
-import { Save, Wallet } from "lucide-react";
+import { Save, Wallet, Bell } from "lucide-react";
 import type { DeptPolicyOverride } from "@/types";
 import {
   OrgInfoCard, DesignDefaultsCard, BrandColorsCard,
@@ -29,6 +29,7 @@ interface Props {
   user: {
     id: string; name: string; email: string; role: string;
     organizationId?: string | null; twoFactorEnabled: boolean;
+    leadNotification: string;
   };
   org: { id: string; name: string; slug: string; primaryColor: string; settings?: OrgSettings | null } | null;
 }
@@ -70,6 +71,23 @@ export function SettingsClientPage({ user, org }: Props) {
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved]   = useState(false);
+
+  const [leadNotif, setLeadNotif]       = useState(user.leadNotification);
+  const [notifSaving, setNotifSaving]   = useState(false);
+  const [notifSaved, setNotifSaved]     = useState(false);
+
+  async function saveLeadNotification(value: string) {
+    setLeadNotif(value);
+    setNotifSaving(true);
+    await fetch("/api/account", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ leadNotification: value }),
+    });
+    setNotifSaving(false);
+    setNotifSaved(true);
+    setTimeout(() => setNotifSaved(false), 2000);
+  }
 
   const [newEmail, setNewEmail]     = useState("");
   const [emailSaving, setEmailSaving] = useState(false);
@@ -163,6 +181,49 @@ export function SettingsClientPage({ user, org }: Props) {
 
       {/* Account actions (password, delete, export) */}
       <AccountActions />
+
+      {/* Lead notifications */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Bell className="h-5 w-5 text-muted-foreground" />
+            <CardTitle className="text-base">Lead-Benachrichtigungen</CardTitle>
+            {notifSaved && <Badge variant="outline" className="ml-auto text-green-600 border-green-300">Gespeichert</Badge>}
+            {notifSaving && <Badge variant="outline" className="ml-auto">Wird gespeichert…</Badge>}
+          </div>
+          <CardDescription>Wie möchtest du benachrichtigt werden, wenn jemand auf deiner Karte Kontakt hinterlässt?</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-2">
+            {([
+              { value: "off",     label: "Keine Benachrichtigungen",    desc: "Leads werden nur im Dashboard gespeichert." },
+              { value: "instant", label: "Sofort",                      desc: "Du bekommst bei jedem neuen Lead eine E-Mail." },
+              { value: "daily",   label: "Tägliche Zusammenfassung",    desc: "Einmal täglich – nur wenn neue Leads vorliegen." },
+            ] as const).map(({ value, label, desc }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => saveLeadNotification(value)}
+                className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-colors ${
+                  leadNotif === value
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:bg-muted/50"
+                }`}
+              >
+                <div className={`mt-0.5 h-4 w-4 shrink-0 rounded-full border-2 flex items-center justify-center ${
+                  leadNotif === value ? "border-primary" : "border-muted-foreground/40"
+                }`}>
+                  {leadNotif === value && <div className="h-2 w-2 rounded-full bg-primary" />}
+                </div>
+                <div>
+                  <p className="text-sm font-medium">{label}</p>
+                  <p className="text-xs text-muted-foreground">{desc}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Integrations */}
       <WebhooksCard />

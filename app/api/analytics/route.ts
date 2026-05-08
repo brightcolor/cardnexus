@@ -124,7 +124,7 @@ export async function GET(request: NextRequest) {
 
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-  const [all, recent, sourceData, deviceData, utmRaw, namedCampaigns] = await Promise.all([
+  const [all, recent, sourceData, deviceData, utmRaw, namedCampaigns, topLinksRaw] = await Promise.all([
     db.cardAnalytic.groupBy({
       by: ["event"],
       where: { cardSlug: card.slug },
@@ -167,6 +167,14 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: "desc" },
       select: { id: true, name: true, urlSlug: true, views: true, expiresAt: true, createdAt: true },
     }),
+    // Top clicked links by label
+    db.cardAnalytic.groupBy({
+      by: ["linkLabel"],
+      where: { cardSlug: card.slug, event: "link_click", linkLabel: { not: null } },
+      _count: true,
+      orderBy: { _count: { linkLabel: "desc" } },
+      take: 10,
+    }),
   ]);
 
   const countByEvent = (event: string) =>
@@ -205,6 +213,7 @@ export async function GET(request: NextRequest) {
       linkClicks: countByEvent("link_click"),
       viewsLast30Days,
       topSources: sourceData.map((s) => ({ source: s.source ?? "direct", count: s._count })),
+      topLinks: topLinksRaw.map((l) => ({ label: l.linkLabel!, count: l._count })),
       deviceSplit: deviceData.map((d) => ({ device: d.device ?? "unknown", count: d._count })),
       utmCampaigns,
       namedCampaigns: namedCampaigns.map((c) => ({

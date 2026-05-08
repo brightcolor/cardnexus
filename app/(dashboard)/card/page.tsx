@@ -7,6 +7,7 @@ import { canUseFeature } from "@/lib/plans";
 import { CardEditor } from "@/components/card/CardEditor";
 import { QRCodeDisplay } from "@/components/card/QRCodeDisplay";
 import { CardSwitcher } from "@/components/card/CardSwitcher";
+import { ApprovalBanner } from "@/components/card/ApprovalBanner";
 import type { CardData } from "@/types";
 
 export const metadata = { title: "Meine Karte" };
@@ -85,6 +86,10 @@ export default async function CardPage({
           <CardSwitcher cards={cards} activeCardId={activeCard?.id} />
         )}
       </div>
+
+      {activeCard && activeCard.approvalStatus && activeCard.approvalStatus !== "approved" && (
+        <ApprovalBanner status={activeCard.approvalStatus} note={activeCard.approvalNote} />
+      )}
 
       <CardEditor
         key={activeCard?.id ?? "new"}

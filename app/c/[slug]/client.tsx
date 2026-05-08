@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { CardData } from "@/types";
-import { Download, Share2, QrCode, Wallet, X, Loader2, UserPlus, CheckCircle2, CalendarDays } from "lucide-react";
+import { Download, Share2, QrCode, Wallet, X, Loader2, UserPlus, CheckCircle2, CalendarDays, Mail, MessageCircle } from "lucide-react";
 
 interface Props {
   card: CardData;
@@ -46,6 +46,7 @@ export function PublicCardView({ card, source, showBadge = true }: Props) {
   const [showLead, setShowLead] = useState(false);
   const [shared, setShared] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [walletLoading, setWalletLoading] = useState(false);
 
   // Track view once on mount
   useEffect(() => {
@@ -82,6 +83,55 @@ export function PublicCardView({ card, source, showBadge = true }: Props) {
     } finally {
       setDownloading(false);
     }
+  }
+
+  async function saveToWallet() {
+    setWalletLoading(true);
+    try {
+      // Try Apple Wallet first (iOS), then Google Wallet
+      const isIos = /iPhone|iPad|iPod/.test(navigator.userAgent);
+      if (isIos) {
+        const res = await fetch(`/api/wallet/apple/${card.slug}`);
+        if (res.ok) {
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url; a.download = `${card.slug}.pkpass`;
+          document.body.appendChild(a); a.click();
+          document.body.removeChild(a); URL.revokeObjectURL(url);
+          track(card.slug, "wallet_save");
+          return;
+        }
+      }
+      // Google Wallet fallback
+      const res = await fetch(`/api/wallet/google/${card.slug}`);
+      if (res.ok) {
+        const { url } = await res.json();
+        window.open(url, "_blank");
+        track(card.slug, "wallet_save");
+      } else {
+        const { error } = await res.json();
+        alert(error ?? "Wallet nicht verfügbar.");
+      }
+    } catch {
+      alert("Wallet nicht verfügbar.");
+    } finally {
+      setWalletLoading(false);
+    }
+  }
+
+  function shareViaWhatsApp() {
+    const url  = window.location.origin + `/c/${card.slug}`;
+    const name = [card.firstName, card.lastName].filter(Boolean).join(" ") || "Visitenkarte";
+    window.open(`https://wa.me/?text=${encodeURIComponent(`${name} – ${url}`)}`, "_blank");
+    track(card.slug, "view", { source: "share" });
+  }
+
+  function shareViaEmail() {
+    const url  = window.location.origin + `/c/${card.slug}`;
+    const name = [card.firstName, card.lastName].filter(Boolean).join(" ") || "Visitenkarte";
+    window.location.href = `mailto:?subject=${encodeURIComponent(name)}&body=${encodeURIComponent(`Meine digitale Visitenkarte: ${url}`)}`;
+    track(card.slug, "view", { source: "share" });
   }
 
   async function handleShare() {
@@ -165,11 +215,24 @@ export function PublicCardView({ card, source, showBadge = true }: Props) {
           </Button>
         </div>
 
-        {/* Wallet – placeholder */}
-        <Button variant="outline" disabled className="w-full opacity-50 cursor-not-allowed">
-          <Wallet className="h-4 w-4" />
-          In Wallet speichern
-          <span className="ml-auto text-xs bg-muted px-1.5 py-0.5 rounded">Demnächst</span>
+        {!card.hideShareButton && (
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant="outline" onClick={shareViaWhatsApp}>
+              <MessageCircle className="h-4 w-4" />
+              WhatsApp
+            </Button>
+            <Button variant="outline" onClick={shareViaEmail}>
+              <Mail className="h-4 w-4" />
+              E-Mail
+            </Button>
+          </div>
+        )}
+
+        <Button variant="outline" className="w-full" onClick={saveToWallet} disabled={walletLoading}>
+          {walletLoading
+            ? <><Loader2 className="h-4 w-4 animate-spin" /> Wird geladen…</>
+            : <><Wallet className="h-4 w-4" /> In Wallet speichern</>
+          }
         </Button>
       </div>
 

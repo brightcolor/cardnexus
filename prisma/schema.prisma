@@ -31,6 +31,9 @@ model user {
   stripeSubscriptionId String?   @unique
   paypalSubscriptionId String?   @unique
 
+  // Lead notification preference
+  leadNotification String @default("off") // off | instant | daily
+
   // Referral
   referralCode  String?  @unique
   referredById  String?
@@ -239,6 +242,10 @@ model Card {
   isDefault     Boolean  @default(true)
   expiresAt     DateTime?
   passwordHash  String?
+
+  // Approval workflow (used when OrganizationSettings.managerApproval = true)
+  approvalStatus String  @default("approved") // approved | pending | rejected
+  approvalNote   String?
 
   // Stats (denormalized for fast reads)
   totalViews Int @default(0)

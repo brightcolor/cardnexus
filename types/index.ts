@@ -72,6 +72,8 @@ export interface CardData {
   isDefault?: boolean;
   expiresAt?: string | null;
   passwordHash?: string | null;
+  approvalStatus?: string; // approved | pending | rejected
+  approvalNote?: string | null;
   totalViews: number;
 
   createdAt: Date;
@@ -180,6 +182,7 @@ export interface AnalyticsSummary {
   linkClicks: number;
   viewsLast30Days: { date: string; count: number }[];
   topSources: { source: string; count: number }[];
+  topLinks: { label: string; count: number }[];
   deviceSplit: { device: string; count: number }[];
   utmCampaigns: {
     campaign: string;

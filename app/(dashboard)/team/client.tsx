@@ -11,12 +11,18 @@ import { formatDate } from "@/lib/utils";
 import type { Role } from "@/types";
 import {
   Search, X, Globe, Eye, EyeOff, ExternalLink, ToggleLeft, ToggleRight,
+  Clock, CheckCircle, XCircle,
 } from "lucide-react";
 
 interface Member {
   id: string; name: string; email: string; image?: string | null;
   role: string; createdAt: string;
   card?: { slug: string; isPublic: boolean; showInTeamDirectory: boolean } | null;
+}
+
+interface PendingCard {
+  id: string; slug: string; name: string; approvalNote?: string | null; updatedAt: string;
+  user: { name: string; email: string };
 }
 
 interface Props {
@@ -33,20 +39,42 @@ interface Props {
   memberCount: number;
   canManage: boolean;
   teamDirectoryEnabled: boolean;
+  pendingCards?: PendingCard[];
 }
 
 export function TeamClientPage({
   users: initialUsers, invitations: initialInvitations,
   currentUserId, currentUserRole, orgName, orgSlug,
   memberCount, canManage, teamDirectoryEnabled: initialDirEnabled,
+  pendingCards: initialPendingCards = [],
 }: Props) {
   const router = useRouter();
   const [users, setUsers] = useState(initialUsers);
   const [invitations, setInvitations] = useState(initialInvitations);
+  const [pendingCards, setPendingCards] = useState(initialPendingCards);
   const [search, setSearch] = useState("");
   const [dirEnabled, setDirEnabled] = useState(initialDirEnabled);
   const [togglingDir, setTogglingDir] = useState(false);
   const [togglingMember, setTogglingMember] = useState<string | null>(null);
+  const [approvingCard, setApprovingCard] = useState<string | null>(null);
+  const [rejectNote, setRejectNote] = useState<Record<string, string>>({});
+
+  async function approveCard(slug: string, status: "approved" | "rejected") {
+    setApprovingCard(slug);
+    try {
+      const res = await fetch(`/api/cards/${slug}/approve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status, note: rejectNote[slug] || undefined }),
+      });
+      if (res.ok) {
+        setPendingCards((prev) => prev.filter((c) => c.slug !== slug));
+        router.refresh();
+      }
+    } finally {
+      setApprovingCard(null);
+    }
+  }
 
   const filtered = users.filter(
     (u) =>
@@ -273,6 +301,60 @@ export function TeamClientPage({
           onRoleChange={handleRoleChange}
           onDelete={handleDelete}
         />
+      )}
+
+      {/* Pending card approvals */}
+      {canManage && pendingCards.length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+            <Clock className="h-5 w-5 text-amber-500" />
+            Karten zur Freigabe
+            <span className="ml-1 text-sm font-normal text-muted-foreground">({pendingCards.length})</span>
+          </h2>
+          <div className="rounded-xl border border-amber-200 bg-amber-50/50 overflow-hidden divide-y divide-amber-100">
+            {pendingCards.map((c) => (
+              <div key={c.slug} className="px-4 py-4">
+                <div className="flex items-start justify-between gap-3 flex-wrap">
+                  <div className="min-w-0">
+                    <p className="font-medium">{c.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {c.user.name} · <a href={`/c/${c.slug}`} target="_blank" rel="noopener noreferrer" className="hover:underline">/c/{c.slug}</a>
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      size="sm" variant="outline"
+                      className="text-green-700 border-green-300 hover:bg-green-50"
+                      disabled={approvingCard === c.slug}
+                      onClick={() => approveCard(c.slug, "approved")}
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                      Freigeben
+                    </Button>
+                    <Button
+                      size="sm" variant="outline"
+                      className="text-red-700 border-red-300 hover:bg-red-50"
+                      disabled={approvingCard === c.slug}
+                      onClick={() => approveCard(c.slug, "rejected")}
+                    >
+                      <XCircle className="h-4 w-4" />
+                      Ablehnen
+                    </Button>
+                  </div>
+                </div>
+                <div className="mt-2">
+                  <input
+                    type="text"
+                    placeholder="Ablehnungsgrund (optional)"
+                    value={rejectNote[c.slug] ?? ""}
+                    onChange={(e) => setRejectNote((prev) => ({ ...prev, [c.slug]: e.target.value }))}
+                    className="w-full text-sm rounded-lg border border-border px-3 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-ring"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* Pending invitations */}

@@ -15,7 +15,7 @@ export default async function SettingsPage() {
   const [dbUser, org] = await Promise.all([
     db.user.findUnique({
       where: { id: user.id },
-      select: { twoFactorEnabled: true },
+      select: { twoFactorEnabled: true, leadNotification: true },
     }),
     user.organizationId
       ? db.organization.findUnique({
@@ -31,6 +31,7 @@ export default async function SettingsPage() {
         ...user,
         role: user.role ?? "member",
         twoFactorEnabled: dbUser?.twoFactorEnabled ?? false,
+        leadNotification: dbUser?.leadNotification ?? "off",
       }}
       org={org ? { ...org, settings: org.settings } : null}
     />
