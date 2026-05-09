@@ -9,14 +9,17 @@ export default async function AdminUsersPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   const currentUser = session!.user as { id: string; role?: string };
 
-  const users = await db.user.findMany({
-    include: {
-      cards: { orderBy: [{ isDefault: "desc" }], take: 1, select: { slug: true, isPublic: true } },
-      organization: { select: { name: true } },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 100,
-  });
+  const [users, orgs] = await Promise.all([
+    db.user.findMany({
+      include: {
+        cards: { orderBy: [{ isDefault: "desc" }], take: 1, select: { slug: true, isPublic: true } },
+        organization: { select: { id: true, name: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+    }),
+    db.organization.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -32,6 +35,7 @@ export default async function AdminUsersPage() {
           cards: u.cards ?? [],
           organization: u.organization ?? null,
         }))}
+        orgs={orgs}
         currentUserId={currentUser.id}
       />
     </div>

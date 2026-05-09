@@ -26,10 +26,12 @@ interface AdminUser {
   id: string; name: string; email: string; image?: string | null;
   role: string; plan: string; planExpiresAt?: string | null; createdAt: string;
   cards?: { slug: string; isPublic: boolean }[] | null;
-  organization?: { name: string } | null;
+  organization?: { id: string; name: string } | null;
 }
 
-export function AdminUsersClient({ users: initial, currentUserId }: { users: AdminUser[]; currentUserId: string }) {
+interface OrgOption { id: string; name: string }
+
+export function AdminUsersClient({ users: initial, orgs, currentUserId }: { users: AdminUser[]; orgs: OrgOption[]; currentUserId: string }) {
   const [users, setUsers] = useState(initial);
   const [search, setSearch] = useState("");
   const [expiryEdit, setExpiryEdit] = useState<string | null>(null); // userId being edited
@@ -55,6 +57,13 @@ export function AdminUsersClient({ users: initial, currentUserId }: { users: Adm
   async function changePlan(userId: string, plan: string) {
     if (!await patch(userId, { plan, planExpiresAt: null })) return;
     setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, plan, planExpiresAt: null } : u)));
+  }
+
+  async function changeOrg(userId: string, orgId: string) {
+    const organizationId = orgId === "__none__" ? null : orgId;
+    if (!await patch(userId, { organizationId })) return;
+    const org = orgs.find((o) => o.id === orgId) ?? null;
+    setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, organization: org } : u)));
   }
 
   async function setExpiry(userId: string, dateStr: string) {
@@ -104,8 +113,18 @@ export function AdminUsersClient({ users: initial, currentUserId }: { users: Adm
                 </td>
 
                 {/* Org */}
-                <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
-                  {user.organization?.name ?? "—"}
+                <td className="px-4 py-3 hidden md:table-cell">
+                  <Select value={user.organization?.id ?? "__none__"} onValueChange={(v) => changeOrg(user.id, v)}>
+                    <SelectTrigger className="h-7 w-40 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">— Keine —</SelectItem>
+                      {orgs.map((o) => (
+                        <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </td>
 
                 {/* Role */}

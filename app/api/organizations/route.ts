@@ -14,6 +14,7 @@ const createSchema = z.object({
 });
 
 const updateSchema = createSchema.partial().extend({
+  id: z.string().optional(),
   logo: z.string().url().optional().nullable(),
   settings: z.object({
     defaultTemplate: z.enum(["classic", "modern", "minimal", "dark"]).optional(),
@@ -130,9 +131,10 @@ export async function PATCH(request: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const role = (session.user as { role?: string }).role ?? "member";
-  const orgId = (session.user as { organizationId?: string }).organizationId;
+  const sessionOrgId = (session.user as { organizationId?: string }).organizationId;
+  const superAdmin = isSuperAdmin(role);
 
-  if (!canManageOrganization(role) || !orgId) {
+  if (!superAdmin && !canManageOrganization(role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -142,22 +144,42 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { settings, ...orgData } = parsed.data;
+  // super_admin can target any org by passing `id`; others can only edit their own org
+  const targetOrgId = superAdmin ? (parsed.data.id ?? sessionOrgId) : sessionOrgId;
+  if (!targetOrgId) {
+    return NextResponse.json({ error: "Organisation nicht gefunden" }, { status: 404 });
+  }
+
+  const { settings, id: _id, ...orgData } = parsed.data;
 
   const org = await db.organization.update({
-    where: { id: orgId },
+    where: { id: targetOrgId },
     data: {
       ...orgData,
-      ...(settings
-        ? {
-            settings: {
-              upsert: { create: settings, update: settings },
-            },
-          }
-        : {}),
+      ...(settings ? { settings: { upsert: { create: settings, update: settings } } } : {}),
     },
     include: { settings: true },
   });
 
   return NextResponse.json({ data: org });
+}
+
+export async function DELETE(request: NextRequest) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const role = (session.user as { role?: string }).role ?? "member";
+  if (!isSuperAdmin(role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  const { id } = await request.json();
+  if (!id) return NextResponse.json({ error: "id erforderlich" }, { status: 400 });
+
+  // Unassign all members before deleting (don't delete the users themselves)
+  await db.user.updateMany({
+    where: { organizationId: id },
+    data: { organizationId: null, role: "member" },
+  });
+  await db.organization.delete({ where: { id } });
+
+  return NextResponse.json({ ok: true });
 }

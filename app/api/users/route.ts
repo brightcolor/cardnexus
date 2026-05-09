@@ -25,8 +25,11 @@ export async function GET(request: NextRequest) {
   const limit = Math.min(parseInt(url.searchParams.get("limit") ?? "20"), 100);
   const search = url.searchParams.get("search") ?? "";
 
+  const orgFilter = url.searchParams.get("organizationId");
   const where = isSuperAdmin(role)
-    ? search ? { OR: [{ name: { contains: search } }, { email: { contains: search } }] } : {}
+    ? orgFilter
+      ? { organizationId: orgFilter }
+      : search ? { OR: [{ name: { contains: search } }, { email: { contains: search } }] } : {}
     : { organizationId: orgId ?? undefined };
 
   const [users, total] = await Promise.all([
