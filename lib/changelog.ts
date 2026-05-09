@@ -6,6 +6,38 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.5.0",
+    date: "2026-05-09",
+    changes: [
+      { type: "feature", text: "6 E-Mail-Signatur-Stile: Standard, Kompakt, Rich, Modern, Minimal, Dark" },
+      { type: "feature", text: "Signatur-Optionen: Farbe, Foto, Social-Links, Karten-Button, Fußzeile" },
+      { type: "feature", text: "Klartext-Kopie der Signatur für E-Mail-Clients ohne HTML-Unterstützung" },
+      { type: "feature", text: "Organisation selbst erstellen (Business-Plan) mit Slug und Farbe" },
+      { type: "feature", text: "CSV-Import-UI für Mitglieder im Team-Bereich" },
+      { type: "feature", text: "Version und Build-Zeit im Admin-Bereich" },
+      { type: "fix",     text: "Super-Admin sah alle User unter Team statt des Admin-Panels" },
+      { type: "fix",     text: "Business-User ohne Organisation konnte Team-Seite nicht nutzen" },
+    ],
+  },
+  {
+    version: "1.4.0",
+    date: "2026-05-08",
+    changes: [
+      { type: "feature", text: "GeoIP-Tracking: Land und Stadt in der Analytics" },
+      { type: "feature", text: "Erweiterte Metriken: Browser, Betriebssystem, Referrer, Sprache" },
+      { type: "feature", text: "Admin Access Log mit allen Karten-Zugriffen und Filtern" },
+      { type: "feature", text: "Karten-Limits in der API und UI durchgesetzt (Free: 1, Pro: 3, Business: ∞)" },
+      { type: "feature", text: "Klon-Button ausgeblendet wenn Karten-Limit erreicht" },
+      { type: "feature", text: "Slug bearbeitbar – alte Slugs leiten automatisch weiter (CardSlugAlias)" },
+      { type: "feature", text: "Analytics-Direktlink im Karten-Editor und Dashboard" },
+      { type: "feature", text: "Dashboard-Übersicht zeigt alle Karten mit 30-Tage-Views" },
+      { type: "feature", text: "12 Karten-Templates (3 weitere: Bold, Glass, Retro)" },
+      { type: "fix",     text: "Bot- und Crawler-Anfragen werden nicht mehr als Views gezählt" },
+      { type: "fix",     text: "Doppelte View-Events beim Teilen der Karte behoben (sessionStorage-Dedup)" },
+      { type: "fix",     text: "geoip-lite ENOENT beim Build durch dynamischen Import behoben" },
+    ],
+  },
+  {
     version: "1.3.0",
     date: "2026-05-07",
     changes: [
@@ -38,7 +70,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       { type: "feature", text: "9 Karten-Templates (Classic, Modern, Minimal, Dark, Bold, Glass, Retro, Neon, Corporate)" },
       { type: "feature", text: "Firmenverzeichnis / Team-Seite" },
       { type: "feature", text: "Abteilungs-Berechtigungen in den Org-Einstellungen" },
-      { type: "feature", text: "Bulk CSV-Import für Teams" },
+      { type: "feature", text: "Bulk CSV-Import für Teams (API)" },
       { type: "feature", text: "E-Mail-Signatur-Generator" },
     ],
   },

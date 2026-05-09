@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { isSuperAdmin, canManageOrganization, slugify } from "@/lib/utils";
+import { canUseFeature, effectivePlan } from "@/lib/plans";
 import { z } from "zod";
 
 const createSchema = z.object({
@@ -70,9 +71,23 @@ export async function POST(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const role = (session.user as { role?: string }).role ?? "member";
-  if (!isSuperAdmin(role)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const userId  = session.user.id;
+  const role    = (session.user as { role?: string }).role ?? "member";
+  const userOrgId = (session.user as { organizationId?: string }).organizationId;
+  const superAdmin = isSuperAdmin(role);
+
+  if (!superAdmin) {
+    const dbUser = await db.user.findUnique({
+      where: { id: userId },
+      select: { plan: true, planExpiresAt: true },
+    });
+    const plan = effectivePlan(dbUser?.plan ?? "free", dbUser?.planExpiresAt);
+    if (!canUseFeature("teamDirectory", plan)) {
+      return NextResponse.json({ error: "Business-Plan erforderlich" }, { status: 403 });
+    }
+    if (userOrgId) {
+      return NextResponse.json({ error: "Du bist bereits Mitglied einer Organisation" }, { status: 400 });
+    }
   }
 
   const body = await request.json();
@@ -82,6 +97,11 @@ export async function POST(request: NextRequest) {
   }
 
   const slug = parsed.data.slug ?? slugify(parsed.data.name);
+
+  const existing = await db.organization.findUnique({ where: { slug }, select: { id: true } });
+  if (existing) {
+    return NextResponse.json({ error: "Dieses URL-Kürzel ist bereits vergeben" }, { status: 409 });
+  }
 
   const org = await db.organization.create({
     data: {
@@ -93,6 +113,14 @@ export async function POST(request: NextRequest) {
     },
     include: { settings: true },
   });
+
+  // Assign the creating user as company_admin of the new org
+  if (!superAdmin) {
+    await db.user.update({
+      where: { id: userId },
+      data: { organizationId: org.id, role: "company_admin" },
+    });
+  }
 
   return NextResponse.json({ data: org }, { status: 201 });
 }

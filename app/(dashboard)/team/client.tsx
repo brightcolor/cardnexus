@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { UserTable } from "@/components/team/UserTable";
 import { InviteModal } from "@/components/team/InviteModal";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +12,7 @@ import { formatDate } from "@/lib/utils";
 import type { Role } from "@/types";
 import {
   Search, X, Globe, Eye, EyeOff, ExternalLink, ToggleLeft, ToggleRight,
-  Clock, CheckCircle, XCircle,
+  Clock, CheckCircle, XCircle, Upload,
 } from "lucide-react";
 
 interface Member {
@@ -40,6 +41,7 @@ interface Props {
   canManage: boolean;
   teamDirectoryEnabled: boolean;
   pendingCards?: PendingCard[];
+  canImport?: boolean;
 }
 
 export function TeamClientPage({
@@ -47,6 +49,7 @@ export function TeamClientPage({
   currentUserId, currentUserRole, orgName, orgSlug,
   memberCount, canManage, teamDirectoryEnabled: initialDirEnabled,
   pendingCards: initialPendingCards = [],
+  canImport = false,
 }: Props) {
   const router = useRouter();
   const [users, setUsers] = useState(initialUsers);
@@ -157,7 +160,15 @@ export function TeamClientPage({
             {orgName ? `${orgName} · ` : ""}{memberCount} Mitglieder
           </p>
         </div>
-        {canManage && <InviteModal onInvited={() => router.refresh()} />}
+        <div className="flex items-center gap-2">
+          {canImport && canManage && (
+            <Link href="/team/import" className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
+              <Upload className="h-3.5 w-3.5" />
+              CSV importieren
+            </Link>
+          )}
+          {canManage && <InviteModal onInvited={() => router.refresh()} />}
+        </div>
       </div>
 
       {/* Team Directory Panel (only for orgs) */}
