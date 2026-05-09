@@ -115,7 +115,7 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
                 {/* Org */}
                 <td className="px-4 py-3 hidden md:table-cell">
                   <Select value={user.organization?.id ?? "__none__"} onValueChange={(v) => changeOrg(user.id, v)}>
-                    <SelectTrigger className="h-7 w-40 text-xs">
+                    <SelectTrigger className="h-7 w-40 text-xs bg-muted">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -130,7 +130,7 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
                 {/* Role */}
                 <td className="px-4 py-3 whitespace-nowrap">
                   <Select value={user.role} onValueChange={(v) => changeRole(user.id, v)}>
-                    <SelectTrigger className="h-7 w-auto min-w-[7rem] max-w-[10rem] text-xs bg-background">
+                    <SelectTrigger className="h-7 w-auto min-w-[7rem] max-w-[10rem] text-xs bg-muted">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -146,8 +146,11 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex items-center gap-1.5">
                     <Select value={user.plan} onValueChange={(v) => changePlan(user.id, v)}>
-                      <SelectTrigger className={`h-7 w-auto px-2 text-xs font-medium border-0 shadow-none focus:ring-0 ${PLAN_VARIANT[user.plan] ?? "bg-muted text-foreground"}`}>
-                        <SelectValue />
+                      <SelectTrigger className="h-7 w-24 text-xs bg-muted">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className={`h-2 w-2 rounded-full shrink-0 ${PLAN_VARIANT[user.plan]?.split(" ")[0] ?? "bg-gray-400"}`} />
+                          <SelectValue />
+                        </div>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="free">Free</SelectItem>
