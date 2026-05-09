@@ -115,7 +115,7 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
                 {/* Org */}
                 <td className="px-4 py-3 hidden md:table-cell">
                   <Select value={user.organization?.id ?? "__none__"} onValueChange={(v) => changeOrg(user.id, v)}>
-                    <SelectTrigger className="h-7 w-40 text-xs !bg-muted">
+                    <SelectTrigger className="h-7 w-40 text-xs" style={{ backgroundColor: "hsl(var(--muted))" }}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -130,7 +130,7 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
                 {/* Role */}
                 <td className="px-4 py-3 whitespace-nowrap">
                   <Select value={user.role} onValueChange={(v) => changeRole(user.id, v)}>
-                    <SelectTrigger className="h-7 w-auto min-w-[7rem] max-w-[10rem] text-xs !bg-muted">
+                    <SelectTrigger className="h-7 w-auto min-w-[7rem] max-w-[10rem] text-xs" style={{ backgroundColor: "hsl(var(--muted))" }}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -146,7 +146,7 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex items-center gap-1.5">
                     <Select value={user.plan} onValueChange={(v) => changePlan(user.id, v)}>
-                      <SelectTrigger className="h-7 w-24 text-xs !bg-muted">
+                      <SelectTrigger className="h-7 w-24 text-xs" style={{ backgroundColor: "hsl(var(--muted))" }}>
                         <div className="flex items-center gap-1.5 min-w-0">
                           <span className={`h-2 w-2 rounded-full shrink-0 ${PLAN_VARIANT[user.plan]?.split(" ")[0] ?? "bg-gray-400"}`} />
                           <SelectValue />
