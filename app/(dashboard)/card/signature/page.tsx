@@ -11,10 +11,18 @@ export default async function SignaturePage() {
   const session = await auth.api.getSession({ headers: await headers() });
   const user = session!.user as { id: string };
 
-  const raw = await db.card.findFirst({ where: { userId: user.id }, orderBy: [{ isDefault: "desc" }] });
-  if (!raw) redirect("/card");
+  const raw = await db.card.findMany({
+    where: { userId: user.id },
+    orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
+  });
+  if (raw.length === 0) redirect("/card");
 
-  const card = { ...raw, customLinks: JSON.parse(raw.customLinks) } as CardData;
+  const cards = raw.map((c) => ({
+    ...c,
+    firstName:   c.firstName ?? "",
+    lastName:    c.lastName  ?? "",
+    customLinks: JSON.parse(c.customLinks as unknown as string || "[]"),
+  })) as CardData[];
 
   return (
     <div className="space-y-8 max-w-4xl">
@@ -24,7 +32,7 @@ export default async function SignaturePage() {
           Kopiere deinen HTML-Code direkt in Outlook, Gmail oder Apple Mail.
         </p>
       </div>
-      <SignatureClient card={card} />
+      <SignatureClient card={cards[0]} allCards={cards} />
     </div>
   );
 }

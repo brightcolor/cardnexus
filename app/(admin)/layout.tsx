@@ -51,6 +51,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">{children}</main>
+      <footer className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pb-6 text-right">
+        <span className="text-[10px] text-muted-foreground/40 select-none tabular-nums">
+          v{process.env.NEXT_PUBLIC_APP_VERSION}
+          {process.env.NEXT_PUBLIC_BUILD_TIME && (
+            <> · {new Date(process.env.NEXT_PUBLIC_BUILD_TIME).toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" })}</>
+          )}
+        </span>
+      </footer>
     </div>
   );
 }
