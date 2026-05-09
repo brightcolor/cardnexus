@@ -1,118 +1,35 @@
-"use client";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { effectivePlan, getPlanFeatures } from "@/lib/plans";
+import { WidgetClient } from "./client";
 
-import { useState } from "react";
-import { Copy, Check, Code2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+export const metadata = { title: "Widget – CardNexus" };
 
-export default function WidgetPage() {
-  const [slug, setSlug] = useState("");
-  const [width, setWidth] = useState("400");
-  const [height, setHeight] = useState("700");
-  const [copied, setCopied] = useState<"iframe" | "link" | null>(null);
+export default async function WidgetPage() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  const user = session!.user as { id: string };
 
-  const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
-  const cardUrl = slug ? `${baseUrl}/c/${slug}` : "";
+  const [dbUser, cards] = await Promise.all([
+    db.user.findUnique({
+      where: { id: user.id },
+      select: { plan: true, planExpiresAt: true },
+    }),
+    db.card.findMany({
+      where: { userId: user.id },
+      select: { slug: true, name: true },
+      orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
+    }),
+  ]);
 
-  const iframeCode = slug
-    ? `<iframe\n  src="${cardUrl}"\n  width="${width}"\n  height="${height}"\n  frameborder="0"\n  style="border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.1);"\n  title="Digitale Visitenkarte"\n  loading="lazy"\n></iframe>`
-    : "";
-
-  async function copy(text: string, key: "iframe" | "link") {
-    await navigator.clipboard.writeText(text).catch(() => {});
-    setCopied(key);
-    setTimeout(() => setCopied(null), 2000);
-  }
+  const plan = effectivePlan(dbUser?.plan ?? "free", dbUser?.planExpiresAt);
+  const { maxCards } = getPlanFeatures(plan);
+  const canSelectMultiple = maxCards > 1;
 
   return (
-    <div className="max-w-2xl space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Code2 className="h-6 w-6" />
-          Karte einbetten
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          Bette deine digitale Karte per iFrame direkt auf deiner Website ein.
-        </p>
-      </div>
-
-      {/* Config */}
-      <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
-        <div>
-          <Label htmlFor="slug">Karten-Slug</Label>
-          <Input
-            id="slug"
-            value={slug}
-            onChange={(e) => setSlug(e.target.value.trim())}
-            placeholder="dein-slug"
-            className="mt-1 font-mono"
-          />
-          <p className="text-xs text-muted-foreground mt-1">Den Slug findest du in der URL deiner Karte: /c/<strong>slug</strong></p>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="width">Breite (px)</Label>
-            <Input id="width" value={width} onChange={(e) => setWidth(e.target.value)} className="mt-1" />
-          </div>
-          <div>
-            <Label htmlFor="height">Höhe (px)</Label>
-            <Input id="height" value={height} onChange={(e) => setHeight(e.target.value)} className="mt-1" />
-          </div>
-        </div>
-      </div>
-
-      {slug && (
-        <>
-          {/* Direktlink */}
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Direktlink</p>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 text-xs bg-muted rounded-lg px-3 py-2 truncate">{cardUrl}</code>
-              <Button size="sm" variant="outline" onClick={() => copy(cardUrl, "link")}>
-                {copied === "link" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
-
-          {/* iFrame Code */}
-          <div className="space-y-2">
-            <p className="text-sm font-medium">iFrame-Code</p>
-            <div className="relative">
-              <pre className="text-xs bg-muted rounded-xl p-4 overflow-x-auto whitespace-pre leading-relaxed">{iframeCode}</pre>
-              <Button
-                size="sm" variant="outline"
-                className="absolute top-2 right-2"
-                onClick={() => copy(iframeCode, "iframe")}
-              >
-                {copied === "iframe" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
-
-          {/* Preview */}
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Vorschau</p>
-            <div className="flex justify-center bg-muted rounded-2xl p-6">
-              <iframe
-                src={cardUrl}
-                width={Math.min(parseInt(width) || 400, 500)}
-                height={Math.min(parseInt(height) || 700, 700)}
-                frameBorder={0}
-                style={{ borderRadius: 16, boxShadow: "0 4px 24px rgba(0,0,0,0.1)" }}
-                title="Vorschau"
-                loading="lazy"
-              />
-            </div>
-          </div>
-        </>
-      )}
-
-      {!slug && (
-        <div className="rounded-xl border border-dashed border-border p-8 text-center text-muted-foreground text-sm">
-          Trage oben deinen Karten-Slug ein, um den Embed-Code zu generieren.
-        </div>
-      )}
-    </div>
+    <WidgetClient
+      cards={cards.map((c) => ({ slug: c.slug, name: c.name ?? c.slug }))}
+      canSelectMultiple={canSelectMultiple}
+    />
   );
 }

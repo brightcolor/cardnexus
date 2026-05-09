@@ -9,10 +9,11 @@ import { UpgradeButtons } from "./UpgradeButtons";
 
 export const metadata = { title: "Upgrade – CardNexus" };
 
-const FEATURE_LABELS: Record<string, string> = {
+const FEATURE_LABELS: Record<string, string | ((v: number | boolean) => string)> = {
   whiteLabel:             "White Label (kein Badge)",
   customDomain:           "Eigene Domain",
   allTemplates:           "Alle 12 Templates",
+  maxCards:               (v) => v === Infinity ? "Unbegrenzte Karten" : `Bis zu ${v} Karte${v === 1 ? "" : "n"}`,
   pdfExport:              "PDF / Print-Export",
   appointmentBooking:     "Terminbuchungs-Link",
   campaigns:              "UTM-Kampagnen",
@@ -115,8 +116,9 @@ export default async function UpgradePage({
               <ul className="space-y-2 flex-1">
                 {Object.entries(plan.features).map(([k, v]) => {
                   if (!v || v === 0) return null;
-                  const label = FEATURE_LABELS[k];
-                  if (!label) return null;
+                  const labelDef = FEATURE_LABELS[k];
+                  if (!labelDef) return null;
+                  const label = typeof labelDef === "function" ? labelDef(v as number | boolean) : labelDef;
                   return (
                     <li key={k} className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Check className="h-3.5 w-3.5 text-green-500 shrink-0" />

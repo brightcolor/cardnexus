@@ -4,6 +4,7 @@ export interface PlanFeatures {
   whiteLabel: boolean;          // Remove "Erstellt mit CardNexus" badge
   customDomain: boolean;        // Use own domain
   allTemplates: boolean;        // Access to all 12 templates (free: 4 only)
+  maxCards: number;             // Max number of cards per user
   maxCustomLinks: number;       // Max custom links on card
   pdfExport: boolean;           // Print/PDF export
   appointmentBooking: boolean;  // Booking URL field
@@ -37,6 +38,7 @@ export const PLANS: Record<Plan, PlanDefinition> = {
       whiteLabel: false,
       customDomain: false,
       allTemplates: false,
+      maxCards: 1,
       maxCustomLinks: 3,
       pdfExport: false,
       appointmentBooking: false,
@@ -60,6 +62,7 @@ export const PLANS: Record<Plan, PlanDefinition> = {
       whiteLabel: true,
       customDomain: true,
       allTemplates: true,
+      maxCards: 3,
       maxCustomLinks: Infinity,
       pdfExport: true,
       appointmentBooking: true,
@@ -82,6 +85,7 @@ export const PLANS: Record<Plan, PlanDefinition> = {
       whiteLabel: true,
       customDomain: true,
       allTemplates: true,
+      maxCards: Infinity,
       maxCustomLinks: Infinity,
       pdfExport: true,
       appointmentBooking: true,

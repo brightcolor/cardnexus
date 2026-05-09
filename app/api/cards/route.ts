@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { hashPassword } from "@/lib/password-hash";
+import { getPlanFeatures, effectivePlan } from "@/lib/plans";
 
 function parseLinks(raw: string | null | unknown) {
   try { return raw ? JSON.parse(raw as string) : []; } catch { return []; }
@@ -123,8 +124,20 @@ export async function POST(req: NextRequest) {
     slug = `${base}-${nanoid(6)}`;
   }
 
-  // First card is default
+  // Enforce per-plan card limit
+  const dbUser = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { plan: true, planExpiresAt: true, role: true },
+  });
+  const plan = effectivePlan(dbUser?.plan ?? "free", dbUser?.planExpiresAt);
+  const { maxCards } = getPlanFeatures(plan);
   const existingCount = await db.card.count({ where: { userId: session.user.id } });
+  if (existingCount >= maxCards) {
+    return NextResponse.json(
+      { error: `Dein Plan erlaubt maximal ${maxCards} Karte${maxCards === 1 ? "" : "n"}. Upgrade für mehr.` },
+      { status: 403 }
+    );
+  }
   const isDefault = existingCount === 0;
 
   const card = await db.card.create({
