@@ -9,6 +9,10 @@ import { rateLimit } from "@/lib/rate-limit";
 import { parseBrowser, parseOs, parseLanguage, parseReferrerDomain } from "@/lib/ua-parser";
 import { z } from "zod";
 
+function isBot(ua: string): boolean {
+  return /bot|crawl|spider|slurp|mediapartners|facebookexternalhit|twitterbot|whatsapp|linkedinbot|embedly|quora|pinterest|lighthouse|headlesschrome|prerender|wget|curl/i.test(ua);
+}
+
 const MILESTONES = [100, 500, 1000, 5000, 10000];
 
 const trackSchema = z.object({
@@ -50,6 +54,7 @@ export async function POST(request: NextRequest) {
   }
 
   const userAgent = request.headers.get("user-agent") ?? "";
+  if (isBot(userAgent)) return NextResponse.json({ ok: true });
   let geo: { country?: string; city?: string } | null = null;
   if (ip) {
     try {

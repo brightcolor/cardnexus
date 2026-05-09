@@ -3,12 +3,13 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Users, Building2, LayoutDashboard, Settings2, CreditCard } from "lucide-react";
+import { ArrowLeft, Users, Building2, LayoutDashboard, Settings2, CreditCard, Activity } from "lucide-react";
 
 const adminNav = [
   { href: "/admin", label: "Übersicht", icon: LayoutDashboard },
   { href: "/admin/users", label: "Benutzer", icon: Users },
   { href: "/admin/cards", label: "Karten", icon: CreditCard },
+  { href: "/admin/access-log", label: "Access Log", icon: Activity },
   { href: "/admin/organizations", label: "Organisationen", icon: Building2 },
   { href: "/admin/settings", label: "Einstellungen", icon: Settings2 },
 ];

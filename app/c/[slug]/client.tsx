@@ -50,8 +50,11 @@ export function PublicCardView({ card, source, showBadge = true }: Props) {
   const [downloading, setDownloading] = useState(false);
   const [walletLoading, setWalletLoading] = useState(false);
 
-  // Track view once on mount
+  // Track view once on mount (deduplicated per session per card slug)
   useEffect(() => {
+    const key = `tracked_${card.slug}`;
+    if (typeof sessionStorage !== "undefined" && sessionStorage.getItem(key)) return;
+    if (typeof sessionStorage !== "undefined") sessionStorage.setItem(key, "1");
     const utm = readUtmFromUrl();
     // If there's a utm_campaign or any utm_*, source is implicitly "campaign".
     const inferredSource =
@@ -126,14 +129,13 @@ export function PublicCardView({ card, source, showBadge = true }: Props) {
     const url  = window.location.origin + `/c/${card.slug}`;
     const name = [card.firstName, card.lastName].filter(Boolean).join(" ") || "Visitenkarte";
     window.open(`https://wa.me/?text=${encodeURIComponent(`${name} – ${url}`)}`, "_blank");
-    track(card.slug, "view", { source: "share" });
   }
 
   function shareViaEmail() {
     const url  = window.location.origin + `/c/${card.slug}`;
     const name = [card.firstName, card.lastName].filter(Boolean).join(" ") || "Visitenkarte";
     window.location.href = `mailto:?subject=${encodeURIComponent(name)}&body=${encodeURIComponent(`Meine digitale Visitenkarte: ${url}`)}`;
-    track(card.slug, "view", { source: "share" });
+
   }
 
   async function handleShare() {
@@ -144,7 +146,6 @@ export function PublicCardView({ card, source, showBadge = true }: Props) {
     if (navigator.share) {
       try {
         await navigator.share({ title: name, url });
-        track(card.slug, "view", { source: "share" });
       } catch { /* user cancelled */ }
       return;
     }
