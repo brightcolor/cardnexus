@@ -300,7 +300,12 @@ model CardAnalytic {
 
   ip        String?
   country   String?
+  city      String?
   device    String?  // mobile | desktop | tablet
+  browser   String?  // Chrome | Firefox | Safari | Edge | ...
+  os        String?  // Windows | macOS | iOS | Android | Linux | ...
+  referrer  String?  // document.referrer domain
+  language  String?  // Accept-Language primary tag
 
   // UTM/campaign attribution. Captured on `view` events whenever the visitor
   // hits the page with utm_* params. Independent of the Campaign model so
@@ -314,6 +319,7 @@ model CardAnalytic {
   @@index([cardSlug])
   @@index([createdAt])
   @@index([utmCampaign])
+  @@index([country])
 }
 
 // ─── Platform-wide settings (singleton row, id = "main") ─────────────────────

@@ -20,6 +20,7 @@ interface TrackOpts {
   utmSource?: string;
   utmMedium?: string;
   utmCampaign?: string;
+  referrer?: string;
 }
 function track(slug: string, event: string, opts: TrackOpts = {}) {
   fetch("/api/analytics", {
@@ -29,8 +30,8 @@ function track(slug: string, event: string, opts: TrackOpts = {}) {
   }).catch(() => {});
 }
 
-/** Read UTM-style params from the current URL (client-side only). */
-function readUtmFromUrl(): { utmSource?: string; utmMedium?: string; utmCampaign?: string } {
+/** Read UTM params and referrer from the current browser context. */
+function readUtmFromUrl(): { utmSource?: string; utmMedium?: string; utmCampaign?: string; referrer?: string } {
   if (typeof window === "undefined") return {};
   const sp = new URLSearchParams(window.location.search);
   const get = (k: string) => sp.get(k)?.slice(0, 80) || undefined;
@@ -38,6 +39,7 @@ function readUtmFromUrl(): { utmSource?: string; utmMedium?: string; utmCampaign
     utmSource:   get("utm_source"),
     utmMedium:   get("utm_medium"),
     utmCampaign: get("utm_campaign"),
+    referrer:    document.referrer || undefined,
   };
 }
 

@@ -180,10 +180,17 @@ export interface AnalyticsSummary {
   vcardDownloads: number;
   qrScans: number;
   linkClicks: number;
+  walletSaves: number;
   viewsLast30Days: { date: string; count: number }[];
   topSources: { source: string; count: number }[];
   topLinks: { label: string; count: number }[];
   deviceSplit: { device: string; count: number }[];
+  topCountries: { country: string; count: number }[];
+  topCities: { city: string; count: number }[];
+  browserSplit: { browser: string; count: number }[];
+  osSplit: { os: string; count: number }[];
+  topReferrers: { referrer: string; count: number }[];
+  topLanguages: { language: string; count: number }[];
   utmCampaigns: {
     campaign: string;
     source: string | null;

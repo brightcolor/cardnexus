@@ -6,6 +6,7 @@ import { getDeviceType } from "@/lib/utils";
 import { canUseFeature } from "@/lib/plans";
 import { clientIp } from "@/lib/client-ip";
 import { rateLimit } from "@/lib/rate-limit";
+import { parseBrowser, parseOs, parseLanguage, parseReferrerDomain } from "@/lib/ua-parser";
 import { z } from "zod";
 
 const MILESTONES = [100, 500, 1000, 5000, 10000];
@@ -15,10 +16,10 @@ const trackSchema = z.object({
   event: z.enum(["view", "vcard_download", "qr_scan", "link_click", "wallet_save"]),
   linkLabel: z.string().max(200).optional(),
   source: z.enum(["nfc", "qr", "direct", "share", "campaign"]).optional(),
-  // UTM attribution — anything coming via ?utm_source=…&utm_medium=…&utm_campaign=…
   utmSource:   z.string().max(80).optional(),
   utmMedium:   z.string().max(80).optional(),
   utmCampaign: z.string().max(120).optional(),
+  referrer:    z.string().max(500).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid" }, { status: 400 });
   }
 
-  const { cardSlug, event, linkLabel, source, utmSource, utmMedium, utmCampaign } = parsed.data;
+  const { cardSlug, event, linkLabel, source, utmSource, utmMedium, utmCampaign, referrer } = parsed.data;
 
   // Make sure the cardSlug actually exists (and is public) before logging,
   // so attackers can't bloat the analytics table with garbage.
@@ -49,6 +50,13 @@ export async function POST(request: NextRequest) {
   }
 
   const userAgent = request.headers.get("user-agent") ?? "";
+  let geo: { country?: string; city?: string } | null = null;
+  if (ip) {
+    try {
+      const geoip = await import("geoip-lite");
+      geo = geoip.default.lookup(ip);
+    } catch { /* geoip unavailable — skip */ }
+  }
 
   await db.cardAnalytic.create({
     data: {
@@ -60,7 +68,13 @@ export async function POST(request: NextRequest) {
       utmMedium,
       utmCampaign,
       ip,
-      device: getDeviceType(userAgent),
+      country:  geo?.country ?? null,
+      city:     geo?.city ?? null,
+      device:   getDeviceType(userAgent),
+      browser:  parseBrowser(userAgent),
+      os:       parseOs(userAgent),
+      referrer: parseReferrerDomain(referrer),
+      language: parseLanguage(request.headers.get("accept-language")),
     },
   });
 
@@ -124,34 +138,26 @@ export async function GET(request: NextRequest) {
 
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-  const [all, recent, sourceData, deviceData, utmRaw, namedCampaigns, topLinksRaw] = await Promise.all([
-    db.cardAnalytic.groupBy({
-      by: ["event"],
-      where: { cardSlug: card.slug },
-      _count: true,
-    }),
+  const where = { cardSlug: card.slug };
+  const whereRecent = { cardSlug: card.slug, createdAt: { gte: since } };
+
+  const [
+    all, recent, sourceData, deviceData, utmRaw, namedCampaigns, topLinksRaw,
+    countryData, cityData, browserData, osData, referrerData, languageData,
+  ] = await Promise.all([
+    db.cardAnalytic.groupBy({ by: ["event"], where, _count: true }),
     db.cardAnalytic.findMany({
-      where: { cardSlug: card.slug, event: "view", createdAt: { gte: since } },
+      where: { ...whereRecent, event: "view" },
       select: { createdAt: true },
       orderBy: { createdAt: "asc" },
     }),
-    db.cardAnalytic.groupBy({
-      by: ["source"],
-      where: { cardSlug: card.slug },
-      _count: true,
-    }),
-    db.cardAnalytic.groupBy({
-      by: ["device"],
-      where: { cardSlug: card.slug },
-      _count: true,
-    }),
-    // UTM/campaign breakdown — last `days` only, ignoring rows without any UTM tag.
+    db.cardAnalytic.groupBy({ by: ["source"], where, _count: true }),
+    db.cardAnalytic.groupBy({ by: ["device"], where, _count: true }),
     db.cardAnalytic.groupBy({
       by: ["utmCampaign", "utmSource", "utmMedium"],
       where: {
-        cardSlug: card.slug,
+        ...whereRecent,
         event: "view",
-        createdAt: { gte: since },
         OR: [
           { utmCampaign: { not: null } },
           { utmSource:   { not: null } },
@@ -160,19 +166,60 @@ export async function GET(request: NextRequest) {
       },
       _count: true,
     }),
-    // Named campaigns (DB-backed) for this card so the UI can show their
-    // total clicks even when no UTM hits matched.
     db.campaign.findMany({
       where: { cardId: card.id },
       orderBy: { createdAt: "desc" },
       select: { id: true, name: true, urlSlug: true, views: true, expiresAt: true, createdAt: true },
     }),
-    // Top clicked links by label
     db.cardAnalytic.groupBy({
       by: ["linkLabel"],
-      where: { cardSlug: card.slug, event: "link_click", linkLabel: { not: null } },
+      where: { ...where, event: "link_click", linkLabel: { not: null } },
       _count: true,
       orderBy: { _count: { linkLabel: "desc" } },
+      take: 10,
+    }),
+    // Geo
+    db.cardAnalytic.groupBy({
+      by: ["country"],
+      where: { ...where, country: { not: null } },
+      _count: true,
+      orderBy: { _count: { country: "desc" } },
+      take: 15,
+    }),
+    db.cardAnalytic.groupBy({
+      by: ["city"],
+      where: { ...where, city: { not: null } },
+      _count: true,
+      orderBy: { _count: { city: "desc" } },
+      take: 10,
+    }),
+    // Browser & OS
+    db.cardAnalytic.groupBy({
+      by: ["browser"],
+      where: { ...where, browser: { not: null } },
+      _count: true,
+      orderBy: { _count: { browser: "desc" } },
+    }),
+    db.cardAnalytic.groupBy({
+      by: ["os"],
+      where: { ...where, os: { not: null } },
+      _count: true,
+      orderBy: { _count: { os: "desc" } },
+    }),
+    // Referrers
+    db.cardAnalytic.groupBy({
+      by: ["referrer"],
+      where: { ...where, referrer: { not: null } },
+      _count: true,
+      orderBy: { _count: { referrer: "desc" } },
+      take: 10,
+    }),
+    // Languages
+    db.cardAnalytic.groupBy({
+      by: ["language"],
+      where: { ...where, language: { not: null } },
+      _count: true,
+      orderBy: { _count: { language: "desc" } },
       take: 10,
     }),
   ]);
@@ -211,10 +258,17 @@ export async function GET(request: NextRequest) {
       vcardDownloads: countByEvent("vcard_download"),
       qrScans: countByEvent("qr_scan"),
       linkClicks: countByEvent("link_click"),
+      walletSaves: countByEvent("wallet_save"),
       viewsLast30Days,
       topSources: sourceData.map((s) => ({ source: s.source ?? "direct", count: s._count })),
       topLinks: topLinksRaw.map((l) => ({ label: l.linkLabel!, count: l._count })),
       deviceSplit: deviceData.map((d) => ({ device: d.device ?? "unknown", count: d._count })),
+      topCountries: countryData.map((r) => ({ country: r.country!, count: r._count })),
+      topCities: cityData.map((r) => ({ city: r.city!, count: r._count })),
+      browserSplit: browserData.map((r) => ({ browser: r.browser!, count: r._count })),
+      osSplit: osData.map((r) => ({ os: r.os!, count: r._count })),
+      topReferrers: referrerData.map((r) => ({ referrer: r.referrer!, count: r._count })),
+      topLanguages: languageData.map((r) => ({ language: r.language!, count: r._count })),
       utmCampaigns,
       namedCampaigns: namedCampaigns.map((c) => ({
         ...c,

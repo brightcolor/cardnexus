@@ -8,8 +8,10 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { AnalyticsSummary } from "@/types";
 import {
-  Eye, Download, QrCode, MousePointer, Megaphone, Link as LinkIcon, ExternalLink,
+  Eye, Download, QrCode, MousePointer, Megaphone, Link as LinkIcon, ExternalLink, Wallet,
 } from "lucide-react";
+import { AnalyticsGeo } from "./AnalyticsGeo";
+import { AnalyticsTech } from "./AnalyticsTech";
 
 const DEVICE_COLORS = ["#0F172A", "#64748B", "#94A3B8"];
 const SOURCE_COLORS = ["#6366F1", "#8B5CF6", "#EC4899", "#F43F5E", "#F59E0B", "#10B981"];
@@ -108,11 +110,12 @@ export function AnalyticsOverview({ cards = [], initialCardId }: Props) {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <StatCard label="Aufrufe gesamt" value={data.totalViews} icon={Eye} />
         <StatCard label="vCard Downloads" value={data.vcardDownloads} icon={Download} />
         <StatCard label="QR-Scans" value={data.qrScans} icon={QrCode} />
         <StatCard label="Link-Klicks" value={data.linkClicks} icon={MousePointer} />
+        <StatCard label="Wallet Saves" value={data.walletSaves ?? 0} icon={Wallet} />
       </div>
 
       {/* Views chart */}
@@ -141,6 +144,20 @@ export function AnalyticsOverview({ cards = [], initialCardId }: Props) {
           </ResponsiveContainer>
         </CardContent>
       </Card>
+
+      {/* Geo stats */}
+      <AnalyticsGeo
+        topCountries={data.topCountries ?? []}
+        topCities={data.topCities ?? []}
+        topReferrers={data.topReferrers ?? []}
+        topLanguages={data.topLanguages ?? []}
+      />
+
+      {/* Browser + OS */}
+      <AnalyticsTech
+        browserSplit={data.browserSplit ?? []}
+        osSplit={data.osSplit ?? []}
+      />
 
       {/* Device + Source split */}
       <div className="grid md:grid-cols-2 gap-4">
