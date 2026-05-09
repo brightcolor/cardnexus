@@ -128,9 +128,9 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
                 </td>
 
                 {/* Role */}
-                <td className="px-4 py-3">
+                <td className="px-4 py-3 whitespace-nowrap">
                   <Select value={user.role} onValueChange={(v) => changeRole(user.id, v)}>
-                    <SelectTrigger className="h-7 w-36 text-xs">
+                    <SelectTrigger className="h-7 w-auto min-w-[7rem] max-w-[10rem] text-xs bg-background">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -143,13 +143,10 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
                 </td>
 
                 {/* Plan */}
-                <td className="px-4 py-3">
+                <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex items-center gap-1.5">
-                    <div className={`px-1.5 py-0.5 rounded text-xs font-medium shrink-0 ${PLAN_VARIANT[user.plan] ?? ""}`}>
-                      {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)}
-                    </div>
                     <Select value={user.plan} onValueChange={(v) => changePlan(user.id, v)}>
-                      <SelectTrigger className="h-7 w-7 text-xs p-0 border-0 shadow-none bg-transparent focus:ring-0" aria-label="Plan ändern">
+                      <SelectTrigger className={`h-7 w-auto px-2 text-xs font-medium border-0 shadow-none focus:ring-0 ${PLAN_VARIANT[user.plan] ?? "bg-muted text-foreground"}`}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -159,7 +156,7 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
                       </SelectContent>
                     </Select>
 
-                    {/* Expiry badge + edit */}
+                    {/* Expiry */}
                     {user.plan !== "free" && (
                       expiryEdit === user.id ? (
                         <div className="flex items-center gap-1">
@@ -209,7 +206,7 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
                 </td>
 
                 {/* Date */}
-                <td className="px-4 py-3 text-muted-foreground text-xs hidden lg:table-cell">
+                <td className="px-4 py-3 text-muted-foreground text-xs hidden lg:table-cell whitespace-nowrap">
                   {formatDate(user.createdAt)}
                 </td>
               </tr>
