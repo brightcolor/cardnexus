@@ -9,6 +9,8 @@ import { QRCodeDisplay } from "@/components/card/QRCodeDisplay";
 import { CardSwitcher } from "@/components/card/CardSwitcher";
 import { ApprovalBanner } from "@/components/card/ApprovalBanner";
 import type { CardData } from "@/types";
+import Link from "next/link";
+import { BarChart2 } from "lucide-react";
 
 export const metadata = { title: "Meine Karte" };
 
@@ -82,9 +84,20 @@ export default async function CardPage({
           </p>
         </div>
 
-        {cards.length > 0 && (
-          <CardSwitcher cards={cards} activeCardId={activeCard?.id} />
-        )}
+        <div className="flex items-center gap-2">
+          {activeCard && (
+            <Link
+              href={`/analytics?cardId=${activeCard.id}`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+            >
+              <BarChart2 className="h-4 w-4" />
+              Analytics
+            </Link>
+          )}
+          {cards.length > 0 && (
+            <CardSwitcher cards={cards} activeCardId={activeCard?.id} />
+          )}
+        </div>
       </div>
 
       {activeCard && activeCard.approvalStatus && activeCard.approvalStatus !== "approved" && (

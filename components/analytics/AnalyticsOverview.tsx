@@ -18,6 +18,7 @@ interface CardOption { id: string; name: string }
 
 interface Props {
   cards?: CardOption[];
+  initialCardId?: string;
 }
 
 function StatCard({ label, value, icon: Icon }: { label: string; value: number; icon: React.ElementType }) {
@@ -38,11 +39,11 @@ function StatCard({ label, value, icon: Icon }: { label: string; value: number; 
   );
 }
 
-export function AnalyticsOverview({ cards = [] }: Props) {
+export function AnalyticsOverview({ cards = [], initialCardId }: Props) {
   const [data, setData] = useState<AnalyticsSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(30);
-  const [cardId, setCardId] = useState<string>(cards[0]?.id ?? "");
+  const [cardId, setCardId] = useState<string>(initialCardId ?? cards[0]?.id ?? "");
 
   useEffect(() => {
     setLoading(true);
