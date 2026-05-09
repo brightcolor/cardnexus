@@ -92,7 +92,10 @@ export default async function PublicCardPage({ params, searchParams }: Props) {
 
   const { passwordHash: _ph, ...safe } = raw;
   const card = { ...safe, customLinks: JSON.parse(raw.customLinks) } as CardData;
-  const whiteLabel = canUseFeature("whiteLabel", raw.user?.plan ?? "free", raw.user?.planExpiresAt);
+  const ownerPlan = raw.user?.plan ?? "free";
+  const ownerExpiry = raw.user?.planExpiresAt;
+  const whiteLabel   = canUseFeature("whiteLabel",   ownerPlan, ownerExpiry);
+  const showLeadForm = canUseFeature("leadCapture",  ownerPlan, ownerExpiry);
 
-  return <PublicCardView card={card} source={source} showBadge={!whiteLabel} />;
+  return <PublicCardView card={card} source={source} showBadge={!whiteLabel} showLeadForm={showLeadForm} />;
 }

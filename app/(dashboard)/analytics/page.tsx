@@ -3,6 +3,9 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { AnalyticsOverview } from "@/components/analytics/AnalyticsOverview";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { canManageOrganization } from "@/lib/utils";
+import Link from "next/link";
+import { Users } from "lucide-react";
 
 export const metadata = { title: "Analytics" };
 
@@ -12,7 +15,7 @@ export default async function AnalyticsPage({
   searchParams: Promise<{ cardId?: string }>;
 }) {
   const session = await auth.api.getSession({ headers: await headers() });
-  const user = session!.user as { id: string };
+  const user = session!.user as { id: string; role?: string; organizationId?: string };
   const { cardId } = await searchParams;
 
   const cards = await db.card.findMany({
@@ -21,15 +24,26 @@ export default async function AnalyticsPage({
     select: { id: true, name: true },
   });
 
-  // Verify the requested cardId belongs to this user
   const validCardId = cardId && cards.some((c) => c.id === cardId) ? cardId : undefined;
+  const isOrgAdmin = canManageOrganization(user.role ?? "member") && !!user.organizationId;
 
   return (
     <div className="space-y-8 max-w-5xl">
-      <PageHeader
-        title="Analytics"
-        description="Wie wird deine Karte genutzt?"
-      />
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <PageHeader
+          title="Analytics"
+          description="Wie wird deine Karte genutzt?"
+        />
+        {isOrgAdmin && (
+          <Link
+            href="/analytics/org"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors shrink-0"
+          >
+            <Users className="h-4 w-4" />
+            Team Analytics
+          </Link>
+        )}
+      </div>
       <AnalyticsOverview cards={cards} initialCardId={validCardId} />
     </div>
   );

@@ -15,6 +15,7 @@ export interface PlanFeatures {
   milestoneNotifications: boolean; // Email on view milestones
   analyticsRetention: number;   // Days of analytics history
   teamDirectory: boolean;       // Team directory & member management
+  leadCapture: boolean;         // Lead capture form on public card
 }
 
 export interface PlanDefinition {
@@ -49,6 +50,7 @@ export const PLANS: Record<Plan, PlanDefinition> = {
       milestoneNotifications: false,
       analyticsRetention: 30,
       teamDirectory: false,
+      leadCapture: false,
     },
   },
   pro: {
@@ -73,6 +75,7 @@ export const PLANS: Record<Plan, PlanDefinition> = {
       milestoneNotifications: true,
       analyticsRetention: 365,
       teamDirectory: false,
+      leadCapture: true,
     },
   },
   business: {
@@ -96,6 +99,7 @@ export const PLANS: Record<Plan, PlanDefinition> = {
       milestoneNotifications: true,
       analyticsRetention: 730,
       teamDirectory: true,
+      leadCapture: true,
     },
   },
 };

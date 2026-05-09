@@ -106,8 +106,8 @@ CardNexus is a self-hosted **digital business card platform** that replaces pape
 | **Analytics** | Views, sources, devices, top clicked links — with UTM campaign breakdown |
 | **Realtime view counter** | Live updating view count on your dashboard |
 | **NFC setup guide** | Step-by-step instructions to program your NFC tag |
-| **Lead capture form** | Visitors can leave their contact details on your card |
-| **Lead notifications** | Get notified instantly or via daily digest when a new lead comes in |
+| **Lead capture form** | Visitors can leave their contact details on your card (Pro+) |
+| **Lead notifications** | Get notified instantly or via daily digest when a new lead comes in (Pro+) |
 | **Share via WhatsApp / Email** | One-tap share buttons in addition to native share and clipboard copy |
 | **Wallet integration** | Save card to Apple Wallet (.pkpass) or Google Wallet (admin-configured) |
 | **Widget / iFrame embed** | Embed your card on any website with auto-generated iFrame code |
@@ -125,7 +125,8 @@ CardNexus is a self-hosted **digital business card platform** that replaces pape
 | **Bulk import template** | Define a card template for CSV bulk imports |
 | **Team directory** | Searchable directory of all org members |
 | **Card approval workflow** | Require admin / team-leader sign-off before member card changes go live |
-| **Analytics** | Aggregate view / download / scan stats across the whole organization |
+| **Team analytics** | Aggregate views, downloads, scans and leads across the whole organization |
+| **CSV member import** | Bulk-create or update member cards from a CSV file |
 
 ### For super admins
 
@@ -135,7 +136,7 @@ CardNexus is a self-hosted **digital business card platform** that replaces pape
 | **Organization management** | Create, configure and assign users to organizations |
 | **User management** | View all users, change roles, plans and expiry dates |
 | **Plan assignment** | Manually assign Free / Pro / Business plan to any user |
-| **Campaign management** | Create UTM-tracked link campaigns with expiry dates |
+| **Access log** | Full audit trail of every card view, QR scan, vCard download and link click |
 | **Platform analytics** | Global stats: total users, cards, views, downloads |
 
 ### Platform
@@ -161,11 +162,11 @@ CardNexus is a self-hosted **digital business card platform** that replaces pape
 | Cards | 1 | 3 | Unlimited |
 | Templates | 4 basic | All 12 | All 12 |
 | Custom booking URL | — | ✓ | ✓ |
-| Analytics | Basic | Full | Full |
+| Analytics | Basic (30d) | Full (1y) | Full (2y) |
 | Lead capture | — | ✓ | ✓ |
 | Milestone notifications | — | ✓ | ✓ |
-| White-label (no badge) | — | — | ✓ |
-| Campaigns / UTM links | — | — | ✓ |
+| White-label (no badge) | — | ✓ | ✓ |
+| Campaigns / UTM links | — | ✓ | ✓ |
 | CSV bulk import | — | — | ✓ |
 | Team directory | — | — | ✓ |
 

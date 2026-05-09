@@ -4,6 +4,7 @@ import { fireWebhooks } from "@/lib/webhooks";
 import { sendLeadNotificationEmail } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
 import { clientIp } from "@/lib/client-ip";
+import { canUseFeature, effectivePlan } from "@/lib/plans";
 import { z } from "zod";
 
 const schema = z.object({
@@ -23,12 +24,17 @@ export async function POST(req: NextRequest) {
       where: { id: data.cardId },
       select: {
         id: true, isPublic: true, name: true, slug: true,
-        user: { select: { id: true, email: true, name: true, leadNotification: true } },
+        user: { select: { id: true, email: true, name: true, leadNotification: true, plan: true, planExpiresAt: true } },
       },
     });
 
     if (!card || !card.isPublic) {
       return NextResponse.json({ error: "Karte nicht gefunden" }, { status: 404 });
+    }
+
+    const ownerPlan = effectivePlan(card.user.plan ?? "free", card.user.planExpiresAt);
+    if (!canUseFeature("leadCapture", ownerPlan)) {
+      return NextResponse.json({ error: "Nicht verfügbar" }, { status: 403 });
     }
 
     const ip = clientIp(req);

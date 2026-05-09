@@ -17,6 +17,7 @@ const FEATURE_LABELS: Record<string, string | ((v: number | boolean) => string)>
   pdfExport:              "PDF / Print-Export",
   appointmentBooking:     "Terminbuchungs-Link",
   campaigns:              "UTM-Kampagnen",
+  leadCapture:            "Lead-Capture-Formular",
   eventInvitations:       "Event-Einladungslinks",
   milestoneNotifications: "Meilenstein-Benachrichtigungen",
   bulkImport:             "Bulk CSV-Import",

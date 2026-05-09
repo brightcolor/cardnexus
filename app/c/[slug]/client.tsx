@@ -13,6 +13,7 @@ interface Props {
   card: CardData;
   source?: string;
   showBadge?: boolean;
+  showLeadForm?: boolean;
 }
 
 interface TrackOpts {
@@ -43,7 +44,7 @@ function readUtmFromUrl(): { utmSource?: string; utmMedium?: string; utmCampaign
   };
 }
 
-export function PublicCardView({ card, source, showBadge = true }: Props) {
+export function PublicCardView({ card, source, showBadge = true, showLeadForm = false }: Props) {
   const [showQR, setShowQR] = useState(false);
   const [showLead, setShowLead] = useState(false);
   const [shared, setShared] = useState(false);
@@ -200,10 +201,12 @@ export function PublicCardView({ card, source, showBadge = true }: Props) {
           </Button>
         )}
 
-        <Button variant="outline" className="w-full" size="lg" onClick={() => setShowLead(true)}>
-          <UserPlus className="h-4 w-4" />
-          Kontakt hinterlassen
-        </Button>
+        {showLeadForm && (
+          <Button variant="outline" className="w-full" size="lg" onClick={() => setShowLead(true)}>
+            <UserPlus className="h-4 w-4" />
+            Kontakt hinterlassen
+          </Button>
+        )}
 
         <div className={`grid gap-2 ${card.hideShareButton ? "grid-cols-1" : "grid-cols-2"}`}>
           {!card.hideShareButton && (
@@ -261,7 +264,7 @@ export function PublicCardView({ card, source, showBadge = true }: Props) {
       )}
 
       {/* Lead Capture Modal */}
-      {showLead && (
+      {showLead && showLeadForm && (
         <LeadModal card={card} onClose={() => setShowLead(false)} />
       )}
 
