@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import type { CardData } from "@/types";
@@ -61,7 +61,13 @@ export default async function PublicCardPage({ params, searchParams }: Props) {
     },
   });
 
-  if (!raw || !raw.isPublic) notFound();
+  if (!raw) {
+    // Check if this is an old slug that was renamed
+    const alias = await db.cardSlugAlias.findUnique({ where: { oldSlug: slug } });
+    if (alias) redirect(`/c/${alias.cardSlug}`);
+    notFound();
+  }
+  if (!raw.isPublic) notFound();
 
   // SECURITY: enforce expiry — abgelaufene Karten dürfen nicht mehr aufgerufen werden.
   if (raw.expiresAt && raw.expiresAt < new Date()) {

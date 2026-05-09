@@ -12,9 +12,10 @@ import type { CardData } from "@/types";
 interface CardSwitcherProps {
   cards: CardData[];
   activeCardId?: string;
+  maxCards?: number;
 }
 
-export function CardSwitcher({ cards, activeCardId }: CardSwitcherProps) {
+export function CardSwitcher({ cards, activeCardId, maxCards = Infinity }: CardSwitcherProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
@@ -119,8 +120,8 @@ export function CardSwitcher({ cards, activeCardId }: CardSwitcherProps) {
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      {/* Card picker */}
-      {cards.length > 0 && (
+      {/* Card picker — only show if user has multiple cards */}
+      {cards.length > 1 && (
         <div className="relative">
           <Button
             variant="outline"
@@ -207,20 +208,22 @@ export function CardSwitcher({ cards, activeCardId }: CardSwitcherProps) {
         </div>
       )}
 
-      {/* Neue Karte */}
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={createCard}
-        disabled={loading !== null}
-        className="gap-1.5"
-      >
-        <Plus className="h-3.5 w-3.5" />
-        {loading === "new" ? "Wird erstellt…" : "Neue Karte"}
-      </Button>
+      {/* Neue Karte — hidden when at plan limit */}
+      {cards.length < maxCards && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={createCard}
+          disabled={loading !== null}
+          className="gap-1.5"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          {loading === "new" ? "Wird erstellt…" : "Neue Karte"}
+        </Button>
+      )}
 
-      {/* Karte klonen */}
-      {activeCardId && (
+      {/* Klonen — hidden when at plan limit */}
+      {activeCardId && cards.length < maxCards && (
         <Button
           variant="outline"
           size="sm"

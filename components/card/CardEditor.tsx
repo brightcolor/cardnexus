@@ -166,6 +166,25 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
                 placeholder="Kurze Beschreibung über dich…" maxLength={500} />
               <p className="text-xs text-muted-foreground text-right">{(card.bio ?? "").length}/500</p>
             </div>
+
+            {!isNew && card.slug && (
+              <div className="space-y-1.5 pt-2 border-t border-border">
+                <Label htmlFor="slug-field">Karten-URL (Slug)</Label>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground shrink-0">/c/</span>
+                  <Input
+                    id="slug-field"
+                    value={card.slug}
+                    onChange={(e) => update("slug", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/--+/g, "-"))}
+                    className="font-mono"
+                    placeholder="mein-slug"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Der alte Link wird automatisch weitergeleitet. Speichere die Karte um die Änderung zu übernehmen.
+                </p>
+              </div>
+            )}
           </TabsContent>
 
           {/* Media */}

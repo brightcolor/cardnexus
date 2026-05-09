@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { resolveDesignPolicy } from "@/lib/design-policy";
 import { getPlatformSettings } from "@/lib/platform";
-import { canUseFeature } from "@/lib/plans";
+import { canUseFeature, effectivePlan, getPlanFeatures } from "@/lib/plans";
 import { CardEditor } from "@/components/card/CardEditor";
 import { QRCodeDisplay } from "@/components/card/QRCodeDisplay";
 import { CardSwitcher } from "@/components/card/CardSwitcher";
@@ -95,7 +95,11 @@ export default async function CardPage({
             </Link>
           )}
           {cards.length > 0 && (
-            <CardSwitcher cards={cards} activeCardId={activeCard?.id} />
+            <CardSwitcher
+              cards={cards}
+              activeCardId={activeCard?.id}
+              maxCards={getPlanFeatures(effectivePlan(user.plan ?? "free", user.planExpiresAt)).maxCards}
+            />
           )}
         </div>
       </div>

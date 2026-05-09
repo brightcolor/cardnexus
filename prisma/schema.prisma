@@ -253,9 +253,10 @@ model Card {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  analytics  CardAnalytic[]
-  leads      Lead[]
-  campaigns  Campaign[]
+  analytics    CardAnalytic[]
+  leads        Lead[]
+  campaigns    Campaign[]
+  slugAliases  CardSlugAlias[]
 
   @@index([userId])
 }
@@ -320,6 +321,16 @@ model CardAnalytic {
   @@index([createdAt])
   @@index([utmCampaign])
   @@index([country])
+}
+
+model CardSlugAlias {
+  id          String   @id @default(cuid())
+  oldSlug     String   @unique
+  cardSlug    String
+  card        Card     @relation(fields: [cardSlug], references: [slug], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@index([oldSlug])
 }
 
 // ─── Platform-wide settings (singleton row, id = "main") ─────────────────────

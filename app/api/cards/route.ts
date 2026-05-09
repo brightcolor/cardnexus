@@ -89,6 +89,9 @@ const CardPatch = z.object({
 
   // custom domain (validation done elsewhere)
   cardDomain:          z.string().max(200).optional().nullable(),
+
+  // slug change (creates an alias for the old slug)
+  slug: z.string().min(2).max(120).regex(/^[a-z0-9-]+$/, "Nur Kleinbuchstaben, Ziffern und Bindestriche").optional(),
 });
 
 /* ─── Routes ───────────────────────────────────────────────────────────── */
@@ -168,11 +171,24 @@ export async function PATCH(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid input", details: parsed.error.flatten() }, { status: 400 });
   }
-  const { id, customLinks, password, ...rest } = parsed.data;
+  const { id, customLinks, password, slug: newSlug, ...rest } = parsed.data;
 
   // Ownership check
   const existing = await db.card.findFirst({ where: { id, userId: session.user.id } });
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  // Slug change: validate uniqueness and create alias for old slug
+  if (newSlug && newSlug !== existing.slug) {
+    const taken = await db.card.findUnique({ where: { slug: newSlug } });
+    if (taken) return NextResponse.json({ error: "Dieser Slug ist bereits vergeben." }, { status: 409 });
+    // Save alias so the old URL keeps working
+    await db.cardSlugAlias.upsert({
+      where: { oldSlug: existing.slug },
+      update: { cardSlug: newSlug },
+      create: { id: `alias-${Date.now()}`, oldSlug: existing.slug, cardSlug: newSlug },
+    });
+    (rest as Record<string, unknown>).slug = newSlug;
+  }
 
   // Load user once for permission checks
   const dbUser = await db.user.findUnique({

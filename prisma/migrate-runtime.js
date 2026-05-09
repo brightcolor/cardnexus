@@ -257,6 +257,28 @@ async function migrate() {
   await addColumn("CardAnalytic", "utmCampaign", "TEXT");
   await createIndex("CardAnalytic_utmCampaign_idx", "CardAnalytic", "utmCampaign");
 
+  // ── CardSlugAlias table ───────────────────────────────────────────────────
+  try {
+    const aliasExists = await tableExists(db, "CardSlugAlias");
+    if (!aliasExists) {
+      await db.$executeRawUnsafe(`
+        CREATE TABLE "CardSlugAlias" (
+          "id"        TEXT     NOT NULL PRIMARY KEY,
+          "oldSlug"   TEXT     NOT NULL UNIQUE,
+          "cardSlug"  TEXT     NOT NULL,
+          "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          CONSTRAINT "CardSlugAlias_cardSlug_fkey" FOREIGN KEY ("cardSlug")
+            REFERENCES "Card" ("slug") ON DELETE CASCADE ON UPDATE CASCADE
+        )
+      `);
+      await createIndex("CardSlugAlias_oldSlug_idx", "CardSlugAlias", "oldSlug");
+      console.log("[migrate] + table CardSlugAlias");
+      ok++;
+    } else { skip++; }
+  } catch (e) {
+    console.error(`[migrate] ! CardSlugAlias table: ${e.message}`);
+  }
+
   // ── CardAnalytic extended metrics ────────────────────────────────────────
   await addColumn("CardAnalytic", "city",     "TEXT");
   await addColumn("CardAnalytic", "browser",  "TEXT");
