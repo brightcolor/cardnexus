@@ -3,7 +3,7 @@ export type Plan = "free" | "pro" | "business";
 export interface PlanFeatures {
   whiteLabel: boolean;          // Remove "Erstellt mit CardNexus" badge
   customDomain: boolean;        // Use own domain
-  allTemplates: boolean;        // Access to all 9 templates (free: 4 only)
+  allTemplates: boolean;        // Access to all 12 templates (free: 4 only)
   maxCustomLinks: number;       // Max custom links on card
   pdfExport: boolean;           // Print/PDF export
   appointmentBooking: boolean;  // Booking URL field
@@ -13,6 +13,7 @@ export interface PlanFeatures {
   eventInvitations: boolean;    // Time-limited campaign links
   milestoneNotifications: boolean; // Email on view milestones
   analyticsRetention: number;   // Days of analytics history
+  teamDirectory: boolean;       // Team directory & member management
 }
 
 export interface PlanDefinition {
@@ -45,6 +46,7 @@ export const PLANS: Record<Plan, PlanDefinition> = {
       eventInvitations: false,
       milestoneNotifications: false,
       analyticsRetention: 30,
+      teamDirectory: false,
     },
   },
   pro: {
@@ -67,6 +69,7 @@ export const PLANS: Record<Plan, PlanDefinition> = {
       eventInvitations: true,
       milestoneNotifications: true,
       analyticsRetention: 365,
+      teamDirectory: false,
     },
   },
   business: {
@@ -88,6 +91,7 @@ export const PLANS: Record<Plan, PlanDefinition> = {
       eventInvitations: true,
       milestoneNotifications: true,
       analyticsRetention: 730,
+      teamDirectory: true,
     },
   },
 };

@@ -159,7 +159,7 @@ CardNexus is a self-hosted **digital business card platform** that replaces pape
 | | Free | Pro | Business |
 |---|---|---|---|
 | Cards | 1 | 3 | Unlimited |
-| Templates | 4 basic | All 9 | All 9 |
+| Templates | 4 basic | All 12 | All 12 |
 | Custom booking URL | — | ✓ | ✓ |
 | Analytics | Basic | Full | Full |
 | Lead capture | — | ✓ | ✓ |

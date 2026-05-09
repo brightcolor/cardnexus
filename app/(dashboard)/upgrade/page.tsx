@@ -12,7 +12,7 @@ export const metadata = { title: "Upgrade – CardNexus" };
 const FEATURE_LABELS: Record<string, string> = {
   whiteLabel:             "White Label (kein Badge)",
   customDomain:           "Eigene Domain",
-  allTemplates:           "Alle 9 Templates",
+  allTemplates:           "Alle 12 Templates",
   pdfExport:              "PDF / Print-Export",
   appointmentBooking:     "Terminbuchungs-Link",
   campaigns:              "UTM-Kampagnen",
@@ -20,6 +20,7 @@ const FEATURE_LABELS: Record<string, string> = {
   milestoneNotifications: "Meilenstein-Benachrichtigungen",
   bulkImport:             "Bulk CSV-Import",
   orgTemplate:            "Karten-Vorlage für Org",
+  teamDirectory:          "Team-Verzeichnis",
 };
 
 export default async function UpgradePage({
