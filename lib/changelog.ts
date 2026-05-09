@@ -6,6 +6,19 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.6.0",
+    date: "2026-05-10",
+    changes: [
+      { type: "feature", text: "Organisation bearbeiten: Name, Farbe, Domain direkt im Admin-Panel" },
+      { type: "feature", text: "Organisation löschen: Mitglieder werden automatisch abgemeldet" },
+      { type: "feature", text: "Admin einer Organisation zuweisen direkt im Bearbeitungs-Dialog" },
+      { type: "feature", text: "Organisation pro User zuweisbar über Dropdown in der Benutzertabelle" },
+      { type: "feature", text: "Team-Analytics für Org-Admins: Aufrufe, Downloads, Leads, Top-Karten" },
+      { type: "fix",     text: "Lead-Capture auf Karten nur noch verfügbar wenn Karten-Owner Pro/Business hat" },
+      { type: "fix",     text: "Selects in der Admin-Benutzertabelle immer sichtbar (bg-muted statt transparent)" },
+    ],
+  },
+  {
     version: "1.5.0",
     date: "2026-05-09",
     changes: [
