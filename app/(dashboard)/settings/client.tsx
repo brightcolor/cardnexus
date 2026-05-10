@@ -89,12 +89,31 @@ export function SettingsClientPage({ user, org }: Props) {
     setTimeout(() => setNotifSaved(false), 2000);
   }
 
+  const [newName, setNewName]       = useState("");
+  const [nameSaving, setNameSaving] = useState(false);
+  const [nameSaved, setNameSaved]   = useState(false);
+
   const [newEmail, setNewEmail]     = useState("");
   const [emailSaving, setEmailSaving] = useState(false);
   const [emailError, setEmailError]   = useState("");
   const [emailSaved, setEmailSaved]   = useState(false);
 
   const canManageOrg = canManageOrganization(user.role);
+
+  async function saveName() {
+    if (!newName.trim() || newName.trim() === user.name) return;
+    setNameSaving(true);
+    const res = await fetch("/api/account", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newName.trim() }),
+    });
+    if (res.ok) {
+      setNameSaved(true);
+      setTimeout(() => { setNameSaved(false); setNewName(""); }, 2000);
+    }
+    setNameSaving(false);
+  }
 
   async function saveEmail() {
     if (!newEmail || newEmail === user.email) return;
@@ -157,21 +176,39 @@ export function SettingsClientPage({ user, org }: Props) {
             </div>
             <Badge className="ml-auto" variant="secondary">{getRoleLabel(user.role)}</Badge>
           </div>
-          <div className="border-t border-border pt-4 mt-4 space-y-3">
-            <p className="text-sm font-medium">E-Mail-Adresse ändern</p>
-            <div className="flex gap-2">
-              <Input
-                type="email"
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-                placeholder={user.email}
-                className="flex-1"
-              />
-              <Button size="sm" onClick={saveEmail} disabled={emailSaving || !newEmail}>
-                {emailSaving ? "…" : emailSaved ? "✓" : "Speichern"}
-              </Button>
+          <div className="border-t border-border pt-4 mt-4 space-y-4">
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Name ändern</p>
+              <div className="flex gap-2">
+                <Input
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder={user.name}
+                  className="flex-1"
+                  onKeyDown={(e) => e.key === "Enter" && saveName()}
+                />
+                <Button size="sm" onClick={saveName} disabled={nameSaving || !newName.trim()}>
+                  {nameSaving ? "…" : nameSaved ? "✓" : "Speichern"}
+                </Button>
+              </div>
             </div>
-            {emailError && <p className="text-xs text-destructive">{emailError}</p>}
+            <div className="space-y-2">
+              <p className="text-sm font-medium">E-Mail-Adresse ändern</p>
+              <div className="flex gap-2">
+                <Input
+                  type="email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  placeholder={user.email}
+                  className="flex-1"
+                  onKeyDown={(e) => e.key === "Enter" && saveEmail()}
+                />
+                <Button size="sm" onClick={saveEmail} disabled={emailSaving || !newEmail}>
+                  {emailSaving ? "…" : emailSaved ? "✓" : "Speichern"}
+                </Button>
+              </div>
+              {emailError && <p className="text-xs text-destructive">{emailError}</p>}
+            </div>
           </div>
         </CardContent>
       </Card>

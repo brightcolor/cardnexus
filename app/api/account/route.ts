@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { z } from "zod";
 
 const patchSchema = z.object({
+  name:             z.string().min(1).max(100).optional(),
   email:            z.string().email().optional(),
   leadNotification: z.enum(["off", "instant", "daily"]).optional(),
 });
@@ -16,8 +17,10 @@ export async function PATCH(req: NextRequest) {
   const body = patchSchema.safeParse(await req.json());
   if (!body.success) return NextResponse.json({ error: "Ungültige Eingabe" }, { status: 400 });
 
-  const { email, leadNotification } = body.data;
+  const { name, email, leadNotification } = body.data;
   const updates: Record<string, unknown> = {};
+
+  if (name !== undefined) updates.name = name;
 
   if (leadNotification !== undefined) {
     updates.leadNotification = leadNotification;
