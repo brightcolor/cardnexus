@@ -8,6 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { getInitials, getRoleLabel, formatDate } from "@/lib/utils";
 import { Search, Pencil, CalendarDays, X, ShieldOff, ShieldCheck, Trash2 } from "lucide-react";
 import Link from "next/link";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const ROLE_VARIANT: Record<string, "default" | "secondary" | "outline" | "warning"> = {
   super_admin: "default",
@@ -35,7 +39,9 @@ interface OrgOption { id: string; name: string }
 export function AdminUsersClient({ users: initial, orgs, currentUserId }: { users: AdminUser[]; orgs: OrgOption[]; currentUserId: string }) {
   const [users, setUsers] = useState(initial);
   const [search, setSearch] = useState("");
-  const [expiryEdit, setExpiryEdit] = useState<string | null>(null); // userId being edited
+  const [expiryEdit, setExpiryEdit] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const filtered = users.filter(
     (u) => u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())
@@ -85,14 +91,17 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
     setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, bannedAt: null } : u)));
   }
 
-  async function deleteUser(userId: string, name: string) {
-    if (!window.confirm(`Benutzer „${name}" unwiderruflich löschen?`)) return;
+  async function confirmDelete() {
+    if (!pendingDelete) return;
+    setDeleting(true);
     const res = await fetch("/api/users", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId }),
+      body: JSON.stringify({ userId: pendingDelete.id }),
     });
-    if (res.ok) setUsers((prev) => prev.filter((u) => u.id !== userId));
+    if (res.ok) setUsers((prev) => prev.filter((u) => u.id !== pendingDelete.id));
+    setDeleting(false);
+    setPendingDelete(null);
   }
 
   return (
@@ -259,7 +268,7 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
                         </button>
                       )}
                       <button
-                        onClick={() => deleteUser(user.id, user.name)}
+                        onClick={() => setPendingDelete({ id: user.id, name: user.name })}
                         title="Löschen"
                         className="p-1.5 rounded hover:bg-red-50 text-red-500 hover:text-red-700 transition-colors"
                       >
@@ -274,5 +283,26 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
         </table>
       </div>
     </div>
+
+    <AlertDialog open={!!pendingDelete} onOpenChange={(open) => { if (!open) setPendingDelete(null); }}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Benutzer löschen</AlertDialogTitle>
+          <AlertDialogDescription>
+            <strong>{pendingDelete?.name}</strong> wird unwiderruflich gelöscht — inklusive aller Karten, Analytics und Leads. Diese Aktion kann nicht rückgängig gemacht werden.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={deleting}>Abbrechen</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={confirmDelete}
+            disabled={deleting}
+            className="bg-red-600 hover:bg-red-700 text-white"
+          >
+            {deleting ? "Wird gelöscht…" : "Endgültig löschen"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
