@@ -195,10 +195,14 @@ model Card {
   department String?
   bio        String?
   avatarUrl  String?
+  pronouns   String?  // e.g. "er/ihm", "she/her", "they/them"
+  gender     String?  // vCard 4.0 GENDER: M | F | O | N | U or free text
+  birthday   String?  // ISO date YYYY-MM-DD
 
   // Contact
   phone   String?
   mobile  String?
+  fax     String?
   email   String?
   website String?
   address String?

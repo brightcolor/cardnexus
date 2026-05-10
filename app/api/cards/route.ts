@@ -47,10 +47,14 @@ const CardPatch = z.object({
   avatarUrl:           z.string().max(500).optional().nullable(),
   coverUrl:            z.string().max(500).optional().nullable(),
   logoUrl:             z.string().max(500).optional().nullable(),
+  pronouns:            z.string().max(60).optional().nullable(),
+  gender:              z.string().max(20).optional().nullable(),
+  birthday:            z.string().max(20).optional().nullable(),
 
   // contact
   phone:               z.string().max(40).optional().nullable(),
   mobile:              z.string().max(40).optional().nullable(),
+  fax:                 z.string().max(40).optional().nullable(),
   email:               z.string().max(200).optional().nullable(),
   website:             z.string().max(500).optional().nullable(),
   address:             z.string().max(500).optional().nullable(),

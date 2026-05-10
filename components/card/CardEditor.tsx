@@ -167,6 +167,32 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
               <p className="text-xs text-muted-foreground text-right">{(card.bio ?? "").length}/500</p>
             </div>
 
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label>Pronomen</Label>
+                <Input value={card.pronouns ?? ""} onChange={(e) => update("pronouns", e.target.value || null)} placeholder="er/ihm, she/her…" />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Geschlecht <span className="text-xs font-normal text-muted-foreground">(vCard)</span></Label>
+                <select
+                  value={card.gender ?? ""}
+                  onChange={(e) => update("gender", e.target.value || null)}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="">— keine Angabe —</option>
+                  <option value="m">Männlich</option>
+                  <option value="w">Weiblich</option>
+                  <option value="divers">Divers</option>
+                  <option value="n">Keine Angabe</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Geburtstag</Label>
+              <Input value={card.birthday ?? ""} onChange={(e) => update("birthday", e.target.value || null)} type="date" />
+            </div>
+
             {!isNew && card.slug && (
               <div className="space-y-1.5 pt-2 border-t border-border">
                 <Label htmlFor="slug-field">Karten-URL (Slug)</Label>
@@ -212,6 +238,10 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
                 <Label>Mobil</Label>
                 <Input value={card.mobile ?? ""} onChange={(e) => update("mobile", e.target.value || null)} placeholder="+49 170 1234567" type="tel" />
               </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Fax</Label>
+              <Input value={card.fax ?? ""} onChange={(e) => update("fax", e.target.value || null)} placeholder="+49 89 1234568" type="tel" />
             </div>
             <div className="space-y-1.5">
               <Label>E-Mail</Label>

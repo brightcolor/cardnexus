@@ -6,6 +6,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.0.0",
+    date: "2026-05-10",
+    changes: [
+      { type: "feature", text: "vCard 4.0: exportierte Visitenkarten nutzen jetzt VERSION:4.0 mit korrekter Formatierung und Zeilenfaltung (RFC 6350)" },
+      { type: "feature", text: "Neue Karten-Felder: Pronomen, Geschlecht (vCard GENDER), Geburtstag (vCard BDAY), Fax" },
+      { type: "feature", text: "Karten-Editor: alle neuen Felder frei ausfüllbar mit passenden Input-Typen (date, tel, select)" },
+    ],
+  },
+  {
     version: "1.9.0",
     date: "2026-05-10",
     changes: [

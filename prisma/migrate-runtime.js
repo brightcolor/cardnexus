@@ -256,6 +256,12 @@ async function migrate() {
     console.error(`[migrate] ! ApiKey table: ${e.message}`);
   }
 
+  // ── Card vCard 4.0 fields (v2.0.0) ──────────────────────────────────────
+  await addColumn("Card", "pronouns", "TEXT");
+  await addColumn("Card", "gender",   "TEXT");
+  await addColumn("Card", "birthday", "TEXT");
+  await addColumn("Card", "fax",      "TEXT");
+
   // ── CardAnalytic UTM columns ────────────────────────────────────────────
   await addColumn("CardAnalytic", "utmSource",   "TEXT");
   await addColumn("CardAnalytic", "utmMedium",   "TEXT");

@@ -36,9 +36,13 @@ export interface CardData {
   bio?: string | null;
   avatarUrl?: string | null;
   coverUrl?: string | null;
+  pronouns?: string | null;
+  gender?: string | null;
+  birthday?: string | null;
 
   phone?: string | null;
   mobile?: string | null;
+  fax?: string | null;
   email?: string | null;
   website?: string | null;
   address?: string | null;
