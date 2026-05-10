@@ -97,21 +97,21 @@ export default function LandingPage() {
 
         {/* Mock card */}
         <div className="mt-20 relative max-w-sm mx-auto">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
             <div className="h-1.5 bg-gray-900" />
             <div className="p-8">
               <div className="flex items-start gap-4 mb-5">
                 <div className="h-16 w-16 rounded-full bg-gray-900 flex items-center justify-center text-white font-bold text-lg shrink-0">MH</div>
                 <div>
-                  <h3 className="text-lg font-bold">Max Hoffmann</h3>
-                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Head of Product</p>
-                  <p className="text-sm text-gray-400 dark:text-gray-500">TechCorp GmbH</p>
+                  <h3 className="text-lg font-bold text-gray-900">Max Hoffmann</h3>
+                  <p className="text-sm font-medium text-gray-500">Head of Product</p>
+                  <p className="text-sm text-gray-400">TechCorp GmbH</p>
                 </div>
               </div>
-              <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <div className="space-y-2 text-sm text-gray-600">
                 {["+49 170 1234567", "max@techcorp.de", "techcorp.de"].map((v) => (
                   <div key={v} className="flex items-center gap-2">
-                    <div className="h-7 w-7 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                    <div className="h-7 w-7 rounded-full bg-gray-100 flex items-center justify-center">
                       <div className="h-2 w-2 rounded-full bg-gray-400" />
                     </div>
                     {v}
@@ -120,7 +120,7 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white dark:from-gray-950 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white to-transparent" />
         </div>
       </section>
 
