@@ -6,6 +6,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.8.0",
+    date: "2026-05-10",
+    changes: [
+      { type: "feature", text: "Benutzer sperren: Super-Admin kann einzelne Accounts sofort deaktivieren (Login blockiert, Sessions ungültig)" },
+      { type: "feature", text: "Benutzer entsperren: Sperre mit einem Klick aufheben" },
+      { type: "feature", text: "Benutzer löschen: Unwiderrufliches Löschen mit Bestätigungsdialog" },
+      { type: "feature", text: "Gesperrt-Badge im Benutzer-Eintrag der Admin-Tabelle" },
+    ],
+  },
+  {
     version: "1.7.0",
     date: "2026-05-10",
     changes: [

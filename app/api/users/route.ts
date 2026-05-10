@@ -12,6 +12,7 @@ const updateSchema = z.object({
   name: z.string().optional(),
   plan: z.enum(["free", "pro", "business"]).optional(),
   planExpiresAt: z.string().datetime().nullable().optional(),
+  bannedAt: z.string().datetime().nullable().optional(),
 });
 
 export async function GET(request: NextRequest) {
@@ -63,10 +64,11 @@ export async function PATCH(request: NextRequest) {
 
   const { userId, ...data } = parsed.data;
 
-  // Only super_admins can change plans or assign super_admin role
+  // Only super_admins can change plans, assign super_admin role, or ban users
   if (!isSuperAdmin(role)) {
     if (data.role === "super_admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     if (data.plan !== undefined) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (data.bannedAt !== undefined) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     // company_admin must not be able to grant company_admin to others (only super_admin can).
     if (data.role === "company_admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     // company_admin cannot move users between orgs.
@@ -98,8 +100,14 @@ export async function PATCH(request: NextRequest) {
     data: {
       ...data,
       planExpiresAt: data.planExpiresAt ? new Date(data.planExpiresAt) : data.planExpiresAt,
+      bannedAt: data.bannedAt ? new Date(data.bannedAt) : data.bannedAt,
     },
   });
+
+  // Immediately kill all active sessions when banning a user
+  if (data.bannedAt) {
+    await db.session.deleteMany({ where: { userId } });
+  }
 
   return NextResponse.json({ data: updated });
 }

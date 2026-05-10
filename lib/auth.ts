@@ -69,6 +69,19 @@ export const auth = betterAuth({
       },
     },
   },
+  databaseHooks: {
+    session: {
+      create: {
+        before: async (session) => {
+          const user = await db.user.findUnique({
+            where: { id: session.userId },
+            select: { bannedAt: true },
+          });
+          if (user?.bannedAt) return false;
+        },
+      },
+    },
+  },
   plugins: [
     // TOTP-based 2FA. The plugin manages /two-factor/* endpoints,
     // a `twoFactor` table and the `user.twoFactorEnabled` field.

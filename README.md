@@ -134,7 +134,7 @@ CardNexus is a self-hosted **digital business card platform** that replaces pape
 |---------|-------------|
 | **Platform branding** | Set app name, URL, favicon and logo — white-label ready |
 | **Organization management** | Create, edit, delete organizations; assign company admin per org |
-| **User management** | View all users, change roles, plans, expiry dates and org assignment |
+| **User management** | View all users, change roles, plans, expiry dates and org assignment; ban, unban and delete individual users |
 | **Plan assignment** | Manually assign Free / Pro / Business plan to any user |
 | **Access log** | Full audit trail of every card view, QR scan, vCard download and link click |
 | **Platform analytics** | Global stats: total users, cards, views, downloads |

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getInitials, getRoleLabel, formatDate } from "@/lib/utils";
-import { Search, Pencil, CalendarDays, X } from "lucide-react";
+import { Search, Pencil, CalendarDays, X, ShieldOff, ShieldCheck, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 const ROLE_VARIANT: Record<string, "default" | "secondary" | "outline" | "warning"> = {
@@ -25,6 +25,7 @@ const PLAN_VARIANT: Record<string, string> = {
 interface AdminUser {
   id: string; name: string; email: string; image?: string | null;
   role: string; plan: string; planExpiresAt?: string | null; createdAt: string;
+  bannedAt?: string | null;
   cards?: { slug: string; isPublic: boolean }[] | null;
   organization?: { id: string; name: string } | null;
 }
@@ -73,6 +74,27 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
     setExpiryEdit(null);
   }
 
+  async function banUser(userId: string) {
+    const bannedAt = new Date().toISOString();
+    if (!await patch(userId, { bannedAt })) return;
+    setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, bannedAt } : u)));
+  }
+
+  async function unbanUser(userId: string) {
+    if (!await patch(userId, { bannedAt: null })) return;
+    setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, bannedAt: null } : u)));
+  }
+
+  async function deleteUser(userId: string, name: string) {
+    if (!window.confirm(`Benutzer „${name}" unwiderruflich löschen?`)) return;
+    const res = await fetch("/api/users", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId }),
+    });
+    if (res.ok) setUsers((prev) => prev.filter((u) => u.id !== userId));
+  }
+
   return (
     <div className="space-y-4">
       <div className="relative">
@@ -90,6 +112,7 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
               <th className="text-left px-4 py-3 font-medium text-muted-foreground">Plan</th>
               <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden lg:table-cell">Karte</th>
               <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden lg:table-cell">Seit</th>
+              <th className="text-right px-4 py-3 font-medium text-muted-foreground">Aktionen</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -103,9 +126,10 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
                       <AvatarFallback className="text-xs">{getInitials(user.name)}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-medium">
-                        {user.name}{" "}
+                      <p className="font-medium flex items-center gap-1.5">
+                        {user.name}
                         {user.id === currentUserId && <span className="text-muted-foreground text-xs">(Ich)</span>}
+                        {user.bannedAt && <span className="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-medium">Gesperrt</span>}
                       </p>
                       <p className="text-xs text-muted-foreground">{user.email}</p>
                     </div>
@@ -211,6 +235,38 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
                 {/* Date */}
                 <td className="px-4 py-3 text-muted-foreground text-xs hidden lg:table-cell whitespace-nowrap">
                   {formatDate(user.createdAt)}
+                </td>
+
+                {/* Actions */}
+                <td className="px-4 py-3 whitespace-nowrap text-right">
+                  {user.id !== currentUserId && (
+                    <div className="flex items-center justify-end gap-1">
+                      {user.bannedAt ? (
+                        <button
+                          onClick={() => unbanUser(user.id)}
+                          title="Entsperren"
+                          className="p-1.5 rounded hover:bg-green-50 text-green-600 hover:text-green-700 transition-colors"
+                        >
+                          <ShieldCheck className="h-4 w-4" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => banUser(user.id)}
+                          title="Sperren"
+                          className="p-1.5 rounded hover:bg-amber-50 text-amber-600 hover:text-amber-700 transition-colors"
+                        >
+                          <ShieldOff className="h-4 w-4" />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => deleteUser(user.id, user.name)}
+                        title="Löschen"
+                        className="p-1.5 rounded hover:bg-red-50 text-red-500 hover:text-red-700 transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}

@@ -31,6 +31,9 @@ model user {
   stripeSubscriptionId String?   @unique
   paypalSubscriptionId String?   @unique
 
+  // Account status
+  bannedAt      DateTime? // set = banned, null = active
+
   // Lead notification preference
   leadNotification String @default("off") // off | instant | daily
 

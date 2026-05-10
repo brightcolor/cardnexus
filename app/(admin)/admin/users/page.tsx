@@ -32,6 +32,7 @@ export default async function AdminUsersPage() {
           ...u,
           createdAt: u.createdAt.toISOString(),
           planExpiresAt: u.planExpiresAt?.toISOString() ?? null,
+          bannedAt: u.bannedAt?.toISOString() ?? null,
           cards: u.cards ?? [],
           organization: u.organization ?? null,
         }))}
