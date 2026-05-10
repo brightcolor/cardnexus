@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getPlatformSettings } from "@/lib/platform";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -45,8 +46,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         )}
       </head>
       <body className="min-h-screen antialiased">
-        {children}
-        <Toaster />
+        <ThemeProvider>
+          {children}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

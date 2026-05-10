@@ -6,6 +6,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.9.0",
+    date: "2026-05-10",
+    changes: [
+      { type: "feature", text: "Dark Mode: vollständige Unterstützung für dunkles Design" },
+      { type: "feature", text: "Theme-Toggle im Header (Sonne/Mond-Icon) — folgt standardmäßig dem System" },
+      { type: "feature", text: "Theme-Präferenz wird im Browser gespeichert (next-themes)" },
+    ],
+  },
+  {
     version: "1.8.0",
     date: "2026-05-10",
     changes: [

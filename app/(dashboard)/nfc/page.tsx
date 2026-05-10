@@ -34,7 +34,7 @@ export default async function NfcPage() {
       {cardUrl && (
         <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5">
           <p className="text-sm font-medium mb-2">Deine Karten-URL (auf NFC-Tag schreiben):</p>
-          <div className="flex items-center gap-2 bg-white rounded-lg border border-border px-3 py-2">
+          <div className="flex items-center gap-2 bg-white dark:bg-gray-900 rounded-lg border border-border px-3 py-2">
             <code className="text-sm flex-1 text-primary font-mono truncate">{cardUrl}</code>
             <a href={cardUrl} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />

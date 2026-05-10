@@ -24,7 +24,7 @@ export default async function AdminCardsPage() {
         <p className="text-muted-foreground mt-1">{cards.length} Karten auf der Plattform</p>
       </div>
 
-      <div className="rounded-xl border border-border overflow-hidden bg-white">
+      <div className="rounded-xl border border-border overflow-hidden bg-white dark:bg-gray-900">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/40">

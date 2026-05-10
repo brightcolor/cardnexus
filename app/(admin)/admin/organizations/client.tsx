@@ -258,7 +258,7 @@ export function OrgAdminClient({ orgs: initial }: { orgs: Org[] }) {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {orgs.map((org) => (
-            <div key={org.id} className="bg-white rounded-2xl border border-border p-6 hover:shadow-md transition-shadow">
+            <div key={org.id} className="bg-white dark:bg-gray-900 rounded-2xl border border-border p-6 hover:shadow-md transition-shadow">
               <div className="flex items-start gap-3 mb-4">
                 <div
                   className="h-10 w-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0"

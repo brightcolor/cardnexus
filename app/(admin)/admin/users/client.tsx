@@ -112,7 +112,7 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
         <Input placeholder="Suchen…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
       </div>
 
-      <div className="rounded-xl border border-border overflow-x-auto bg-white">
+      <div className="rounded-xl border border-border overflow-x-auto bg-white dark:bg-gray-900">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border !bg-muted/40">

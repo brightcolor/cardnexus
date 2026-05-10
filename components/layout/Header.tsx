@@ -10,8 +10,9 @@ import { getInitials, getRoleLabel } from "@/lib/utils";
 import { signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Sun, Moon } from "lucide-react";
 import { MobileNav } from "./MobileNav";
+import { useTheme } from "next-themes";
 
 interface HeaderProps {
   user: {
@@ -29,6 +30,7 @@ interface HeaderProps {
 
 export function Header({ user, cardSlug, appName, orgName, logoUrl }: HeaderProps) {
   const router = useRouter();
+  const { resolvedTheme, setTheme } = useTheme();
 
   async function handleSignOut() {
     await signOut();
@@ -48,6 +50,14 @@ export function Header({ user, cardSlug, appName, orgName, logoUrl }: HeaderProp
       <div className="flex-1" />
 
       <div className="flex items-center gap-3 sm:gap-4">
+        <button
+          onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+          className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          aria-label="Theme wechseln"
+        >
+          {resolvedTheme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </button>
+
         {cardSlug && (
           <Link
             href={`/c/${cardSlug}`}

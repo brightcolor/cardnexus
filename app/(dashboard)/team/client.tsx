@@ -359,7 +359,7 @@ export function TeamClientPage({
                     placeholder="Ablehnungsgrund (optional)"
                     value={rejectNote[c.slug] ?? ""}
                     onChange={(e) => setRejectNote((prev) => ({ ...prev, [c.slug]: e.target.value }))}
-                    className="w-full text-sm rounded-lg border border-border px-3 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-ring"
+                    className="w-full text-sm rounded-lg border border-border px-3 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
                   />
                 </div>
               </div>
