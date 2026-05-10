@@ -15,13 +15,19 @@ export default async function DashboardLayout({ children }: { children: React.Re
     image?: string; role?: string; organizationId?: string;
   };
 
-  const [card, org, settings] = await Promise.all([
+  const [card, org, settings, dbUser] = await Promise.all([
     db.card.findFirst({ where: { userId: user.id }, orderBy: [{ isDefault: "desc" }], select: { slug: true } }),
     user.organizationId
       ? db.organization.findUnique({ where: { id: user.organizationId }, select: { name: true } })
       : null,
     getPlatformSettings(),
+    db.user.findUnique({ where: { id: user.id }, select: { bannedAt: true } }),
   ]);
+
+  if (dbUser?.bannedAt) {
+    await auth.api.signOut({ headers: await headers() });
+    redirect("/login?error=banned");
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
