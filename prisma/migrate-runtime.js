@@ -58,6 +58,11 @@ async function migrate() {
   // ── Organization table ───────────────────────────────────────────────────
   await addColumn("Organization", "plan",         'TEXT NOT NULL DEFAULT "free"');
   await addColumn("Organization", "customDomain", "TEXT");
+  await addColumn("Organization", "isActive",     "INTEGER NOT NULL DEFAULT 1");  // v1.7.0 org-freeze
+  await addColumn("Organization", "frozenAt",     "DATETIME");                    // v1.7.0 org-freeze
+
+  // ── user account status (v1.8.0) ────────────────────────────────────────
+  await addColumn("user", "bannedAt", "DATETIME");
 
   // ── OrganizationSettings new columns ────────────────────────────────────
   try {
