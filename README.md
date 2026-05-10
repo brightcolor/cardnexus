@@ -144,7 +144,8 @@ CardNexus is a self-hosted **digital business card platform** that replaces pape
 | Feature | Description |
 |---------|-------------|
 | **Subscription plans** | Free / Pro / Business tiers with Stripe payments |
-| **Stripe integration** | Checkout, billing portal, webhook handling (subscriptions & renewals) |
+| **Stripe integration** | Checkout, billing portal, webhook handling (subscriptions, renewals & cancellations) |
+| **Org freeze / restore** | Cancelling Business plan freezes the org non-destructively; all data preserved; auto-restored on resubscribe |
 | **Email delivery** | Invitation emails and welcome emails via any SMTP provider |
 | **Milestone notifications** | Notify users when their card hits 100, 500, 1 000 … views |
 | **Self-hostable** | Docker image, SQLite by default, Postgres-ready via Prisma |

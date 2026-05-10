@@ -127,6 +127,9 @@ model Organization {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  isActive    Boolean  @default(true) // false = frozen (admin's Business plan cancelled)
+  frozenAt    DateTime? // timestamp when org was frozen
+
   plan        String   @default("free") // free | pro | business
   customDomain String?
 

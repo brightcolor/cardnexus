@@ -6,6 +6,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.7.0",
+    date: "2026-05-10",
+    changes: [
+      { type: "feature", text: "Org-Freeze: Bei Kündigung des Business-Plans wird die Organisation eingefroren statt gelöscht" },
+      { type: "feature", text: "Alle Mitglieder-Daten und Karten bleiben erhalten; bei Wiederbuchung sofortige Reaktivierung" },
+      { type: "feature", text: "Frozen-Banner auf der Team-Seite für Admins (mit Upgrade-Link) und Members" },
+      { type: "feature", text: "E-Mail-Benachrichtigung an Org-Admins bei Einfrieren und Reaktivierung" },
+      { type: "feature", text: "Schema: isActive + frozenAt auf Organization" },
+    ],
+  },
+  {
     version: "1.6.0",
     date: "2026-05-10",
     changes: [

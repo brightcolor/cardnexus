@@ -5,7 +5,7 @@ import { canManageUsers } from "@/lib/utils";
 import { canUseFeature, effectivePlan } from "@/lib/plans";
 import { TeamClientPage } from "./client";
 import Link from "next/link";
-import { Users, Zap, LayoutDashboard, Building2 } from "lucide-react";
+import { Users, Zap, LayoutDashboard, Building2, SnowflakeIcon } from "lucide-react";
 import { CreateOrgForm } from "./CreateOrgForm";
 
 export const metadata = { title: "Team" };
@@ -41,12 +41,55 @@ export default async function TeamPage() {
     );
   }
 
-  // Non-super-admin: check Business plan
-  const dbUser = await db.user.findUnique({
-    where: { id: user.id },
-    select: { plan: true, planExpiresAt: true },
-  });
+  // Non-super-admin: check Business plan + org frozen state
+  const [dbUser, frozenOrg] = await Promise.all([
+    db.user.findUnique({
+      where: { id: user.id },
+      select: { plan: true, planExpiresAt: true },
+    }),
+    orgId
+      ? db.organization.findUnique({
+          where: { id: orgId },
+          select: { isActive: true, name: true, frozenAt: true },
+        })
+      : null,
+  ]);
   const plan = effectivePlan(dbUser?.plan ?? "free", dbUser?.planExpiresAt);
+
+  // Org is frozen (admin cancelled Business plan)
+  if (frozenOrg && !frozenOrg.isActive) {
+    const isAdmin = role === "company_admin" || role === "super_admin";
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center px-4">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-100">
+          <SnowflakeIcon className="h-8 w-8 text-amber-600" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold">Organisation eingefroren</h1>
+          <p className="text-muted-foreground max-w-sm">
+            {isAdmin
+              ? <>Der Business-Plan für <strong>{frozenOrg.name}</strong> ist abgelaufen. Alle Daten sind erhalten — buche den Plan erneut um die Organisation sofort wieder zu aktivieren.</>
+              : <>Die Organisation <strong>{frozenOrg.name}</strong> ist derzeit eingefroren. Bitte wende dich an deinen Administrator.</>
+            }
+          </p>
+          {frozenOrg.frozenAt && (
+            <p className="text-xs text-muted-foreground">
+              Eingefroren seit {new Date(frozenOrg.frozenAt).toLocaleDateString("de-DE")}
+            </p>
+          )}
+        </div>
+        {isAdmin && (
+          <Link
+            href="/upgrade"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            <Zap className="h-4 w-4" />
+            Business-Plan buchen
+          </Link>
+        )}
+      </div>
+    );
+  }
 
   if (!canUseFeature("teamDirectory", plan)) {
     return (
@@ -111,7 +154,7 @@ export default async function TeamPage() {
     db.organization.findUnique({
       where: { id: orgId },
       select: {
-        name: true, slug: true,
+        name: true, slug: true, isActive: true,
         _count: { select: { users: true } },
         settings: { select: { teamDirectoryEnabled: true } },
       },

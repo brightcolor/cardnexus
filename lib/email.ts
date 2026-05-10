@@ -214,6 +214,68 @@ export async function sendLeadNotificationEmail({
   await send(to, `Neuer Lead: ${leadName} (${cardName})`, html);
 }
 
+// ── Org frozen email ──────────────────────────────────────────────────────
+export async function sendOrgFrozenEmail({
+  to, adminName, orgName, upgradeUrl,
+}: {
+  to: string;
+  adminName: string;
+  orgName: string;
+  upgradeUrl: string;
+}) {
+  const html = layout(
+    esc(`Organisation eingefroren – ${orgName}`),
+    `
+    ${h1("Deine Organisation wurde eingefroren")}
+    ${p(`Hallo ${esc(adminName.split(" ")[0])}, dein <strong>Business-Plan</strong> für die Organisation <strong>${esc(orgName)}</strong> ist ausgelaufen oder wurde gekündigt.`)}
+    ${p("Deine Organisation und alle Mitglieder-Daten bleiben erhalten. Die Mitglieder können ${APP_NAME} weiterhin mit ihren eigenen Free-Accounts nutzen – jedoch ohne Organisations-Features.")}
+    <table style="margin:16px 0;border-radius:8px;background:#fef3c7;padding:16px;width:100%;border-left:4px solid #f59e0b;">
+      <tr><td style="font-size:14px;color:#92400e;line-height:1.6;">
+        <strong>Was eingefroren ist:</strong><br/>
+        &bull; Mitgliederverwaltung &amp; Einladungen<br/>
+        &bull; Org-Design-Vorgaben für Karten<br/>
+        &bull; Bulk-Import<br/>
+        &bull; Team-Verzeichnis<br/><br/>
+        <strong>Was erhalten bleibt:</strong><br/>
+        &bull; Alle Karten und Kontaktdaten<br/>
+        &bull; Alle Analytics-Daten<br/>
+        &bull; Org-Zuordnung aller Mitglieder
+      </td></tr>
+    </table>
+    ${p("Buche erneut den Business-Plan um die Organisation sofort wieder zu aktivieren.")}
+    <div style="text-align:center;">
+      ${btn("Business-Plan buchen", esc(upgradeUrl))}
+    </div>
+    ${muted("Du erhältst diese E-Mail als Administrator der Organisation.")}
+    `
+  );
+  await send(to, `Organisation eingefroren: ${orgName}`, html);
+}
+
+// ── Org restored email ─────────────────────────────────────────────────────
+export async function sendOrgRestoredEmail({
+  to, adminName, orgName, dashboardUrl,
+}: {
+  to: string;
+  adminName: string;
+  orgName: string;
+  dashboardUrl: string;
+}) {
+  const html = layout(
+    esc(`Organisation wieder aktiv – ${orgName}`),
+    `
+    ${h1("Deine Organisation ist wieder aktiv")}
+    ${p(`Hallo ${esc(adminName.split(" ")[0])}, dein Business-Plan ist wieder aktiv – die Organisation <strong>${esc(orgName)}</strong> und alle Features stehen sofort wieder zur Verfügung.`)}
+    ${p("Alle Mitglieder, Karten und Einstellungen sind unverändert erhalten.")}
+    <div style="text-align:center;">
+      ${btn("Zum Team-Bereich", esc(dashboardUrl))}
+    </div>
+    ${muted("Du erhältst diese E-Mail als Administrator der Organisation.")}
+    `
+  );
+  await send(to, `Organisation wieder aktiv: ${orgName}`, html);
+}
+
 // ── Password reset email ───────────────────────────────────────────────────
 export async function sendPasswordResetEmail({
   to, url,
