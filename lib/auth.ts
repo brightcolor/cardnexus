@@ -78,6 +78,7 @@ export const auth = betterAuth({
             select: { bannedAt: true },
           });
           if (user?.bannedAt) return false;
+          return { data: session };
         },
       },
     },
