@@ -105,6 +105,7 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
   }
 
   return (
+    <>
     <div className="space-y-4">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -284,7 +285,7 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
       </div>
     </div>
 
-    <AlertDialog open={!!pendingDelete} onOpenChange={(open) => { if (!open) setPendingDelete(null); }}>
+    <AlertDialog open={pendingDelete !== null} onOpenChange={(open) => !open && setPendingDelete(null)}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Benutzer löschen</AlertDialogTitle>
@@ -304,5 +305,6 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+    </>
   );
 }
