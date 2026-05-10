@@ -177,7 +177,7 @@ export function PublicCardView({ card, source, showBadge = true, showLeadForm = 
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center py-8 px-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col items-center py-8 px-4">
       {/* Card */}
       <div className="w-full max-w-sm">
         <CardPreview card={card} />
@@ -249,7 +249,7 @@ export function PublicCardView({ card, source, showBadge = true, showLeadForm = 
           onClick={() => setShowQR(false)}
         >
           <div
-            className="bg-white rounded-2xl p-6 max-w-xs w-full shadow-2xl"
+            className="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-xs w-full shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
@@ -270,9 +270,9 @@ export function PublicCardView({ card, source, showBadge = true, showLeadForm = 
 
       {/* Powered by — only for free plan */}
       {showBadge && (
-        <p className="mt-8 text-xs text-gray-400">
+        <p className="mt-8 text-xs text-gray-400 dark:text-gray-500">
           Erstellt mit{" "}
-          <a href="/" className="hover:text-gray-600 transition-colors font-medium">CardNexus</a>
+          <a href="/" className="hover:text-gray-600 dark:hover:text-gray-400 transition-colors font-medium">CardNexus</a>
         </p>
       )}
     </div>
@@ -322,7 +322,7 @@ function LeadModal({ card, onClose }: { card: CardData; onClose: () => void }) {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+        className="bg-white dark:bg-gray-900 rounded-2xl p-6 w-full max-w-sm shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

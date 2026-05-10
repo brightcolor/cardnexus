@@ -42,20 +42,20 @@ export function FaqSection() {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
-    <div className="divide-y divide-gray-100 border border-gray-100 rounded-2xl overflow-hidden">
+    <div className="divide-y divide-gray-100 dark:divide-gray-800 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
       {faqs.map((faq, i) => (
         <div key={i}>
           <button
             onClick={() => setOpen(open === i ? null : i)}
-            className="w-full flex items-center justify-between px-6 py-5 text-left hover:bg-gray-50 transition-colors"
+            className="w-full flex items-center justify-between px-6 py-5 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
-            <span className="font-medium text-gray-900 pr-4">{faq.q}</span>
+            <span className="font-medium text-gray-900 dark:text-gray-100 pr-4">{faq.q}</span>
             <ChevronDown
               className={`h-5 w-5 text-gray-400 shrink-0 transition-transform duration-200 ${open === i ? "rotate-180" : ""}`}
             />
           </button>
           {open === i && (
-            <div className="px-6 pb-5 text-gray-500 text-sm leading-relaxed">
+            <div className="px-6 pb-5 text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
               {faq.a}
             </div>
           )}

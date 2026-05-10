@@ -216,7 +216,7 @@ export function SecurityCard({ twoFactorEnabled }: Props) {
                   alt="TOTP QR-Code"
                   width={200}
                   height={200}
-                  className="rounded-lg border border-border bg-white p-2"
+                  className="rounded-lg border border-border bg-white dark:bg-gray-900 p-2"
                 />
               )}
               <div className="space-y-3 text-sm">

@@ -29,7 +29,7 @@ export function QRCodeDisplay({ slug, color = "#000000", size = 200 }: QRCodeDis
 
   return (
     <div className="flex flex-col items-center gap-3">
-      <div className="rounded-xl border border-border p-3 bg-white">
+      <div className="rounded-xl border border-border p-3 bg-white dark:bg-gray-900">
         <img
           src={src}
           alt="QR Code"

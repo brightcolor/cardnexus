@@ -23,11 +23,11 @@ export default function PricingPage() {
   const plans: Plan[] = ["free", "pro", "business"];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-16 px-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 py-16 px-4">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900">Einfache, faire Preise</h1>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">Einfache, faire Preise</h1>
           <p className="text-lg text-gray-500 mt-3">Starte kostenlos. Upgrade wenn du bereit bist.</p>
         </div>
 
@@ -38,10 +38,10 @@ export default function PricingPage() {
             return (
               <div
                 key={planId}
-                className={`bg-white rounded-2xl p-8 flex flex-col ${
+                className={`bg-white dark:bg-gray-900 rounded-2xl p-8 flex flex-col ${
                   plan.highlight
                     ? "ring-2 ring-primary shadow-xl relative"
-                    : "border border-gray-200 shadow-sm"
+                    : "border border-gray-200 dark:border-gray-700 shadow-sm"
                 }`}
               >
                 {plan.highlight && (
@@ -56,11 +56,11 @@ export default function PricingPage() {
                   <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{plan.name}</p>
                   <div className="mt-2 flex items-end gap-1">
                     {plan.monthlyPrice === 0 ? (
-                      <span className="text-4xl font-bold text-gray-900">Kostenlos</span>
+                      <span className="text-4xl font-bold text-gray-900 dark:text-gray-100">Kostenlos</span>
                     ) : (
                       <>
-                        <span className="text-4xl font-bold text-gray-900">{plan.monthlyPrice} €</span>
-                        <span className="text-gray-400 mb-1">/Monat</span>
+                        <span className="text-4xl font-bold text-gray-900 dark:text-gray-100">{plan.monthlyPrice} €</span>
+                        <span className="text-gray-400 dark:text-gray-500 mb-1">/Monat</span>
                       </>
                     )}
                   </div>
@@ -69,7 +69,7 @@ export default function PricingPage() {
                       oder {plan.yearlyPrice} €/Monat bei Jahreszahlung
                     </p>
                   )}
-                  <p className="text-sm text-gray-500 mt-2">{plan.description}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">{plan.description}</p>
                 </div>
 
                 <Button
@@ -90,7 +90,7 @@ export default function PricingPage() {
                         {enabled
                           ? <Check className="h-4 w-4 text-green-500 shrink-0" />
                           : <X className="h-4 w-4 text-gray-300 shrink-0" />}
-                        <span className={enabled ? "text-gray-700" : "text-gray-400"}>
+                        <span className={enabled ? "text-gray-700 dark:text-gray-300" : "text-gray-400 dark:text-gray-500"}>
                           {row.label}
                           {row.note && planId === "free" && (
                             <span className="text-xs text-muted-foreground ml-1">({row.note})</span>
@@ -105,9 +105,9 @@ export default function PricingPage() {
           })}
         </div>
 
-        <p className="text-center text-sm text-gray-400">
+        <p className="text-center text-sm text-gray-400 dark:text-gray-500">
           Alle Preise zzgl. MwSt. · Jederzeit kündbar · Fragen?{" "}
-          <a href="mailto:support@cardnexus.app" className="underline hover:text-gray-600">Kontakt</a>
+          <a href="mailto:support@cardnexus.app" className="underline hover:text-gray-600 dark:hover:text-gray-400">Kontakt</a>
         </p>
       </div>
     </div>

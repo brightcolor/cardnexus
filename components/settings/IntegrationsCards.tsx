@@ -265,7 +265,7 @@ export function ApiKeysCard() {
               Notiere diesen Key jetzt — er wird nicht erneut angezeigt:
             </p>
             <div className="flex gap-2 items-center">
-              <code className="flex-1 rounded bg-white px-3 py-2 font-mono text-sm break-all border border-amber-200">
+              <code className="flex-1 rounded bg-white dark:bg-gray-900 px-3 py-2 font-mono text-sm break-all border border-amber-200">
                 {revealed.key}
               </code>
               <Button type="button" size="sm" variant="outline" onClick={copyKey}>

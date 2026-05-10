@@ -59,7 +59,7 @@ export default async function PublicTeamPage({ params }: Props) {
   const color = org.primaryColor ?? "#0F172A";
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Header */}
       <div className="w-full" style={{ backgroundColor: color }}>
         <div className="max-w-5xl mx-auto px-6 py-12 flex flex-col items-center text-center text-white">
@@ -122,7 +122,7 @@ function MemberCard({
   return (
     <Link
       href={`/c/${member.slug}`}
-      className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all overflow-hidden"
+      className="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all overflow-hidden"
     >
       {/* Color bar */}
       <div className="h-1" style={{ backgroundColor: color }} />
@@ -140,7 +140,7 @@ function MemberCard({
           </div>
 
           <div className="min-w-0">
-            <p className="font-bold text-gray-900 truncate group-hover:text-primary transition-colors">
+            <p className="font-bold text-gray-900 dark:text-gray-100 truncate group-hover:text-primary transition-colors">
               {name || "Kein Name"}
             </p>
             {member.title && (
@@ -157,25 +157,25 @@ function MemberCard({
         {/* Contact snippets */}
         <div className="space-y-1">
           {member.email && (
-            <div className="flex items-center gap-2 text-xs text-gray-500 truncate">
+            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 truncate">
               <Mail className="h-3 w-3 shrink-0" />
               <span className="truncate">{member.email}</span>
             </div>
           )}
           {member.phone && (
-            <div className="flex items-center gap-2 text-xs text-gray-500">
+            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
               <Phone className="h-3 w-3 shrink-0" />
               <span>{member.phone}</span>
             </div>
           )}
           {member.website && (
-            <div className="flex items-center gap-2 text-xs text-gray-500 truncate">
+            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 truncate">
               <Globe className="h-3 w-3 shrink-0" />
               <span className="truncate">{member.website.replace(/^https?:\/\//, "")}</span>
             </div>
           )}
           {member.address && (
-            <div className="flex items-center gap-2 text-xs text-gray-500 truncate">
+            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 truncate">
               <MapPin className="h-3 w-3 shrink-0" />
               <span className="truncate">{member.address}</span>
             </div>
@@ -183,7 +183,7 @@ function MemberCard({
         </div>
       </div>
 
-      <div className="px-5 py-3 border-t border-gray-50 bg-gray-50/50">
+      <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
         <span className="text-xs font-medium text-primary group-hover:underline">
           Karte ansehen →
         </span>

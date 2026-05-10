@@ -221,8 +221,8 @@ export function SignatureClient({ card: initialCard, allCards = [] }: Props) {
       {/* ── Preview ── */}
       <div className="space-y-3">
         <p className="text-sm font-medium">Vorschau</p>
-        <div className="border border-border rounded-xl bg-white overflow-hidden">
-          <div className="border-b border-border px-4 py-3 bg-gray-50 space-y-1">
+        <div className="border border-border rounded-xl bg-white dark:bg-gray-900 overflow-hidden">
+          <div className="border-b border-border px-4 py-3 bg-gray-50 dark:bg-gray-800 space-y-1">
             {[
               { label: "Von:",  val: card.email ?? "deine@email.de" },
               { label: "An:",   val: "empfaenger@beispiel.de" },
@@ -235,7 +235,7 @@ export function SignatureClient({ card: initialCard, allCards = [] }: Props) {
             ))}
           </div>
           <div className="px-4 py-4">
-            <p className="text-sm text-gray-400 mb-6">Hallo,<br /><br />…<br /><br />Mit freundlichen Grüßen</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mb-6">Hallo,<br /><br />…<br /><br />Mit freundlichen Grüßen</p>
             <div dangerouslySetInnerHTML={{ __html: html }} />
           </div>
         </div>

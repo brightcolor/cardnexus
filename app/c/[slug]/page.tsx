@@ -72,7 +72,7 @@ export default async function PublicCardPage({ params, searchParams }: Props) {
   // SECURITY: enforce expiry — abgelaufene Karten dürfen nicht mehr aufgerufen werden.
   if (raw.expiresAt && raw.expiresAt < new Date()) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50 dark:bg-gray-950">
         <div className="max-w-sm text-center space-y-2">
           <h1 className="text-2xl font-semibold">Karte abgelaufen</h1>
           <p className="text-muted-foreground">Diese Karte ist nicht mehr verfügbar.</p>

@@ -29,14 +29,14 @@ export function CardPasswordGate({ slug }: Props) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50 dark:bg-gray-950">
       <form
         onSubmit={submit}
-        className="w-full max-w-sm rounded-2xl border border-border bg-white p-8 shadow-sm space-y-4"
+        className="w-full max-w-sm rounded-2xl border border-border bg-white dark:bg-gray-900 p-8 shadow-sm space-y-4"
       >
         <div className="flex flex-col items-center text-center mb-2">
-          <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-            <Lock className="h-5 w-5 text-gray-600" />
+          <div className="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3">
+            <Lock className="h-5 w-5 text-gray-600 dark:text-gray-400" />
           </div>
           <h1 className="text-lg font-semibold">Geschützte Karte</h1>
           <p className="text-sm text-muted-foreground mt-1">

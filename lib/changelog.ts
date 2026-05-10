@@ -12,6 +12,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       { type: "feature", text: "Dark Mode: vollständige Unterstützung für dunkles Design" },
       { type: "feature", text: "Theme-Toggle im Header (Sonne/Mond-Icon) — folgt standardmäßig dem System" },
       { type: "feature", text: "Theme-Präferenz wird im Browser gespeichert (next-themes)" },
+      { type: "feature", text: "Dark Mode für alle Seiten: Dashboard, Admin, Auth, Landing, Karten-Ansicht, Einstellungen, Team-Verzeichnis" },
     ],
   },
   {
