@@ -3,10 +3,25 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { twoFactor } from "better-auth/plugins";
 import { db } from "./db";
 
+// Internal URL for server-side fetches (DB access, session validation).
+// Never use the public HTTPS URL here — inside Docker the container can't
+// reach the external TLS endpoint, which causes ERR_SSL_WRONG_VERSION_NUMBER.
+const internalUrl = `http://localhost:${process.env.PORT ?? 3000}`;
+
+// Public URL (may be https://domain.com) — used for trusted origins and
+// deciding whether to force Secure cookies.
+const publicUrl = process.env.APP_URL ?? process.env.BETTER_AUTH_URL ?? internalUrl;
+
 export const auth = betterAuth({
+  baseURL: internalUrl,
   database: prismaAdapter(db, {
     provider: "sqlite",
   }),
+  advanced: {
+    // Force Secure cookie flag when the public-facing URL is HTTPS.
+    // Required when TLS is terminated at the reverse proxy.
+    useSecureCookies: publicUrl.startsWith("https"),
+  },
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
