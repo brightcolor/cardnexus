@@ -50,6 +50,12 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next({ request: { headers } });
   }
 
+  // ── API routes: only fix the Host header, skip all other logic ────────────
+  // Auth checks and custom-domain routing must NOT run for API calls.
+  if (pathname.startsWith("/api/")) {
+    return nextWithFixedHost();
+  }
+
   // ── Custom domain routing ──────────────────────────────────────────────────
   if (isLikelyCustomDomain(host)) {
     const url = request.nextUrl.clone();
@@ -93,6 +99,8 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // Include /api/* so the Host header is fixed for API calls too.
+    // API routes exit early (only host-fix, no auth/domain logic).
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
