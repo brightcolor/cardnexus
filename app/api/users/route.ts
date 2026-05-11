@@ -142,6 +142,14 @@ export async function DELETE(request: NextRequest) {
     }
   }
 
-  await db.user.delete({ where: { id: userId } });
+  try {
+    await db.user.delete({ where: { id: userId } });
+  } catch (e) {
+    console.error("[DELETE /api/users] db.user.delete failed:", e);
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : String(e) },
+      { status: 500 }
+    );
+  }
   return NextResponse.json({ ok: true });
 }
