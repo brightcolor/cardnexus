@@ -5,7 +5,6 @@ import type { Session } from "./lib/auth";
 
 // ─── Custom domain detection ──────────────────────────────────────────────────
 
-// Strip protocol and port from a URL/host string to get just the hostname
 function toHostname(val: string) {
   return val.replace(/^https?:\/\//, "").split(":")[0].split("/")[0];
 }
@@ -17,17 +16,11 @@ const PLATFORM_HOSTNAMES = [
   process.env.APP_URL ? toHostname(process.env.APP_URL) : "",
 ].filter(Boolean);
 
-/**
- * Returns true only for real external domain names that could be custom domains.
- * Excludes: localhost, 0.0.0.0, IPv4 addresses, hostnames without a dot.
- */
 function isLikelyCustomDomain(host: string): boolean {
   const hostname = toHostname(host);
   if (!hostname) return false;
   if (PLATFORM_HOSTNAMES.includes(hostname)) return false;
-  // Reject plain IPs (v4) — they are never valid custom domains
   if (/^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) return false;
-  // Must look like a real domain (has at least one dot)
   if (!hostname.includes(".")) return false;
   return true;
 }
@@ -39,13 +32,25 @@ const AUTH_PATHS = ["/login", "/register"];
 const ADMIN_PATHS = ["/admin"];
 
 export async function proxy(request: NextRequest) {
-  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "";
-  const proto = request.headers.get("x-forwarded-proto") ?? "http";
-  const base = `${proto}://${host}`;
+  const fwdHost  = request.headers.get("x-forwarded-host");
+  const fwdProto = request.headers.get("x-forwarded-proto") ?? "http";
+  const host     = fwdHost ?? request.headers.get("host") ?? "";
+  const base     = `${fwdProto}://${host}`;
   const { pathname } = request.nextUrl;
 
+  // ── Fix Host header for app code behind a reverse proxy ───────────────────
+  // Reverse proxies forward the backend address (e.g. 46.x.x.x:3000) as Host.
+  // better-auth constructs the origin from this header and rejects sessions
+  // because the raw IP is not in trustedOrigins.
+  // Solution: rewrite Host to X-Forwarded-Host for all NextResponse.next() calls.
+  function nextWithFixedHost() {
+    if (!fwdHost) return NextResponse.next();
+    const headers = new Headers(request.headers);
+    headers.set("host", fwdHost);
+    return NextResponse.next({ request: { headers } });
+  }
+
   // ── Custom domain routing ──────────────────────────────────────────────────
-  // Only activate for real external domains (not IPs, not localhost, not 0.0.0.0)
   if (isLikelyCustomDomain(host)) {
     const url = request.nextUrl.clone();
     const hostname = toHostname(host);
@@ -55,27 +60,27 @@ export async function proxy(request: NextRequest) {
 
   // ── Auth / route protection ───────────────────────────────────────────────
   const isPublic = PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p));
-  const isAuth = AUTH_PATHS.some((p) => pathname.startsWith(p));
-  const isAdmin = ADMIN_PATHS.some((p) => pathname.startsWith(p));
+  const isAuth   = AUTH_PATHS.some((p) => pathname.startsWith(p));
+  const isAdmin  = ADMIN_PATHS.some((p) => pathname.startsWith(p));
 
+  // Always use the internal URL so we don't get ERR_SSL_WRONG_VERSION_NUMBER
+  // when the container tries to fetch itself through the external TLS proxy.
+  const internalBase = `http://localhost:${process.env.PORT ?? 3000}`;
   const { data: session } = await betterFetch<Session>("/api/auth/get-session", {
-    baseURL: request.nextUrl.origin,
+    baseURL: internalBase,
     headers: { cookie: request.headers.get("cookie") ?? "" },
   });
 
   const isAuthenticated = !!session?.user;
 
-  // Redirect logged-in users away from auth pages
   if (isAuthenticated && isAuth) {
     return NextResponse.redirect(`${base}/dashboard`);
   }
 
-  // Protect dashboard and admin routes
   if (!isAuthenticated && !isPublic) {
     return NextResponse.redirect(`${base}/login`);
   }
 
-  // Admin routes: only super_admin
   if (isAdmin && session?.user) {
     const role = (session.user as { role?: string }).role;
     if (role !== "super_admin") {
@@ -83,7 +88,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  return nextWithFixedHost();
 }
 
 export const config = {
