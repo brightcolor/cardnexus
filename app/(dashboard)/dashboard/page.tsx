@@ -9,8 +9,13 @@ import { Eye, Download, ArrowRight, Plus, BarChart2, Pencil, MousePointer } from
 import { LiveViews } from "./LiveViews";
 
 export default async function DashboardPage() {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const hdrs   = await headers();
+  const session = await auth.api.getSession({ headers: hdrs });
   const user = session!.user as { id: string; name: string; role?: string };
+
+  const proto  = hdrs.get("x-forwarded-proto") ?? "https";
+  const host   = hdrs.get("x-forwarded-host") ?? hdrs.get("host") ?? "localhost:3000";
+  const appUrl = `${proto}://${host}`;
 
   const cards = await db.card.findMany({
     where: { userId: user.id },
@@ -151,7 +156,7 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center gap-2 rounded-lg bg-muted p-3 text-sm font-mono text-muted-foreground overflow-hidden">
-                <span className="truncate">{process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/c/{defaultCard.slug}</span>
+                <span className="truncate">{appUrl}/c/{defaultCard.slug}</span>
               </div>
               <div className="flex gap-2">
                 <Button asChild variant="outline" size="sm" className="flex-1">
