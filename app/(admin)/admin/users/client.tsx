@@ -12,6 +12,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { toast } from "@/components/ui/sonner";
 
 const ROLE_VARIANT: Record<string, "default" | "secondary" | "outline" | "warning"> = {
   super_admin: "default",
@@ -94,14 +95,25 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
   async function confirmDelete() {
     if (!pendingDelete) return;
     setDeleting(true);
-    const res = await fetch("/api/users", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: pendingDelete.id }),
-    });
-    if (res.ok) setUsers((prev) => prev.filter((u) => u.id !== pendingDelete.id));
-    setDeleting(false);
-    setPendingDelete(null);
+    try {
+      const res = await fetch("/api/users", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: pendingDelete.id }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setUsers((prev) => prev.filter((u) => u.id !== pendingDelete.id));
+        toast.success("Benutzer gelöscht");
+      } else {
+        toast.error(`Fehler: ${json.error ?? res.status}`);
+      }
+    } catch (e) {
+      toast.error(`Netzwerkfehler: ${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      setDeleting(false);
+      setPendingDelete(null);
+    }
   }
 
   return (
