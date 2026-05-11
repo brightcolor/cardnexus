@@ -8,6 +8,12 @@ services:
     volumes:
       - ./data:/app/data
       - ./uploads:/app/public/uploads
+    # REVERSE PROXY NOTE: The proxy MUST pass these headers to avoid redirect loops:
+    #   X-Forwarded-Proto: https
+    #   X-Forwarded-Host:  yourdomain.com
+    # Nginx example:
+    #   proxy_set_header X-Forwarded-Proto $scheme;
+    #   proxy_set_header X-Forwarded-Host  $host;
     environment:
       # Required: generate with: openssl rand -base64 32
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET in .env}
