@@ -155,17 +155,26 @@ export default async function DashboardPage() {
               <CardTitle className="text-base">Karte teilen</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="flex items-center gap-2 rounded-lg bg-muted p-3 text-sm font-mono text-muted-foreground overflow-hidden">
-                <span className="truncate">{appUrl}/c/{defaultCard.slug}</span>
-              </div>
-              <div className="flex gap-2">
-                <Button asChild variant="outline" size="sm" className="flex-1">
-                  <Link href={`/c/${defaultCard.slug}`} target="_blank">Öffnen</Link>
-                </Button>
-                <Button asChild variant="outline" size="sm" className="flex-1">
-                  <Link href={`/api/vcard/${defaultCard.slug}`}>vCard</Link>
-                </Button>
-              </div>
+              {/* Prefer custom domain, then app URL derived from request headers */}
+              {(({ cardUrl }: { cardUrl: string }) => (
+                <>
+                  <div className="flex items-center gap-2 rounded-lg bg-muted p-3 text-sm font-mono text-muted-foreground overflow-hidden">
+                    <span className="truncate">{cardUrl}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button asChild variant="outline" size="sm" className="flex-1">
+                      <Link href={cardUrl} target="_blank">Öffnen</Link>
+                    </Button>
+                    <Button asChild variant="outline" size="sm" className="flex-1">
+                      <Link href={`/api/vcard/${defaultCard.slug}`}>vCard</Link>
+                    </Button>
+                  </div>
+                </>
+              ))({
+                cardUrl: defaultCard.cardDomain
+                  ? `https://${defaultCard.cardDomain}/c/${defaultCard.slug}`
+                  : `${appUrl}/c/${defaultCard.slug}`,
+              })}
             </CardContent>
           </Card>
 
