@@ -203,7 +203,7 @@ export async function PATCH(req: NextRequest) {
     },
   });
   const inOrg    = !!dbUser?.organizationId;
-  const isAdmin  = dbUser?.role === "company_admin" || dbUser?.role === "super_admin" || dbUser?.role === "super_admin";
+  const isAdmin  = dbUser?.role === "company_admin" || dbUser?.role === "super_admin";
   const isMember = dbUser?.role === "member";
 
   // Logo permission: org members (non-admin) may not change the logo

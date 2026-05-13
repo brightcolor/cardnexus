@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
 
     // Send instant email notification if enabled (non-blocking)
     if (card.user.leadNotification === "instant" && card.user.email) {
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+      const appUrl = process.env.APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
       sendLeadNotificationEmail({
         to: card.user.email,
         ownerName: card.user.name ?? "",

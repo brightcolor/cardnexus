@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Eye, Download, ArrowRight, Plus, BarChart2, Pencil, MousePointer } from "lucide-react";
 import { LiveViews } from "./LiveViews";
+import { CardSparkline } from "./CardSparkline";
 
 export default async function DashboardPage() {
   const hdrs   = await headers();
@@ -22,21 +23,38 @@ export default async function DashboardPage() {
     orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
   });
 
-  // Fetch 30-day view counts per card in a single query
-  const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-  const recentViews = cards.length
-    ? await db.cardAnalytic.groupBy({
-        by: ["cardSlug"],
-        where: {
-          cardSlug: { in: cards.map((c) => c.slug) },
-          event: "view",
-          createdAt: { gte: since },
-        },
-        _count: true,
-      })
-    : [];
+  // Fetch 30-day view counts and 7-day sparkline data per card in parallel
+  const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const since7  = new Date(Date.now() -  7 * 24 * 60 * 60 * 1000);
+
+  const [recentViews, sparkRaw] = cards.length
+    ? await Promise.all([
+        db.cardAnalytic.groupBy({
+          by: ["cardSlug"],
+          where: { cardSlug: { in: cards.map((c) => c.slug) }, event: "view", createdAt: { gte: since30 } },
+          _count: true,
+        }),
+        db.cardAnalytic.findMany({
+          where: { cardSlug: { in: cards.map((c) => c.slug) }, event: "view", createdAt: { gte: since7 } },
+          select: { cardSlug: true, createdAt: true },
+        }),
+      ])
+    : [[], []];
 
   const viewsBySlug = new Map(recentViews.map((r) => [r.cardSlug, r._count]));
+
+  // Build slug → [day0…day6] arrays (oldest first, today = day6)
+  const sparkBySlug = new Map<string, number[]>(
+    cards.map((c) => [c.slug, Array<number>(7).fill(0)])
+  );
+  for (const r of sparkRaw) {
+    const msDiff = Date.now() - r.createdAt.getTime();
+    const dayIdx = Math.floor(msDiff / (24 * 60 * 60 * 1000)); // 0 = today
+    if (dayIdx >= 0 && dayIdx < 7) {
+      const arr = sparkBySlug.get(r.cardSlug)!;
+      arr[6 - dayIdx] += 1; // reverse so oldest is leftmost
+    }
+  }
 
   const firstName = user.name.split(" ")[0];
   const defaultCard = cards.find((c) => c.isDefault) ?? cards[0] ?? null;
@@ -84,6 +102,7 @@ export default async function DashboardPage() {
           <div className="grid gap-3">
             {cards.map((c) => {
               const recentCount = viewsBySlug.get(c.slug) ?? 0;
+              const sparkData   = sparkBySlug.get(c.slug) ?? Array<number>(7).fill(0);
               return (
                 <div
                   key={c.id}
@@ -107,6 +126,11 @@ export default async function DashboardPage() {
                       </Badge>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">/c/{c.slug}</p>
+                  </div>
+
+                  {/* Sparkline — 7 days */}
+                  <div className="hidden md:block shrink-0" title="Aufrufe letzte 7 Tage">
+                    <CardSparkline data={sparkData} color={c.primaryColor ?? "#0F172A"} />
                   </div>
 
                   {/* Stats */}

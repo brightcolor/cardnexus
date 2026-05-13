@@ -185,7 +185,13 @@ export function PublicCardView({ card, source, showBadge = true, showLeadForm = 
 
       {/* Action buttons */}
       <div className="mt-6 w-full max-w-sm flex flex-col gap-2">
-        <Button onClick={downloadVCard} className="w-full" size="lg" disabled={downloading}>
+        <Button
+          onClick={downloadVCard}
+          className="w-full font-semibold shadow-sm"
+          size="lg"
+          disabled={downloading}
+          style={{ backgroundColor: card.primaryColor, borderColor: card.primaryColor }}
+        >
           {downloading
             ? <><Loader2 className="h-4 w-4 animate-spin" /> Wird vorbereitet…</>
             : <><Download className="h-4 w-4" /> Kontakt speichern</>

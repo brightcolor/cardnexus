@@ -298,11 +298,6 @@ async function migrate() {
   await addColumn("CardAnalytic", "language", "TEXT");
   await createIndex("CardAnalytic_country_idx", "CardAnalytic", "country");
 
-  // ── user.leadNotification & Card approval columns ────────────────────────
-  await addColumn("user", "leadNotification", 'TEXT NOT NULL DEFAULT "off"');
-  await addColumn("Card", "approvalStatus",   'TEXT NOT NULL DEFAULT "approved"');
-  await addColumn("Card", "approvalNote",     "TEXT");
-
   // ── twoFactor table (better-auth twoFactor plugin) ───────────────────────
   try {
     const twoFactorExists = await tableExists(db, "twoFactor");

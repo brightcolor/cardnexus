@@ -1,23 +1,38 @@
 import { db } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Building2, CreditCard, Activity } from "lucide-react";
+import { Users, Building2, CreditCard, Activity, TrendingUp } from "lucide-react";
 import { CHANGELOG } from "@/lib/changelog";
+import { PLANS } from "@/lib/plans";
 
 export const metadata = { title: "Admin" };
 
 export default async function AdminPage() {
-  const [userCount, orgCount, cardCount, recentAnalytics] = await Promise.all([
-    db.user.count(),
-    db.organization.count(),
-    db.card.count(),
-    db.cardAnalytic.count({
-      where: { createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } },
-    }),
-  ]);
+  const now = new Date();
+  const [userCount, orgCount, cardCount, recentAnalytics, planGroups, newUsersThisMonth] =
+    await Promise.all([
+      db.user.count(),
+      db.organization.count(),
+      db.card.count(),
+      db.cardAnalytic.count({
+        where: { createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } },
+      }),
+      db.user.groupBy({ by: ["plan"], _count: true }),
+      db.user.count({
+        where: { createdAt: { gte: new Date(now.getFullYear(), now.getMonth(), 1) } },
+      }),
+    ]);
+
+  // Plan breakdown & MRR estimate (active = not expired)
+  const planMap = Object.fromEntries(planGroups.map((p) => [p.plan, p._count])) as Record<string, number>;
+  const freeCount     = planMap["free"]     ?? 0;
+  const proCount      = planMap["pro"]      ?? 0;
+  const businessCount = planMap["business"] ?? 0;
+  // Conservative MRR estimate — counts all paid-plan users, expiry not tracked here
+  const mrrEst = proCount * PLANS.pro.monthlyPrice + businessCount * PLANS.business.monthlyPrice;
 
   const stats = [
     { label: "Benutzer gesamt", value: userCount, icon: Users },
-    { label: "Organisationen", value: orgCount, icon: Building2 },
+    { label: "Neu diesen Monat", value: newUsersThisMonth, icon: TrendingUp },
     { label: "Digitale Karten", value: cardCount, icon: CreditCard },
     { label: "Events (30d)", value: recentAnalytics, icon: Activity },
   ];
@@ -45,6 +60,65 @@ export default async function AdminPage() {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* Plan breakdown */}
+      <div className="grid sm:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Plan-Verteilung</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {[
+              { plan: "Free",     count: freeCount,     color: "bg-gray-400",  bar: freeCount     },
+              { plan: "Pro",      count: proCount,      color: "bg-blue-500",  bar: proCount      },
+              { plan: "Business", count: businessCount, color: "bg-amber-500", bar: businessCount },
+            ].map(({ plan, count, color, bar }) => (
+              <div key={plan} className="space-y-1">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-2">
+                    <span className={`h-2 w-2 rounded-full ${color}`} />
+                    {plan}
+                  </span>
+                  <span className="font-medium tabular-nums">{count.toLocaleString("de-DE")}</span>
+                </div>
+                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className={`h-full rounded-full ${color} transition-all`}
+                    style={{ width: userCount ? `${(bar / userCount) * 100}%` : "0%" }}
+                  />
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Umsatz-Schätzung</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <p className="text-sm text-muted-foreground">MRR (geschätzt)</p>
+              <p className="text-3xl font-bold mt-1">
+                {mrrEst.toLocaleString("de-DE", { style: "currency", currency: "EUR" })}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Basierend auf {proCount} Pro × {PLANS.pro.monthlyPrice} € + {businessCount} Business × {PLANS.business.monthlyPrice} €
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 pt-1">
+              <div className="rounded-lg bg-muted p-3">
+                <p className="text-xs text-muted-foreground">Organisationen</p>
+                <p className="text-xl font-bold mt-0.5">{orgCount.toLocaleString("de-DE")}</p>
+              </div>
+              <div className="rounded-lg bg-muted p-3">
+                <p className="text-xs text-muted-foreground">Bezahlend</p>
+                <p className="text-xl font-bold mt-0.5">{(proCount + businessCount).toLocaleString("de-DE")}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Build info */}
