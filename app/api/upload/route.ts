@@ -36,8 +36,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Datei zu groß (max. 5 MB)" }, { status: 400 });
   }
 
-  // Per-user upload limit: count files already owned by this user in the uploads dir.
   const uploadDir = join(process.cwd(), "public", "uploads");
+
+  // Per-user upload limit: count files already owned by this user in the uploads dir.
   try {
     const existing = await readdir(uploadDir);
     const userCount = existing.filter((f) => f.startsWith(`${session.user.id}-`)).length;
@@ -56,7 +57,6 @@ export async function POST(request: NextRequest) {
   // double-extension and CRLF tricks all neutralised).
   const ext = MIME_TO_EXT[file.type as AllowedMime];
   const filename = `${session.user.id}-${nanoid(16)}.${ext}`;
-  const uploadDir = join(process.cwd(), "public", "uploads");
 
   await mkdir(uploadDir, { recursive: true });
   await writeFile(join(uploadDir, filename), Buffer.from(await file.arrayBuffer()));
