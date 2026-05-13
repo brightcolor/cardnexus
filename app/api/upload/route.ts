@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { writeFile, mkdir } from "fs/promises";
+import { writeFile, mkdir, readdir } from "fs/promises";
 import { join } from "path";
 import { nanoid } from "nanoid";
 
@@ -19,6 +19,7 @@ const MIME_TO_EXT: Record<AllowedMime, string> = {
 };
 
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
+const MAX_UPLOADS_PER_USER = 20;
 
 export async function POST(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -33,6 +34,21 @@ export async function POST(request: NextRequest) {
   }
   if (file.size > MAX_SIZE) {
     return NextResponse.json({ error: "Datei zu groß (max. 5 MB)" }, { status: 400 });
+  }
+
+  // Per-user upload limit: count files already owned by this user in the uploads dir.
+  const uploadDir = join(process.cwd(), "public", "uploads");
+  try {
+    const existing = await readdir(uploadDir);
+    const userCount = existing.filter((f) => f.startsWith(`${session.user.id}-`)).length;
+    if (userCount >= MAX_UPLOADS_PER_USER) {
+      return NextResponse.json(
+        { error: `Upload-Limit erreicht (max. ${MAX_UPLOADS_PER_USER} Dateien). Lösche nicht mehr benötigte Bilder.` },
+        { status: 400 }
+      );
+    }
+  } catch {
+    // Directory doesn't exist yet — first upload, continue.
   }
 
   // Use MIME-derived extension and a fully randomised name — never echo any

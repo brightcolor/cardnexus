@@ -1,4 +1,4 @@
-import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { randomBytes, scryptSync, timingSafeEqual, createHmac } from "node:crypto";
 
 /**
  * Hash a password using scrypt (Node built-in, no extra dependency).
@@ -8,6 +8,16 @@ export function hashPassword(password: string): string {
   const salt = randomBytes(16);
   const hash = scryptSync(password.normalize("NFKC"), salt, 64);
   return `scrypt:${salt.toString("hex")}:${hash.toString("hex")}`;
+}
+
+/**
+ * Creates an HMAC token that proves the cookie was issued by this server.
+ * Stored in the cookie instead of the raw hash — prevents an attacker who
+ * somehow learns the hash (DB dump, log leak) from forging the unlock cookie.
+ */
+export function makeCardUnlockToken(slug: string, hash: string): string {
+  const secret = process.env.BETTER_AUTH_SECRET ?? "cardnexus-dev-fallback";
+  return createHmac("sha256", secret).update(`unlock:${slug}:${hash}`).digest("hex");
 }
 
 /** Timing-safe verification of a password against a stored scrypt hash. */

@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { db } from "@/lib/db";
-import { verifyPassword } from "@/lib/password-hash";
+import { verifyPassword, makeCardUnlockToken } from "@/lib/password-hash";
 
 function unlockCookieName(slug: string): string {
   return `card_unlocked_${slug}`;
@@ -24,7 +24,10 @@ export async function unlockCard(
     return { ok: false, error: "Falsches Passwort" };
   }
 
-  (await cookies()).set(unlockCookieName(slug), card.passwordHash, {
+  // Store an HMAC-signed token, not the raw hash — prevents forging the cookie
+  // by knowing the hash alone (e.g. from a DB dump or log leak).
+  const token = makeCardUnlockToken(slug, card.passwordHash);
+  (await cookies()).set(unlockCookieName(slug), token, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",

@@ -281,5 +281,7 @@ export async function GET(request: NextRequest) {
         createdAt: c.createdAt.toISOString(),
       })),
     },
-  });
+  // Cache in the browser for 60 s; allow stale for 5 min while revalidating.
+  // Keeps the dashboard snappy without hammering the DB on every tab switch.
+  }, { headers: { "Cache-Control": "private, max-age=60, stale-while-revalidate=300" } });
 }

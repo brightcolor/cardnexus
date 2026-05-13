@@ -123,14 +123,6 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   const body = parsed.data;
 
-  // Generate unique slug
-  const base = [body.firstName, body.lastName].filter(Boolean).join("-").toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "karte";
-  let slug = `${base}-${nanoid(6)}`;
-  while (await db.card.findUnique({ where: { slug } })) {
-    slug = `${base}-${nanoid(6)}`;
-  }
-
   // Enforce per-plan card limit
   const dbUser = await db.user.findUnique({
     where: { id: session.user.id },
@@ -147,22 +139,43 @@ export async function POST(req: NextRequest) {
   }
   const isDefault = existingCount === 0;
 
-  const card = await db.card.create({
-    data: {
-      userId: session.user.id,
-      slug,
-      name:         body.name ?? "Meine Karte",
-      isDefault,
-      isPublic:     body.isPublic ?? true,
-      firstName:    body.firstName ?? "",
-      lastName:     body.lastName ?? "",
-      templateId:   body.templateId ?? "classic",
-      primaryColor: body.primaryColor ?? "#0F172A",
-      fontFamily:   body.fontFamily ?? "inter",
-      layoutStyle:  body.layoutStyle ?? "standard",
-      customLinks:  "[]",
-    },
-  });
+  // Generate a unique slug by inserting and retrying on unique-constraint
+  // violations (P2002). This is race-condition-safe — no gap between check
+  // and insert where a concurrent request could claim the same slug.
+  const base = [body.firstName, body.lastName].filter(Boolean).join("-").toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "karte";
+
+  let card: Awaited<ReturnType<typeof db.card.create>> | null = null;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      card = await db.card.create({
+        data: {
+          userId:       session.user.id,
+          slug:         `${base}-${nanoid(6)}`,
+          name:         body.name ?? "Meine Karte",
+          isDefault,
+          isPublic:     body.isPublic ?? true,
+          firstName:    body.firstName ?? "",
+          lastName:     body.lastName ?? "",
+          templateId:   body.templateId ?? "classic",
+          primaryColor: body.primaryColor ?? "#0F172A",
+          fontFamily:   body.fontFamily ?? "inter",
+          layoutStyle:  body.layoutStyle ?? "standard",
+          customLinks:  "[]",
+        },
+      });
+      break; // success
+    } catch (e: unknown) {
+      // P2002 = Prisma unique-constraint violation → try another slug
+      if (typeof e === "object" && e !== null && "code" in e && (e as { code: string }).code === "P2002") {
+        continue;
+      }
+      throw e;
+    }
+  }
+  if (!card) {
+    return NextResponse.json({ error: "Slug-Konflikt — bitte erneut versuchen." }, { status: 500 });
+  }
 
   return NextResponse.json({ ...card, customLinks: [] }, { status: 201 });
 }

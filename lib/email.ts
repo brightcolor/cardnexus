@@ -276,6 +276,26 @@ export async function sendOrgRestoredEmail({
   await send(to, `Organisation wieder aktiv: ${orgName}`, html);
 }
 
+// ── Email change notification ──────────────────────────────────────────────
+export async function sendEmailChangeNotification({
+  to, newEmail,
+}: {
+  to: string;
+  newEmail: string;
+}) {
+  const html = layout(
+    esc(`E-Mail-Adresse geändert – ${APP_NAME}`),
+    `
+    ${h1("E-Mail-Adresse geändert")}
+    ${p(`Die E-Mail-Adresse für deinen ${esc(APP_NAME)}-Account wurde soeben geändert.`)}
+    ${p(`Neue Adresse: <strong>${esc(newEmail)}</strong>`)}
+    ${p("Falls du diese Änderung <strong>nicht</strong> selbst vorgenommen hast, kontaktiere uns sofort und ändere dein Passwort.")}
+    ${muted("Du erhältst diese Sicherheits-E-Mail an deine bisherige Adresse.")}
+    `
+  );
+  await send(to, `E-Mail-Adresse geändert – ${APP_NAME}`, html);
+}
+
 // ── Password reset email ───────────────────────────────────────────────────
 export async function sendPasswordResetEmail({
   to, url,

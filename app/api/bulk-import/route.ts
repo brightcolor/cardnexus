@@ -17,31 +17,61 @@ interface CsvRow {
   department?: string;
 }
 
+/**
+ * RFC 4180-compliant CSV line parser.
+ * Handles quoted fields that contain commas, newlines, and escaped double-quotes ("").
+ */
+function parseCsvLine(line: string): string[] {
+  const cells: string[] = [];
+  let current = "";
+  let inQuote = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuote) {
+      if (ch === '"') {
+        if (line[i + 1] === '"') { current += '"'; i++; } // escaped ""
+        else inQuote = false;
+      } else {
+        current += ch;
+      }
+    } else {
+      if (ch === '"') { inQuote = true; }
+      else if (ch === ",") { cells.push(current.trim()); current = ""; }
+      else { current += ch; }
+    }
+  }
+  cells.push(current.trim());
+  return cells;
+}
+
 function parseCsv(text: string): CsvRow[] {
   const lines = text.trim().split(/\r?\n/);
   if (lines.length < 2) return [];
 
-  const headers = lines[0].split(",").map((h) => h.trim().replace(/^"|"$/g, "").toLowerCase());
+  const headerCells = parseCsvLine(lines[0]).map((h) => h.toLowerCase());
 
   const col = (row: string[], name: string) => {
-    const i = headers.indexOf(name);
-    return i >= 0 ? row[i]?.trim().replace(/^"|"$/g, "") ?? "" : "";
+    const i = headerCells.indexOf(name);
+    return i >= 0 ? row[i] ?? "" : "";
   };
 
-  return lines.slice(1).map((line) => {
-    // Simple CSV split (handles quoted fields naively)
-    const cells = line.split(",");
-    return {
-      firstName: col(cells, "firstname") || col(cells, "vorname"),
-      lastName:  col(cells, "lastname")  || col(cells, "nachname"),
-      email:     col(cells, "email"),
-      title:     col(cells, "title")     || col(cells, "titel") || undefined,
-      company:   col(cells, "company")   || col(cells, "firma") || undefined,
-      phone:     col(cells, "phone")     || col(cells, "telefon") || undefined,
-      mobile:    col(cells, "mobile")    || col(cells, "mobil") || undefined,
-      department: col(cells, "department") || col(cells, "abteilung") || undefined,
-    };
-  }).filter((r) => r.email && r.firstName);
+  return lines.slice(1)
+    .filter((l) => l.trim())
+    .map((line) => {
+      const cells = parseCsvLine(line);
+      return {
+        firstName:  col(cells, "firstname")  || col(cells, "vorname"),
+        lastName:   col(cells, "lastname")   || col(cells, "nachname"),
+        email:      col(cells, "email"),
+        title:      col(cells, "title")      || col(cells, "titel")     || undefined,
+        company:    col(cells, "company")    || col(cells, "firma")     || undefined,
+        phone:      col(cells, "phone")      || col(cells, "telefon")   || undefined,
+        mobile:     col(cells, "mobile")     || col(cells, "mobil")     || undefined,
+        department: col(cells, "department") || col(cells, "abteilung") || undefined,
+      };
+    })
+    .filter((r) => r.email && r.firstName);
 }
 
 export async function POST(req: NextRequest) {

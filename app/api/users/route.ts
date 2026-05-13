@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { canManageOrganization, isSuperAdmin } from "@/lib/utils";
+import { auditLog } from "@/lib/audit";
 import { z } from "zod";
 
 const updateSchema = z.object({
@@ -107,6 +108,19 @@ export async function PATCH(request: NextRequest) {
   // Immediately kill all active sessions when banning a user
   if (data.bannedAt) {
     await db.session.deleteMany({ where: { userId } });
+    auditLog("user.ban", session.user.id, { targetId: userId });
+  }
+  if (data.bannedAt === null) {
+    auditLog("user.unban", session.user.id, { targetId: userId });
+  }
+  if (data.role) {
+    auditLog("user.role_change", session.user.id, { targetId: userId, newRole: data.role });
+  }
+  if (data.plan) {
+    auditLog("user.plan_change", session.user.id, { targetId: userId, newPlan: data.plan });
+  }
+  if (data.organizationId !== undefined) {
+    auditLog("user.org_change", session.user.id, { targetId: userId, newOrgId: data.organizationId });
   }
 
   return NextResponse.json({ data: updated });
@@ -142,6 +156,12 @@ export async function DELETE(request: NextRequest) {
     }
   }
 
+  // Fetch name/email before delete for the audit record
+  const target = await db.user.findUnique({
+    where: { id: userId },
+    select: { email: true, name: true },
+  });
+
   try {
     await db.user.delete({ where: { id: userId } });
   } catch (e) {
@@ -151,5 +171,12 @@ export async function DELETE(request: NextRequest) {
       { status: 500 }
     );
   }
+
+  auditLog("user.delete", session.user.id, {
+    targetId: userId,
+    targetEmail: target?.email,
+    targetName: target?.name,
+  });
+
   return NextResponse.json({ ok: true });
 }

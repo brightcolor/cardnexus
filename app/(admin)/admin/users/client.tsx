@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useTransition } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -37,16 +38,33 @@ interface AdminUser {
 
 interface OrgOption { id: string; name: string }
 
-export function AdminUsersClient({ users: initial, orgs, currentUserId }: { users: AdminUser[]; orgs: OrgOption[]; currentUserId: string }) {
+export function AdminUsersClient({
+  users: initial, orgs, currentUserId, initialSearch = "",
+}: {
+  users: AdminUser[];
+  orgs: OrgOption[];
+  currentUserId: string;
+  initialSearch?: string;
+}) {
+  const router   = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [, startTransition] = useTransition();
+
   const [users, setUsers] = useState(initial);
-  const [search, setSearch] = useState("");
   const [expiryEdit, setExpiryEdit] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const filtered = users.filter(
-    (u) => u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())
-  );
+  // Search navigates to the server — the page re-renders with DB-filtered results.
+  const handleSearch = useCallback((value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) params.set("q", value);
+    else params.delete("q");
+    startTransition(() => router.replace(`${pathname}?${params.toString()}`));
+  }, [pathname, router, searchParams]);
+
+  const filtered = users; // filtering is done server-side
 
   async function patch(userId: string, data: Record<string, unknown>) {
     const res = await fetch("/api/users", {
@@ -121,7 +139,12 @@ export function AdminUsersClient({ users: initial, orgs, currentUserId }: { user
     <div className="space-y-4">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Suchen…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+        <Input
+          placeholder="Suchen…"
+          defaultValue={initialSearch}
+          onChange={(e) => handleSearch(e.target.value)}
+          className="pl-9"
+        />
       </div>
 
       <div className="rounded-xl border border-border overflow-x-auto bg-white dark:bg-gray-900">

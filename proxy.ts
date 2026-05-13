@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { betterFetch } from "@better-fetch/fetch";
 import type { Session } from "./lib/auth";
+import { rateLimit } from "./lib/rate-limit";
 
 // ─── Custom domain detection ──────────────────────────────────────────────────
 
@@ -48,6 +49,25 @@ export async function proxy(request: NextRequest) {
     const headers = new Headers(request.headers);
     headers.set("host", fwdHost);
     return NextResponse.next({ request: { headers } });
+  }
+
+  // ── Auth brute-force protection ───────────────────────────────────────────
+  // Rate-limit sign-in and sign-up: max 10 attempts per IP per minute.
+  // Must run BEFORE the API early-return so it applies to auth routes.
+  if (
+    pathname.startsWith("/api/auth/sign-in") ||
+    pathname.startsWith("/api/auth/sign-up")
+  ) {
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+      request.headers.get("x-real-ip") ??
+      "anon";
+    if (!rateLimit({ key: `auth:${ip}`, max: 10, windowMs: 60_000 })) {
+      return new NextResponse(
+        JSON.stringify({ error: "Zu viele Anmeldeversuche. Bitte in 1 Minute erneut versuchen." }),
+        { status: 429, headers: { "Content-Type": "application/json", "Retry-After": "60" } }
+      );
+    }
   }
 
   // ── API routes: only fix the Host header, skip all other logic ────────────

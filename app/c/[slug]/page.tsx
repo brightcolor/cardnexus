@@ -5,6 +5,7 @@ import type { CardData } from "@/types";
 import { PublicCardView } from "./client";
 import { CardPasswordGate } from "./PasswordGate";
 import { canUseFeature } from "@/lib/plans";
+import { makeCardUnlockToken } from "@/lib/password-hash";
 import type { Metadata } from "next";
 
 interface Props {
@@ -84,7 +85,8 @@ export default async function PublicCardPage({ params, searchParams }: Props) {
   // SECURITY: enforce password-protection.
   if (raw.passwordHash) {
     const cookie = (await cookies()).get(unlockCookieName(slug))?.value;
-    const unlocked = !!cookie && cookie === raw.passwordHash;
+    const expected = makeCardUnlockToken(slug, raw.passwordHash);
+    const unlocked = !!cookie && cookie === expected;
     if (!unlocked) {
       return <CardPasswordGate slug={slug} />;
     }

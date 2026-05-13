@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { sendEmailChangeNotification } from "@/lib/email";
 import { z } from "zod";
 
 const patchSchema = z.object({
@@ -26,7 +27,9 @@ export async function PATCH(req: NextRequest) {
     updates.leadNotification = leadNotification;
   }
 
-  if (email !== undefined && email !== session.user.email) {
+  const oldEmail = session.user.email; // capture before any update
+
+  if (email !== undefined && email !== oldEmail) {
     // Don't reveal whether the email is already taken — return success either way
     // and only update if the address is free. This prevents email enumeration.
     const existing = await db.user.findUnique({ where: { email }, select: { id: true } });
@@ -37,6 +40,12 @@ export async function PATCH(req: NextRequest) {
 
   if (Object.keys(updates).length > 0) {
     await db.user.update({ where: { id: session.user.id }, data: updates });
+  }
+
+  // Notify the OLD address when email changes — security alert in case the
+  // change was not initiated by the account owner.
+  if (updates.email && oldEmail) {
+    sendEmailChangeNotification({ to: oldEmail, newEmail: updates.email as string }).catch(() => {});
   }
 
   return NextResponse.json({ success: true });
