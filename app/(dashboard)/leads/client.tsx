@@ -1,5 +1,10 @@
-﻿"use client";
+"use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/pages/leads.json";
+import it from "@/messages/it/pages/leads.json";
+import en from "@/messages/en/pages/leads.json";
 import { useState } from "react";
 import type { Lead } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -15,6 +20,8 @@ interface Props {
 }
 
 export function LeadsClient({ leads: initialLeads, hasCard }: Props) {
+  const locale = useLocale();
+  const t = translator(locale, de, it, en);
   const [leads, setLeads] = useState(initialLeads);
   const [query, setQuery] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -48,7 +55,7 @@ export function LeadsClient({ leads: initialLeads, hasCard }: Props) {
         `"${l.email ?? ""}"`,
         `"${l.phone ?? ""}"`,
         `"${(l.message ?? "").replace(/"/g, '""')}"`,
-        new Date(l.createdAt).toLocaleDateString("de-DE"),
+        new Date(l.createdAt).toLocaleDateString(locale),
       ].join(",")
     );
     const csv = [header, ...rows].join("\n");
@@ -65,12 +72,12 @@ export function LeadsClient({ leads: initialLeads, hasCard }: Props) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center gap-3">
         <CreditCard className="h-12 w-12 text-muted-foreground/40" />
-        <p className="font-semibold text-muted-foreground">Noch keine Karte erstellt</p>
+        <p className="font-semibold text-muted-foreground">{t("noCard")}</p>
         <p className="text-sm text-muted-foreground">
-          Erstelle zuerst deine Visitenkarte, um Leads zu sammeln.
+          {t("cardRequired")}
         </p>
         <Button asChild variant="outline" className="mt-2">
-          <a href="/card">Karte erstellen</a>
+          <a href="/card">{t("createCard")}</a>
         </Button>
       </div>
     );
@@ -84,14 +91,14 @@ export function LeadsClient({ leads: initialLeads, hasCard }: Props) {
           <UserCheck className="h-4 w-4 text-primary" />
           <span className="font-semibold text-sm">{leads.length}</span>
           <span className="text-sm text-muted-foreground">
-            {leads.length === 1 ? "Lead" : "Leads"}
+            {leads.length === 1 ? t("single") : t("multiple")}
           </span>
         </div>
 
         <div className="flex-1 min-w-[200px] relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Suchen…"
+            placeholder={t("search")}
             className="pl-9"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -101,7 +108,7 @@ export function LeadsClient({ leads: initialLeads, hasCard }: Props) {
         {leads.length > 0 && (
           <Button variant="outline" size="sm" onClick={exportCsv}>
             <Download className="h-4 w-4" />
-            CSV Export
+            {t("exportCsv")}
           </Button>
         )}
       </div>
@@ -110,13 +117,13 @@ export function LeadsClient({ leads: initialLeads, hasCard }: Props) {
       {leads.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center gap-3 border-2 border-dashed rounded-2xl">
           <UserCheck className="h-12 w-12 text-muted-foreground/40" />
-          <p className="font-semibold text-muted-foreground">Noch keine Leads</p>
+          <p className="font-semibold text-muted-foreground">{t("empty")}</p>
           <p className="text-sm text-muted-foreground max-w-xs">
-            Wenn jemand auf deiner Karte auf „Kontakt hinterlassen" tippt, erscheint er hier.
+            {t("emptyHint")}
           </p>
         </div>
       ) : filtered.length === 0 ? (
-        <p className="text-center text-muted-foreground py-12">Keine Ergebnisse für „{query}"</p>
+        <p className="text-center text-muted-foreground py-12">{t("noResults", { query })}</p>
       ) : (
         <div className="space-y-3">
           {filtered.map((lead) => (
@@ -138,6 +145,8 @@ function LeadCard({
 }: {
   lead: Lead; onDelete: () => void; deleting: boolean;
 }) {
+  const locale = useLocale();
+  const t = translator(locale, de, it, en);
   const [showFull, setShowFull] = useState(false);
   const date = new Date(lead.createdAt);
 
@@ -153,8 +162,8 @@ function LeadCard({
         <div className="flex items-start justify-between gap-2 flex-wrap">
           <p className="font-semibold text-sm">{lead.name}</p>
           <span className="text-xs text-muted-foreground whitespace-nowrap">
-            {date.toLocaleDateString("de-DE", { day: "2-digit", month: "short", year: "numeric" })}{" "}
-            {date.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
+            {date.toLocaleDateString(locale, { day: "2-digit", month: "short", year: "numeric" })}{" "}
+            {date.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })}
           </span>
         </div>
 
@@ -180,7 +189,7 @@ function LeadCard({
               onClick={() => setShowFull((v) => !v)}
             >
               <MessageSquare className="h-3 w-3" />
-              {showFull ? "Nachricht verbergen" : "Nachricht anzeigen"}
+              {showFull ? t("hideMessage") : t("showMessage")}
             </button>
             {showFull && (
               <p className="mt-1.5 text-sm bg-muted rounded-lg px-3 py-2 text-muted-foreground leading-relaxed">
@@ -196,7 +205,7 @@ function LeadCard({
         onClick={onDelete}
         disabled={deleting}
         className="text-muted-foreground hover:text-destructive transition-colors p-1 rounded hover:bg-destructive/10 shrink-0"
-        title="Lead löschen"
+        title={t("delete")}
       >
         <Trash2 className="h-4 w-4" />
       </button>

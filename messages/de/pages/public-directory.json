@@ -1,0 +1,9 @@
+{
+  "notFound": "Team nicht gefunden",
+  "empty": "Keine öffentlichen Karten vorhanden.",
+  "poweredBy": "Erstellt mit",
+  "noName": "Kein Name",
+  "viewCard": "Karte ansehen →",
+  "title": "Team – {name}",
+  "description": "Digitale Visitenkarten des Teams {name}"
+}

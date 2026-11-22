@@ -1,3 +1,4 @@
+import { apiMessage, apiValidation } from "@/lib/i18n/api";
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -20,7 +21,7 @@ export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
   const role = (session?.user as { role?: string })?.role;
   if (!session || role !== "super_admin") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return NextResponse.json({ error: await apiMessage("forbidden") }, { status: 403 });
   }
 
   const settings = await db.platformSettings.upsert({
@@ -36,13 +37,13 @@ export async function PATCH(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
   const role = (session?.user as { role?: string })?.role;
   if (!session || role !== "super_admin") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return NextResponse.json({ error: await apiMessage("forbidden") }, { status: 403 });
   }
 
   const body = await request.json();
   const parsed = schema.safeParse(body);
   if (!parsed.success) {
-    const msg = Object.values(parsed.error.flatten().fieldErrors).flat()[0] ?? "Ungültige Daten";
+    const msg = Object.values((await apiValidation(parsed.error)).fieldErrors).flat()[0] ?? await apiMessage("invalidData");
     return NextResponse.json({ error: msg }, { status: 400 });
   }
 

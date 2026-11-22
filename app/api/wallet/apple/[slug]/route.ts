@@ -1,20 +1,23 @@
+import { apiMessage, apiProviderError } from "@/lib/i18n/api";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { canReadCard, publishedCardScope, unexpiredCardScope } from "@/lib/card-publication";
 import { generateAppleWalletPass, WalletFeatureDisabledError } from "@/lib/wallet";
 import { headers } from "next/headers";
+import { getLocale } from "@/lib/i18n/server";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
   const card = await db.card.findUnique({
-    where: { slug, isPublic: true },
+    where: { slug, ...publishedCardScope, ...unexpiredCardScope() },
     select: {
-      slug: true, firstName: true, lastName: true, title: true,
+      slug: true, passwordHash: true, firstName: true, lastName: true, title: true,
       company: true, email: true, phone: true, primaryColor: true, avatarUrl: true,
     },
   });
 
-  if (!card) return NextResponse.json({ error: "Nicht gefunden" }, { status: 404 });
+  if (!card || !await canReadCard(card)) return NextResponse.json({ error: await apiMessage("missing") }, { status: 404 });
 
   const hdrs  = await headers();
   const host  = hdrs.get("x-forwarded-host") ?? hdrs.get("host") ?? "localhost:3000";
@@ -32,19 +35,20 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ slu
       primaryColor: card.primaryColor,
       avatarUrl:    card.avatarUrl,
       cardUrl:      `${proto}://${host}/c/${card.slug}`,
-    });
+    }, await getLocale());
 
     return new Response(new Uint8Array(pass), {
       headers: {
+        "Cache-Control": "private, no-store",
         "Content-Type": "application/vnd.apple.pkpass",
         "Content-Disposition": `attachment; filename="${card.slug}.pkpass"`,
       },
     });
   } catch (err) {
     if (err instanceof WalletFeatureDisabledError) {
-      return NextResponse.json({ error: err.message }, { status: 503 });
+      return NextResponse.json({ error: await apiProviderError(err.message, "walletUnavailable") }, { status: 503 });
     }
     console.error("[wallet/apple]", err);
-    return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
+    return NextResponse.json({ error: await apiMessage("serverError") }, { status: 500 });
   }
 }

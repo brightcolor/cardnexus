@@ -1,0 +1,9 @@
+{
+  "current": "Piano attuale",
+  "manageStripe": "Gestisci o annulla l’abbonamento (Stripe)",
+  "managePaypalPrefix": "Puoi annullare l’abbonamento PayPal su",
+  "managePaypalSuffix": ". ",
+  "contactByEmail": "Chiedi informazioni via email",
+  "cardOrSepa": "Carta di credito o SEPA",
+  "upgradeSubject": "Passaggio al piano {plan}"
+}

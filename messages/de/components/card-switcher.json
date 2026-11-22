@@ -1,0 +1,15 @@
+{
+  "newCard": "Neue Karte",
+  "createFailed": "Fehler beim Erstellen",
+  "cloneFailed": "Fehler beim Klonen",
+  "lastCard": "Letzte Karte kann nicht gelöscht werden.",
+  "confirmDelete": "Karte wirklich unwiderruflich löschen?",
+  "choose": "Karte wählen",
+  "rename": "Umbenennen",
+  "makeDefault": "Als Standard",
+  "delete": "Löschen",
+  "creating": "Wird erstellt…",
+  "cloning": "Wird geklont…",
+  "clone": "Klonen",
+  "deleteFailed": "Karte konnte nicht gelöscht werden."
+}

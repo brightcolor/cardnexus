@@ -1,0 +1,14 @@
+{
+  "views": "Views",
+  "downloads": "Downloads",
+  "scans": "QR scans",
+  "clicks": "Link clicks",
+  "leads": "Leads",
+  "members": "Members",
+  "month": "This month",
+  "topViews": "Most viewed cards",
+  "empty": "No views yet.",
+  "topLeads": "Top lead generators",
+  "noLeads": "No leads yet.",
+  "viewCount": "Views"
+}

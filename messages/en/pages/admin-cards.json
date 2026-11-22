@@ -1,0 +1,16 @@
+{
+  "title": "Manage business cards",
+  "allCards": "All cards",
+  "onPlatform": "on the platform",
+  "owner": "Owner",
+  "slug": "URL slug",
+  "template": "Template",
+  "views": "Views",
+  "lastModified": "Last modified",
+  "status": "Status",
+  "public": "Public",
+  "private": "Private",
+  "view": "View",
+  "edit": "Edit",
+  "empty": "No business cards found."
+}

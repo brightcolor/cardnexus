@@ -1,3 +1,5 @@
+import { apiMessage } from "@/lib/i18n/api";
+import { getLocale } from "@/lib/i18n/server";
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -13,13 +15,13 @@ export async function POST(req: NextRequest) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "");
 
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const user = session.user as { id: string; email: string; name?: string; stripeCustomerId?: string };
   const { plan } = await req.json() as { plan: string };
 
   const priceId = PRICE_IDS[plan];
-  if (!priceId) return NextResponse.json({ error: "Unbekannter Plan" }, { status: 400 });
+  if (!priceId) return NextResponse.json({ error: await apiMessage("unknownPlan") }, { status: 400 });
 
   const hdrs = await headers();
   const host  = hdrs.get("x-forwarded-host") ?? hdrs.get("host") ?? "localhost:3000";
@@ -39,6 +41,7 @@ export async function POST(req: NextRequest) {
   }
 
   const checkoutSession = await stripe.checkout.sessions.create({
+    locale: await getLocale(),
     customer:   customerId,
     mode:       "subscription",
     line_items: [{ price: priceId, quantity: 1 }],

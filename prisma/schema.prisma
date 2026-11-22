@@ -10,6 +10,7 @@ datasource db {
 // ─── better-auth required tables ─────────────────────────────────────────────
 
 model user {
+  locale String?
   id            String    @id
   name          String
   email         String    @unique
@@ -67,6 +68,8 @@ model twoFactor {
   secret      String
   backupCodes String
   verified    Boolean @default(true)
+  failedVerificationCount Int @default(0)
+  lockedUntil DateTime?
 
   @@index([secret])
   @@index([userId])
@@ -267,8 +270,17 @@ model Card {
   leads        Lead[]
   campaigns    Campaign[]
   slugAliases  CardSlugAlias[]
+  emailSignature CardEmailSignature?
 
   @@index([userId])
+}
+
+model CardEmailSignature {
+  cardId     String  @id
+  card       Card    @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  footerText String  @default("")
+  showAvatar Boolean?
+  showLogo   Boolean @default(false)
 }
 
 model Campaign {

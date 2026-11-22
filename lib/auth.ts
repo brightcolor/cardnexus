@@ -31,12 +31,31 @@ export const auth = betterAuth({
       catch (e) { console.error("[auth] sendResetPassword failed", e); }
     },
   },
+  emailVerification: {
+    async sendVerificationEmail({ user, url }) {
+      const { sendEmailVerification } = await import("./email");
+      const verificationUrl = new URL(url);
+      await sendEmailVerification({
+        to: user.email,
+        url: new URL(verificationUrl.pathname + verificationUrl.search, publicUrl).toString(),
+      });
+    },
+  },
   session: {
     expiresIn: 60 * 60 * 24 * 30,
     updateAge: 60 * 60 * 24,
-    cookieCache: {
-      enabled: true,
-      maxAge: 5 * 60,
+  },
+  databaseHooks: {
+    session: {
+      create: {
+        before: async (session) => {
+          const user = await db.user.findUnique({
+            where: { id: session.userId },
+            select: { bannedAt: true },
+          });
+          if (!user || user.bannedAt) return false;
+        },
+      },
     },
   },
   trustedOrigins: [
@@ -50,10 +69,12 @@ export const auth = betterAuth({
         type: "string",
         defaultValue: "member",
         required: false,
+        input: false,
       },
       organizationId: {
         type: "string",
         required: false,
+        input: false,
       },
       // Subscription plan — set by server/webhooks only, never by client
       plan: {

@@ -1,0 +1,7 @@
+{
+  "notFound": "Biglietto da visita non trovato",
+  "unavailable": "La raccolta dei recapiti non è disponibile.",
+  "rateLimit": "Troppe richieste. Riprova più tardi.",
+  "invalidInput": "Controlla i recapiti inseriti e riprova.",
+  "serverError": "Non è stato possibile inviare i recapiti. Riprova più tardi."
+}

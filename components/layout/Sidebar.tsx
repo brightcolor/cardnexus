@@ -1,5 +1,10 @@
 "use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/components/sidebar.json";
+import it from "@/messages/it/components/sidebar.json";
+import en from "@/messages/en/components/sidebar.json";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -15,34 +20,6 @@ interface NavSection {
   items: { href: string; label: string; icon: React.ElementType; indented?: boolean }[];
 }
 
-const sections: NavSection[] = [
-  {
-    label: "Workspace",
-    items: [
-      { href: "/dashboard", label: "Dashboard",   icon: LayoutDashboard },
-      { href: "/card",      label: "Meine Karte", icon: CreditCard },
-      { href: "/card/signature", label: "Signatur", icon: Mail, indented: true },
-    ],
-  },
-  {
-    label: "Wachstum",
-    items: [
-      { href: "/leads",     label: "Leads",       icon: UserCheck },
-      { href: "/campaigns", label: "Kampagnen",   icon: Megaphone },
-      { href: "/analytics", label: "Analytics",   icon: BarChart2 },
-    ],
-  },
-  {
-    label: "Organisation",
-    items: [
-      { href: "/team",      label: "Team",          icon: Users },
-      { href: "/nfc",       label: "NFC",           icon: Nfc },
-      { href: "/widget",    label: "Widget",        icon: Code2 },
-      { href: "/settings",  label: "Einstellungen", icon: Settings },
-    ],
-  },
-];
-
 interface SidebarProps {
   userRole?: string;
   orgName?: string;
@@ -55,6 +32,37 @@ interface SidebarProps {
 export function SidebarNav({
   userRole, orgName, appName = "CardNexus", logoUrl, onNavigate, className,
 }: SidebarProps) {
+  const locale = useLocale();
+  const t = translator(locale, de, it, en);
+
+  const sections: NavSection[] = [
+    {
+      label: t("workspace"),
+      items: [
+        { href: "/dashboard", label: t("dashboard"),   icon: LayoutDashboard },
+        { href: "/card",      label: t("myCard"), icon: CreditCard },
+        { href: "/card/signature", label: t("signature"), icon: Mail, indented: true },
+      ],
+    },
+    {
+      label: t("growth"),
+      items: [
+        { href: "/leads",     label: t("leads"),       icon: UserCheck },
+        { href: "/campaigns", label: t("campaigns"),   icon: Megaphone },
+        { href: "/analytics", label: t("analytics"),   icon: BarChart2 },
+      ],
+    },
+    {
+      label: t("organization"),
+      items: [
+        { href: "/team",      label: "Team",          icon: Users },
+        { href: "/nfc",       label: "NFC",           icon: Nfc },
+        { href: "/widget",    label: "Widget",        icon: Code2 },
+        { href: "/settings",  label: t("settings"), icon: Settings },
+      ],
+    },
+  ];
+
   const pathname = usePathname();
   const router = useRouter();
 
@@ -92,7 +100,7 @@ export function SidebarNav({
       )}
 
       {/* Navigation */}
-      <nav aria-label="Hauptnavigation" className="flex-1 space-y-4 p-3 overflow-y-auto">
+      <nav aria-label={t("mainNavigation")} className="flex-1 space-y-4 p-3 overflow-y-auto">
         {sections.map((section) => (
           <div key={section.label}>
             <p className="px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70 mb-1">
@@ -162,7 +170,7 @@ export function SidebarNav({
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
         >
           <LogOut className="h-4 w-4 shrink-0" />
-          Abmelden
+          {t("signOut")}
         </button>
       </div>
     </aside>

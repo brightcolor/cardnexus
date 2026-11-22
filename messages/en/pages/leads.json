@@ -1,0 +1,22 @@
+{
+  "noCard": "No business card yet",
+  "cardRequired": "Create a card to collect leads.",
+  "createCard": "Create card",
+  "search": "Search leads",
+  "exportCsv": "Export CSV",
+  "empty": "No leads yet.",
+  "emptyHint": "Contacts shared through your business card will appear here.",
+  "hideMessage": "Hide message",
+  "showMessage": "Show message",
+  "delete": "Delete",
+  "noResults": "No results for “{query}”",
+  "single": "lead",
+  "multiple": "leads",
+  "csvDate": "Date",
+  "csvName": "Name",
+  "csvEmail": "Email",
+  "csvPhone": "Phone",
+  "csvMessage": "Message",
+  "csvCard": "Business card",
+  "csvMember": "Member"
+}

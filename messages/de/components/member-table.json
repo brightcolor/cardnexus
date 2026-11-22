@@ -1,0 +1,16 @@
+{
+  "confirmDelete": "Benutzer wirklich löschen?",
+  "empty": "Keine Benutzer gefunden",
+  "user": "Benutzer",
+  "role": "Rolle",
+  "card": "Karte",
+  "joined": "Seit",
+  "me": "(Ich)",
+  "admin": "Admin",
+  "leader": "Team Leader",
+  "member": "Mitglied",
+  "active": "Aktiv",
+  "noCard": "Keine Karte",
+  "viewCard": "Karte ansehen",
+  "delete": "Löschen"
+}

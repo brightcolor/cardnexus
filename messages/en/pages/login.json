@@ -1,0 +1,12 @@
+{
+  "invalidCredentials": "Invalid email or password.",
+  "heading": "Sign in",
+  "description": "Sign in to your account.",
+  "email": "Email",
+  "password": "Password",
+  "submitting": "Signing in…",
+  "submit": "Sign in",
+  "forgotPassword": "Forgot your password?",
+  "noAccount": "Don't have an account?",
+  "register": "Sign up"
+}

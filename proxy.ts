@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { betterFetch } from "@better-fetch/fetch";
 import type { Session } from "./lib/auth";
+import { db } from "./lib/db";
+import deAuth from "./messages/de/api/authentication.json";
+import itAuth from "./messages/it/api/authentication.json";
+import enAuth from "./messages/en/api/authentication.json";
+import { defaultLocale, localeCookie, localeCookieOptions, parseLocale } from "./lib/i18n/locales";
 import { rateLimit } from "./lib/rate-limit";
 
 // ─── Custom domain detection ──────────────────────────────────────────────────
@@ -28,7 +33,10 @@ function isLikelyCustomDomain(host: string): boolean {
 
 // ─── Auth route constants ─────────────────────────────────────────────────────
 
-const PUBLIC_PATHS = ["/", "/login", "/register", "/c/", "/p/"];
+const PUBLIC_PAGES = new Set([
+  "/", "/demo", "/login", "/login/2fa", "/register", "/invite",
+  "/forgot-password", "/reset-password", "/pricing", "/impressum", "/datenschutz",
+]);
 const AUTH_PATHS = ["/login", "/register"];
 const ADMIN_PATHS = ["/admin"];
 
@@ -63,8 +71,9 @@ export async function proxy(request: NextRequest) {
       request.headers.get("x-real-ip") ??
       "anon";
     if (!rateLimit({ key: `auth:${ip}`, max: 10, windowMs: 60_000 })) {
+      const locale = parseLocale(request.cookies.get(localeCookie)?.value) ?? defaultLocale();
       return new NextResponse(
-        JSON.stringify({ error: "Zu viele Anmeldeversuche. Bitte in 1 Minute erneut versuchen." }),
+        JSON.stringify({ error: ({ de: deAuth, it: itAuth, en: enAuth }[locale]).proxyRateLimit }),
         { status: 429, headers: { "Content-Type": "application/json", "Retry-After": "60" } }
       );
     }
@@ -77,7 +86,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // ── Custom domain routing ──────────────────────────────────────────────────
-  if (isLikelyCustomDomain(host)) {
+  if (!pathname.startsWith("/c/") && isLikelyCustomDomain(host)) {
     const url = request.nextUrl.clone();
     const hostname = toHostname(host);
     url.pathname = `/api/domain/${encodeURIComponent(hostname)}`;
@@ -85,8 +94,8 @@ export async function proxy(request: NextRequest) {
   }
 
   // ── Auth / route protection ───────────────────────────────────────────────
-  const isPublic = PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p));
-  const isAuth   = AUTH_PATHS.some((p) => pathname.startsWith(p));
+  const isPublic = PUBLIC_PAGES.has(pathname) || ["/c/", "/p/", "/print/", "/team/"].some((prefix) => pathname.startsWith(prefix));
+  const isAuth   = AUTH_PATHS.includes(pathname);
   const isAdmin  = ADMIN_PATHS.some((p) => pathname.startsWith(p));
 
   // Always use the internal URL so we don't get ERR_SSL_WRONG_VERSION_NUMBER
@@ -100,6 +109,8 @@ export async function proxy(request: NextRequest) {
   const isAuthenticated = !!session?.user;
 
   if (isAuthenticated && isAuth) {
+    const invite = request.nextUrl.searchParams.get("invite");
+    if (invite) return NextResponse.redirect(`${base}/invite?${new URLSearchParams({ invite })}`);
     return NextResponse.redirect(`${base}/dashboard`);
   }
 
@@ -114,7 +125,27 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  return nextWithFixedHost();
+  const response = nextWithFixedHost();
+  if (session?.user) {
+    const explicit = parseLocale(request.cookies.get(localeCookie)?.value);
+    const user = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: { locale: true },
+    });
+    const preference = parseLocale(user?.locale);
+    if (preference && preference !== explicit) {
+      response.cookies.set(localeCookie, preference, {
+        ...localeCookieOptions,
+        secure: fwdProto === "https" || request.nextUrl.protocol === "https:",
+      });
+    } else if (user && user.locale === null && explicit) {
+      await db.user.updateMany({
+        where: { id: session.user.id, locale: null },
+        data: { locale: explicit },
+      });
+    }
+  }
+  return response;
 }
 
 export const config = {

@@ -1,5 +1,10 @@
 "use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/components/image-upload.json";
+import it from "@/messages/it/components/image-upload.json";
+import en from "@/messages/en/components/image-upload.json";
 import { useRef, useState } from "react";
 import { Button } from "./button";
 import { Input } from "./input";
@@ -17,10 +22,12 @@ interface ImageUploadProps {
 export function ImageUpload({
   value,
   onChange,
-  label = "Bild hochladen",
+  label,
   shape = "square",
   className,
 }: ImageUploadProps) {
+  const locale = useLocale();
+  const t = translator(locale, de, it, en);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [urlInput, setUrlInput] = useState("");
@@ -34,10 +41,10 @@ export function ImageUpload({
       form.append("file", file);
       const res = await fetch("/api/upload", { method: "POST", body: form });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Upload fehlgeschlagen");
+      if (!res.ok) throw new Error(json.error ?? t("uploadError"));
       onChange(json.url);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Fehler");
+      setError(e instanceof Error ? e.message : t("error"));
     } finally {
       setUploading(false);
     }
@@ -88,7 +95,7 @@ export function ImageUpload({
           <div className="flex flex-col items-center gap-1 p-3 text-center">
             <Upload className="h-5 w-5 text-muted-foreground" />
             {shape === "wide" && (
-              <p className="text-xs text-muted-foreground">{label}</p>
+              <p className="text-xs text-muted-foreground">{label ?? t("upload")}</p>
             )}
           </div>
         )}
@@ -96,6 +103,8 @@ export function ImageUpload({
         {/* Remove button */}
         {value && !uploading && (
           <button
+            type="button"
+            aria-label={t("remove")}
             className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/60 flex items-center justify-center hover:bg-black/80 transition-colors"
             onClick={(e) => { e.stopPropagation(); onChange(null); }}
           >
@@ -122,7 +131,7 @@ export function ImageUpload({
         disabled={uploading}
       >
         {uploading ? (
-          <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Wird hochgeladen…</>
+          <><Loader2 className="h-3.5 w-3.5 animate-spin" /> {t("uploading")}</>
         ) : (
           <><Upload className="h-3.5 w-3.5" /> {label}</>
         )}
@@ -131,7 +140,7 @@ export function ImageUpload({
       {/* URL input alternative */}
       <div className="flex gap-1">
         <Input
-          placeholder="oder URL einfügen…"
+          placeholder={t("urlAlternative")}
           value={urlInput}
           onChange={(e) => setUrlInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleUrlApply()}

@@ -1,19 +1,24 @@
+import { apiMessage } from "@/lib/i18n/api";
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { canManageOrganization } from "@/lib/utils";
 import { buildCsv } from "@/lib/csv";
+import { getLocale } from "@/lib/i18n/server";
+import de from "@/messages/de/pages/leads.json";
+import it from "@/messages/it/pages/leads.json";
+import en from "@/messages/en/pages/leads.json";
 
 export async function GET(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const role = (session.user as { role?: string }).role ?? "member";
   const orgId = (session.user as { organizationId?: string }).organizationId;
 
   if (!canManageOrganization(role) || !orgId) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return NextResponse.json({ error: await apiMessage("forbidden") }, { status: 403 });
   }
 
   const url = new URL(request.url);
@@ -41,13 +46,17 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
+    const locale = await getLocale();
+
+    const labels = { de, it, en }[locale];
+
     const csv = buildCsv(
-      ["Datum", "Name", "E-Mail", "Telefon", "Nachricht", "Karte", "Mitglied"],
+      [labels.csvDate, labels.csvName, labels.csvEmail, labels.csvPhone, labels.csvMessage, labels.csvCard, labels.csvMember],
       leads.map((l) => {
         const card = cardMap.get(l.cardId);
         const memberName = card ? (userNameMap.get(card.userId) ?? "") : "";
         return [
-          l.createdAt.toLocaleDateString("de-DE"),
+          l.createdAt.toLocaleDateString(locale),
           l.name, l.email, l.phone, l.message,
           card?.name ?? "", memberName,
         ];

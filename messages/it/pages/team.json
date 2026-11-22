@@ -1,0 +1,17 @@
+{
+  "title": "Team",
+  "manageUsers": "Gestione utenti",
+  "adminHint": "Come Super Admin puoi gestire tutti gli utenti e le organizzazioni dal pannello di amministrazione. L’area Team è riservata ai membri di un’organizzazione.",
+  "adminPanel": "Vai al pannello di amministrazione",
+  "suspended": "Organizzazione sospesa",
+  "subscribe": "Attiva il piano Business",
+  "directory": "Elenco del team",
+  "upgrade": "Passa al piano Business",
+  "createOrg": "Crea la tua organizzazione",
+  "createOrgHint": "Dai un nome all’organizzazione, invita i membri e definisci uno stile comune per tutti i biglietti da visita.",
+  "suspendedAdmin": "Il piano Business di {organization} è scaduto. I dati sono ancora disponibili. Riattiva il piano per ripristinare subito l’organizzazione.",
+  "suspendedMember": "L’organizzazione {organization} è sospesa. Rivolgiti al tuo amministratore.",
+  "suspendedSince": "Sospesa dal {date}",
+  "businessHint": "Con il {plan} puoi usare l’elenco del team, gestire i membri e inviare inviti.",
+  "businessPlan": "piano Business"
+}

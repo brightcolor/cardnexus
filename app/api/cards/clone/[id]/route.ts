@@ -1,13 +1,14 @@
+import { apiMessage, apiCardLimit } from "@/lib/i18n/api";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { headers } from "next/headers";
-import { nanoid } from "nanoid";
+import { generateCardSlug } from "@/lib/card-slug";
 import { effectivePlan, getPlanFeatures } from "@/lib/plans";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const { id } = await params;
 
@@ -18,21 +19,21 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     db.card.count({ where: { userId: session.user.id } }),
   ]);
 
-  if (!source) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!source) return NextResponse.json({ error: await apiMessage("notFound") }, { status: 404 });
 
   const plan = effectivePlan(dbUser?.plan ?? "free", dbUser?.planExpiresAt);
   const { maxCards } = getPlanFeatures(plan);
   if (existingCount >= maxCards) {
     return NextResponse.json(
-      { error: `Dein Plan erlaubt maximal ${maxCards} Karte${maxCards === 1 ? "" : "n"}.` },
+      { error: await apiCardLimit(maxCards) },
       { status: 403 }
     );
   }
 
-  const base = [source.firstName, source.lastName].filter(Boolean).join("-").toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "karte";
-  let slug = `${base}-${nanoid(6)}`;
-  while (await db.card.findUnique({ where: { slug } })) slug = `${base}-${nanoid(6)}`;
+  let slug = generateCardSlug(source.firstName, source.lastName);
+  while (await db.card.findUnique({ where: { slug } })) {
+    slug = generateCardSlug(source.firstName, source.lastName);
+  }
 
   const omit = new Set(["id", "slug", "createdAt", "updatedAt"]);
   const data = Object.fromEntries(
@@ -45,12 +46,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       slug,
       name: `${source.name} (Kopie)`,
       isDefault: false,
+      isPublic: false,
+      cardDomain: null,
       totalViews: 0,
     } as Parameters<typeof db.card.create>[0]["data"],
   });
 
+  const { passwordHash: _ph, ...safe } = cloned;
   return NextResponse.json(
-    { ...cloned, customLinks: JSON.parse((cloned.customLinks as unknown as string) || "[]") },
+    { ...safe, customLinks: JSON.parse((cloned.customLinks as unknown as string) || "[]") },
     { status: 201 }
   );
 }

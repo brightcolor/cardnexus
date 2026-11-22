@@ -1,15 +1,24 @@
+import { getLocale } from "@/lib/i18n/server";
+import { translator } from "@/lib/i18n/messages";
+import de from "@/messages/de/pages/admin-users.json";
+import it from "@/messages/it/pages/admin-users.json";
+import en from "@/messages/en/pages/admin-users.json";
 import { db } from "@/lib/db";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { AdminUsersClient } from "./client";
 
-export const metadata = { title: "Benutzer verwalten" };
+export async function generateMetadata() {
+  return { title: translator(await getLocale(), de, it, en)("title") };
+}
 
 export default async function AdminUsersPage({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
+  const locale = await getLocale();
+  const t = translator(locale, de, it, en);
   const session = await auth.api.getSession({ headers: await headers() });
   const currentUser = session!.user as { id: string; role?: string };
 
@@ -37,11 +46,11 @@ export default async function AdminUsersPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Alle Benutzer</h1>
+        <h1 className="text-2xl font-bold">{t("all")}</h1>
         <p className="text-muted-foreground mt-1">
           {search
-            ? `${users.length} Treffer für „${search}" (${total} gesamt)`
-            : `${total} Benutzer auf der Plattform`}
+            ? t("searchResults", { count: users.length, query: search, total })
+            : t("totalUsers", { total })}
         </p>
       </div>
       <AdminUsersClient

@@ -1,0 +1,6 @@
+{
+  "pending": "Karte wartet auf Freigabe",
+  "pendingHint": "Deine letzte Änderung wird von einem Administrator geprüft. Die Karte bleibt bis zur Freigabe in ihrem bisherigen Zustand sichtbar.",
+  "rejected": "Änderung abgelehnt",
+  "rejectedHint": "Bitte überarbeite deine Karte und speichere erneut."
+}

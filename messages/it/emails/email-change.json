@@ -1,0 +1,8 @@
+{
+  "subject": "Indirizzo email aggiornato su {app}",
+  "heading": "Indirizzo email aggiornato",
+  "intro": "L’indirizzo email del tuo account {app} è stato appena aggiornato.",
+  "newAddress": "Nuovo indirizzo: {email}",
+  "security": "Se <strong>non</strong> hai fatto questa modifica, contattaci subito e cambia la password.",
+  "reason": "Per sicurezza, abbiamo inviato questo messaggio al tuo indirizzo precedente."
+}

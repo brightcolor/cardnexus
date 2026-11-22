@@ -1,0 +1,18 @@
+{
+  "freeQuestion": "Ist {appName} wirklich kostenlos?",
+  "freeAnswer": "Ja. Der Free-Plan ist dauerhaft kostenlos und enthält eine vollständige digitale Visitenkarte mit QR-Code, vCard-Download und Lead Capture. Ohne Kreditkarte.",
+  "appQuestion": "Brauche ich eine App um meine Karte zu teilen?",
+  "appAnswer": "Nein. Deine Karte ist eine normale Webseite und öffnet sich in jedem Browser. Besucher benötigen keine App. Für NFC-Tags wird eine einmalige Schreib-App benötigt, danach funktioniert es ohne alles.",
+  "nfcQuestion": "Wie funktioniert NFC?",
+  "nfcAnswer": "Du beschreibst einen günstigen NFC-Tag (ca. 0,50–2 €) einmalig mit deiner Karten-URL. Hält jemand sein Smartphone an den Tag, öffnet sich deine digitale Karte sofort – bei iPhone ab iPhone 7, bei Android ab Version 4.4.",
+  "teamQuestion": "Kann ich {appName} für mein Team einsetzen?",
+  "teamAnswer": "Ja. Mit dem Business-Plan verwaltest du beliebig viele Mitglieder, vergibst Rollen, importierst per CSV und setzt ein einheitliches Firmendesign für alle Karten.",
+  "expiryQuestion": "Was passiert wenn mein Plan ausläuft?",
+  "expiryAnswer": "Dein Account wird auf den Free-Plan zurückgestuft. Deine Karte bleibt aktiv, Pro/Business-Features wie Whitelabel oder Kampagnen sind nicht mehr nutzbar bis du verlängerst.",
+  "cancelQuestion": "Wie kündige ich?",
+  "cancelAnswer": "Schreib uns einfach eine E-Mail. Es gibt keine Mindestlaufzeit – du kannst monatlich kündigen.",
+  "safetyQuestion": "Sind meine Daten sicher?",
+  "safetyAnswer": "Ja. Server und Datenbank liegen in Deutschland. Wir verwenden keine Tracking-Cookies von Drittanbietern und sind vollständig DSGVO-konform.",
+  "domainQuestion": "Kann ich meine eigene Domain verwenden?",
+  "domainAnswer": "Ab dem Pro-Plan ja. Du kannst deine Karte unter deiner eigenen Domain (z.B. karte.meinefirma.de) erreichbar machen."
+}

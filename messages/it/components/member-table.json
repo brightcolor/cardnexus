@@ -1,0 +1,16 @@
+{
+  "confirmDelete": "Vuoi eliminare questo utente?",
+  "empty": "Nessun utente trovato",
+  "user": "Utente",
+  "role": "Ruolo",
+  "card": "Biglietto da visita",
+  "joined": "Membro dal",
+  "me": "(tu)",
+  "admin": "Amministratore",
+  "leader": "Responsabile del team",
+  "member": "Membro",
+  "active": "Attivo",
+  "noCard": "Nessun biglietto da visita",
+  "viewCard": "Visualizza biglietto",
+  "delete": "Elimina"
+}

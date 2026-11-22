@@ -1,0 +1,9 @@
+{
+  "phone": "Telefon",
+  "mobile": "Mobil",
+  "email": "E-Mail",
+  "website": "Web",
+  "address": "Adresse",
+  "qrHint": "Scan für digitale Karte",
+  "qrAlt": "QR Code"
+}

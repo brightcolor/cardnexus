@@ -14,7 +14,7 @@ export interface PlatformSettings {
 
 const DEFAULTS: Omit<PlatformSettings, "id"> = {
   appName: "CardNexus",
-  appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+  appUrl: process.env.APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
   faviconUrl: null,
   logoUrl: null,
   primaryColor: "#0F172A",

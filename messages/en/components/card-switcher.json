@@ -1,0 +1,15 @@
+{
+  "newCard": "New card",
+  "createFailed": "Could not create the card.",
+  "cloneFailed": "Could not duplicate the card.",
+  "lastCard": "You cannot delete your last card.",
+  "confirmDelete": "Delete this card?",
+  "choose": "Choose a card",
+  "rename": "Rename",
+  "makeDefault": "Make default",
+  "delete": "Delete",
+  "creating": "Creating…",
+  "cloning": "Duplicating…",
+  "clone": "Duplicate",
+  "deleteFailed": "Could not delete the business card."
+}

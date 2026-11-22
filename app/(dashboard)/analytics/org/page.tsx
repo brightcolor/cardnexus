@@ -1,3 +1,8 @@
+import { translator } from "@/lib/i18n/messages";
+import { getLocale } from "@/lib/i18n/server";
+import de from "@/messages/de/pages/team-analytics.json";
+import it from "@/messages/it/pages/team-analytics.json";
+import en from "@/messages/en/pages/team-analytics.json";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -7,9 +12,13 @@ import { OrgAnalyticsClient } from "./client";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-export const metadata = { title: "Team Analytics" };
+export async function generateMetadata() {
+  return { title: translator(await getLocale(), de, it, en)("title") };
+}
 
 export default async function OrgAnalyticsPage() {
+  const locale = await getLocale();
+  const t = translator(locale, de, it, en);
   const session = await auth.api.getSession({ headers: await headers() });
   const user = session!.user as { id: string; role?: string; organizationId?: string };
   const role = user.role ?? "member";
@@ -88,9 +97,9 @@ export default async function OrgAnalyticsPage() {
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold">Team Analytics</h1>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
           <p className="text-muted-foreground mt-1">
-            {org?.name} · {cards.length} Karten · letzte 30 Tage
+            {org?.name} · {cards.length} {t("period")}
           </p>
         </div>
       </div>

@@ -1,5 +1,10 @@
 "use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/pages/card-editor.json";
+import it from "@/messages/it/pages/card-editor.json";
+import en from "@/messages/en/pages/card-editor.json";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -44,6 +49,8 @@ const SOCIAL_FIELDS = [
 ];
 
 export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, saveEndpoint, userPlan = "free", allowedDomains, canCustomDomain }: CardEditorProps) {
+  const locale = useLocale();
+  const t = translator(locale, de, it, en);
   const router = useRouter();
   const allTemplates = userPlan !== "free";
 
@@ -59,11 +66,12 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
     socialStyle:    "icons",
     avatarBorder:   "none",
     cardBackground: "white",
-    showQrOnCard: false, showInTeamDirectory: true, isPublic: true,
+    showQrOnCard: false, showInTeamDirectory: true, isPublic: false,
     customLinks: [],
   };
 
   const [card, setCard]         = useState<Partial<CardData>>(initialCard ?? defaultCard);
+  const [savedSlug, setSavedSlug] = useState(initialCard?.slug);
   const [saving, setSaving]     = useState(false);
   const [error, setError]       = useState("");
   const [success, setSuccess]   = useState(false);
@@ -98,24 +106,30 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
       const method = isNew ? "POST" : "PATCH";
       // For PATCH the route reads `id` from the body — card state already contains it
       // when initialCard was provided. Ensure it's always present.
-      const payload = isNew ? card : { ...card, id: card.id };
+      const payload = !isNew && !saveEndpoint && card.slug === savedSlug
+        ? { ...card, slug: undefined }
+        : card;
       const res = await fetch(saveEndpoint ?? "/api/cards", {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(typeof json.error === "string" ? json.error : "Fehler beim Speichern");
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json) {
+        const message = typeof json?.error === "string" ? json.error : t("saveError", { status: res.status });
+        throw new Error(message);
+      }
+      if (typeof json.slug === "string") setSavedSlug(json.slug);
       // On new card creation, navigate to the card page with the new card selected
       if (isNew && json.id) {
         router.push(`/card?card=${json.id}`);
       }
       setSuccess(true);
-      toast.success("Karte gespeichert");
+      toast.success(t("savedToast"));
       setTimeout(() => setSuccess(false), 3000);
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Unbekannter Fehler");
+      setError(e instanceof Error ? e.message : t("unknownError"));
     } finally {
       setSaving(false);
     }
@@ -126,76 +140,76 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
       <div className="flex-1 min-w-0">
         <Tabs defaultValue="profile">
           <TabsList className="mb-6 flex-wrap h-auto gap-1">
-            <TabsTrigger value="profile">Profil</TabsTrigger>
-            <TabsTrigger value="media">Bilder</TabsTrigger>
-            <TabsTrigger value="contact">Kontakt</TabsTrigger>
-            <TabsTrigger value="social">Social</TabsTrigger>
-            <TabsTrigger value="design">Design</TabsTrigger>
-            <TabsTrigger value="links">Links</TabsTrigger>
+            <TabsTrigger value="profile">{t("profileTab")}</TabsTrigger>
+            <TabsTrigger value="media">{t("mediaTab")}</TabsTrigger>
+            <TabsTrigger value="contact">{t("contactTab")}</TabsTrigger>
+            <TabsTrigger value="social">{t("socialTab")}</TabsTrigger>
+            <TabsTrigger value="design">{t("designTab")}</TabsTrigger>
+            <TabsTrigger value="links">{t("linksTab")}</TabsTrigger>
           </TabsList>
 
           {/* Profile */}
           <TabsContent value="profile" className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label>Vorname</Label>
+                <Label>{t("firstName")}</Label>
                 <Input value={card.firstName ?? ""} onChange={(e) => update("firstName", e.target.value || null)} placeholder="Max" />
               </div>
               <div className="space-y-1.5">
-                <Label>Nachname</Label>
-                <Input value={card.lastName ?? ""} onChange={(e) => update("lastName", e.target.value || null)} placeholder="Mustermann" />
+                <Label>{t("lastName")}</Label>
+                <Input value={card.lastName ?? ""} onChange={(e) => update("lastName", e.target.value || null)} placeholder={t("lastNameExample")} />
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label>Berufsbezeichnung</Label>
+              <Label>{t("jobTitle")}</Label>
               <Input value={card.title ?? ""} onChange={(e) => update("title", e.target.value || null)} placeholder="Senior Developer" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label>Unternehmen</Label>
+                <Label>{t("company")}</Label>
                 <Input value={card.company ?? ""} onChange={(e) => update("company", e.target.value || null)} placeholder="ACME GmbH" />
               </div>
               <div className="space-y-1.5">
-                <Label>Abteilung</Label>
+                <Label>{t("department")}</Label>
                 <Input value={card.department ?? ""} onChange={(e) => update("department", e.target.value || null)} placeholder="Engineering" />
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label>Kurzbeschreibung</Label>
+              <Label>{t("bio")}</Label>
               <Textarea value={card.bio ?? ""} onChange={(e) => update("bio", e.target.value || null)}
-                placeholder="Kurze Beschreibung über dich…" maxLength={500} />
+                placeholder={t("bioPlaceholder")} maxLength={500} />
               <p className="text-xs text-muted-foreground text-right">{(card.bio ?? "").length}/500</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label>Pronomen</Label>
-                <Input value={card.pronouns ?? ""} onChange={(e) => update("pronouns", e.target.value || null)} placeholder="er/ihm, she/her…" />
+                <Label>{t("pronouns")}</Label>
+                <Input value={card.pronouns ?? ""} onChange={(e) => update("pronouns", e.target.value || null)} placeholder={t("pronounsExample")} />
               </div>
               <div className="space-y-1.5">
-                <Label>Geschlecht <span className="text-xs font-normal text-muted-foreground">(vCard)</span></Label>
+                <Label>{t("gender")} <span className="text-xs font-normal text-muted-foreground">(vCard)</span></Label>
                 <select
                   value={card.gender ?? ""}
                   onChange={(e) => update("gender", e.target.value || null)}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 >
-                  <option value="">— keine Angabe —</option>
-                  <option value="m">Männlich</option>
-                  <option value="w">Weiblich</option>
-                  <option value="divers">Divers</option>
-                  <option value="n">Keine Angabe</option>
+                  <option value="">{t("genderUnspecified")}</option>
+                  <option value="m">{t("genderMale")}</option>
+                  <option value="w">{t("genderFemale")}</option>
+                  <option value="divers">{t("genderOther")}</option>
+                  <option value="n">{t("genderUndisclosed")}</option>
                 </select>
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <Label>Geburtstag</Label>
+              <Label>{t("birthday")}</Label>
               <Input value={card.birthday ?? ""} onChange={(e) => update("birthday", e.target.value || null)} type="date" />
             </div>
 
             {!isNew && card.slug && (
               <div className="space-y-1.5 pt-2 border-t border-border">
-                <Label htmlFor="slug-field">Karten-URL (Slug)</Label>
+                <Label htmlFor="slug-field">{t("slug")}</Label>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground shrink-0">/c/</span>
                   <Input
@@ -203,11 +217,11 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
                     value={card.slug}
                     onChange={(e) => update("slug", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/--+/g, "-"))}
                     className="font-mono"
-                    placeholder="mein-slug"
+                    placeholder={t("slugExample")}
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Der alte Link wird automatisch weitergeleitet. Speichere die Karte um die Änderung zu übernehmen.
+                  {t("slugHelp")}
                 </p>
               </div>
             )}
@@ -216,14 +230,14 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
           {/* Media */}
           <TabsContent value="media" className="space-y-6">
             <div className="space-y-2">
-              <Label>Avatar</Label>
-              <p className="text-xs text-muted-foreground">Profilbild. Empfohlen: quadratisch, mind. 200×200 px.</p>
-              <ImageUpload value={card.avatarUrl} onChange={(url) => update("avatarUrl", url)} label="Avatar hochladen" shape="circle" />
+              <Label>{t("avatar")}</Label>
+              <p className="text-xs text-muted-foreground">{t("avatarHint")}</p>
+              <ImageUpload value={card.avatarUrl} onChange={(url) => update("avatarUrl", url)} label={t("uploadAvatar")} shape="circle" />
             </div>
             <div className="space-y-2">
-              <Label>Cover-Bild</Label>
-              <p className="text-xs text-muted-foreground">Hintergrundbild für das Modern-Template. Empfohlen: 800×300 px.</p>
-              <ImageUpload value={card.coverUrl} onChange={(url) => update("coverUrl", url)} label="Cover hochladen" shape="wide" className="h-28" />
+              <Label>{t("cover")}</Label>
+              <p className="text-xs text-muted-foreground">{t("coverHint")}</p>
+              <ImageUpload value={card.coverUrl} onChange={(url) => update("coverUrl", url)} label={t("uploadCover")} shape="wide" className="h-28" />
             </div>
           </TabsContent>
 
@@ -231,11 +245,11 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
           <TabsContent value="contact" className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label>Telefon (Büro)</Label>
+                <Label>{t("officePhone")}</Label>
                 <Input value={card.phone ?? ""} onChange={(e) => update("phone", e.target.value || null)} placeholder="+49 89 1234567" type="tel" />
               </div>
               <div className="space-y-1.5">
-                <Label>Mobil</Label>
+                <Label>{t("mobilePhone")}</Label>
                 <Input value={card.mobile ?? ""} onChange={(e) => update("mobile", e.target.value || null)} placeholder="+49 170 1234567" type="tel" />
               </div>
             </div>
@@ -244,21 +258,21 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
               <Input value={card.fax ?? ""} onChange={(e) => update("fax", e.target.value || null)} placeholder="+49 89 1234568" type="tel" />
             </div>
             <div className="space-y-1.5">
-              <Label>E-Mail</Label>
+              <Label>{t("email")}</Label>
               <Input value={card.email ?? ""} onChange={(e) => update("email", e.target.value || null)} placeholder="max@example.com" type="email" />
             </div>
             <div className="space-y-1.5">
-              <Label>Website</Label>
+              <Label>{t("website")}</Label>
               <Input value={card.website ?? ""} onChange={(e) => update("website", e.target.value || null)} placeholder="https://example.com" type="url" />
             </div>
             <div className="space-y-1.5">
-              <Label>Adresse</Label>
-              <Input value={card.address ?? ""} onChange={(e) => update("address", e.target.value || null)} placeholder="Musterstraße 1, 80331 München" />
+              <Label htmlFor="card-address">{t("address")}</Label>
+              <Textarea id="card-address" rows={3} value={card.address ?? ""} onChange={(e) => update("address", e.target.value || null)} placeholder={t("addressExample")} />
             </div>
             <div className="space-y-1.5">
-              <Label>Terminbuchungs-Link <span className="text-xs font-normal text-muted-foreground">(Pro)</span></Label>
+              <Label>{t("bookingLink")} <span className="text-xs font-normal text-muted-foreground">(Pro)</span></Label>
               <Input value={card.bookingUrl ?? ""} onChange={(e) => update("bookingUrl", e.target.value || null)} placeholder="https://calendly.com/..." type="url" />
-              <p className="text-xs text-muted-foreground">Wird als Button auf deiner Karte angezeigt.</p>
+              <p className="text-xs text-muted-foreground">{t("bookingHint")}</p>
             </div>
           </TabsContent>
 
@@ -284,8 +298,8 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
           {/* Custom Links — reorderable via drag handle */}
           <TabsContent value="links" className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Eigene Links werden als Buttons auf der Karte angezeigt (max. 5).
-              Ziehe am Griff <GripVertical className="inline h-3.5 w-3.5 align-text-bottom" />, um die Reihenfolge zu ändern.
+              {t("customLinksHint")}{" "}
+              {t("dragHint").split("{handle}").map((part, index) => index === 0 ? part : <span key={index}><GripVertical className="inline h-3.5 w-3.5 align-text-bottom" />{part}</span>)}
             </p>
             <ul className="space-y-2">
               {(card.customLinks ?? []).map((link, i) => (
@@ -306,26 +320,26 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
                 >
                   <button
                     type="button"
-                    aria-label={`Link ${i + 1} verschieben`}
+                    aria-label={t("moveLink", { number: i + 1 })}
                     className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-1 -ml-1"
-                    title="Ziehen zum Sortieren"
+                    title={t("sortHint")}
                     tabIndex={-1}
                   >
                     <GripVertical className="h-4 w-4" />
                   </button>
                   <Input
-                    placeholder="Label"
+                    placeholder={t("linkLabel")}
                     value={link.label}
                     onChange={(e) => updateLink(i, "label", e.target.value)}
                     className="w-32"
-                    aria-label={`Link ${i + 1} Label`}
+                    aria-label={t("linkLabelAria", { number: i + 1 })}
                   />
                   <Input
                     placeholder="https://…"
                     value={link.url}
                     onChange={(e) => updateLink(i, "url", e.target.value)}
                     type="url"
-                    aria-label={`Link ${i + 1} URL`}
+                    aria-label={t("linkUrl", { number: i + 1 })}
                   />
                   <div className="flex flex-col">
                     <button
@@ -333,20 +347,20 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
                       onClick={() => moveLink(i, i - 1)}
                       disabled={i === 0}
                       className="text-xs text-muted-foreground hover:text-foreground disabled:opacity-30 px-1 leading-3"
-                      aria-label="Nach oben"
+                      aria-label={t("moveUp")}
                     >▲</button>
                     <button
                       type="button"
                       onClick={() => moveLink(i, i + 1)}
                       disabled={i === (card.customLinks?.length ?? 0) - 1}
                       className="text-xs text-muted-foreground hover:text-foreground disabled:opacity-30 px-1 leading-3"
-                      aria-label="Nach unten"
+                      aria-label={t("moveDown")}
                     >▼</button>
                   </div>
                   <Button
                     type="button" variant="ghost" size="icon"
                     onClick={() => removeLink(i)}
-                    aria-label={`Link ${i + 1} entfernen`}
+                    aria-label={t("deleteLink", { number: i + 1 })}
                   >
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
@@ -355,7 +369,7 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
             </ul>
             {(card.customLinks ?? []).length < 5 && (
               <Button type="button" variant="outline" size="sm" onClick={addLink}>
-                <Plus className="h-4 w-4" /> Link hinzufügen
+                <Plus className="h-4 w-4" /> {t("addLink")}
               </Button>
             )}
           </TabsContent>
@@ -365,22 +379,22 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
           <p className="mt-4 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive border border-destructive/20">{error}</p>
         )}
         {success && (
-          <p className="mt-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700 border border-emerald-200">Gespeichert ✓</p>
+          <p className="mt-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700 border border-emerald-200">{t("saved")}</p>
         )}
 
         <div className="flex items-center gap-3 mt-6 pt-6 border-t border-border">
           <Button type="button" onClick={save} disabled={saving}>
             <Save className="h-4 w-4" />
-            {saving ? "Wird gespeichert…" : "Speichern"}
+            {saving ? t("saving") : t("saveCard")}
           </Button>
           <Button type="button" variant="outline" onClick={() => setShowPreview(!showPreview)} className="lg:hidden">
-            <Eye className="h-4 w-4" /> Vorschau
+            <Eye className="h-4 w-4" /> {t("preview")}
           </Button>
         </div>
       </div>
 
       <div className={`lg:w-80 lg:sticky lg:top-4 lg:self-start ${showPreview ? "" : "hidden lg:block"}`}>
-        <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-4">Live-Vorschau</p>
+        <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-4">{t("livePreview")}</p>
         <CardPreview card={card} scale={0.85} />
       </div>
     </div>

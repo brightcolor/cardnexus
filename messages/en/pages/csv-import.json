@@ -1,0 +1,21 @@
+{
+  "fileRequired": "Select a CSV file first.",
+  "unknownError": "An unknown error occurred.",
+  "format": "CSV format",
+  "required": "Required",
+  "or": "or",
+  "optional": "Optional",
+  "description": "The import updates organization members matched by email address. To add a new member, send an invitation.",
+  "template": "Download template",
+  "drop": "Drop a CSV file here or click to select it.",
+  "importing": "Importing…",
+  "start": "Start import",
+  "email": "Email",
+  "status": "Status",
+  "note": "Note",
+  "again": "Import another file",
+  "importError": "Could not import the file.",
+  "created": "Created",
+  "updated": "Updated",
+  "skipped": "Skipped"
+}

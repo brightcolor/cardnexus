@@ -1,3 +1,10 @@
+"use client";
+
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/components/gradient-card.json";
+import it from "@/messages/it/components/gradient-card.json";
+import en from "@/messages/en/components/gradient-card.json";
 import { Phone, Mail, Globe, MapPin } from "lucide-react";
 import type { CardData } from "@/types";
 import { fontClass, shadowClass, avatarBorderStyle } from "../CardPreview";
@@ -13,6 +20,8 @@ function darken(hex: string, amount = 0.35): string {
 }
 
 export function GradientTemplate({ card }: { card: Partial<CardData> }) {
+  const locale = useLocale();
+  const t = translator(locale, de, it, en);
   const color   = card.primaryColor ?? "#7c3aed";
   const accent  = card.accentColor  ?? darken(color, 0.2);
   const font    = fontClass(card.fontFamily);
@@ -93,7 +102,7 @@ export function GradientTemplate({ card }: { card: Partial<CardData> }) {
           {card.address && (
             <div className="flex items-start gap-3 text-sm text-white/80 px-3 py-2">
               <MapPin className="h-3.5 w-3.5 shrink-0 text-white/60 mt-0.5" />
-              {card.address}
+              <span className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]">{card.address}</span>
             </div>
           )}
         </div>
@@ -115,8 +124,8 @@ export function GradientTemplate({ card }: { card: Partial<CardData> }) {
 
         {card.showQrOnCard && card.slug && (
           <div className="mt-5 flex items-center gap-3">
-            <img src={`/api/qr/${card.slug}`} alt="QR" className="h-10 w-10 rounded opacity-90" />
-            <p className="text-xs text-white/50">Scan für digitale Karte</p>
+            <img src={`/api/qr/${card.slug}`} alt={t("qrAlt")} className="h-10 w-10 rounded" />
+            <p className="text-xs text-white/50">{t("scan")}</p>
           </div>
         )}
       </div>

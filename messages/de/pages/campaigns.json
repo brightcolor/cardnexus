@@ -1,0 +1,15 @@
+{
+  "cardRequired": "Erstelle zuerst deine Visitenkarte, um Kampagnen zu verwenden.",
+  "newCampaign": "Neue Kampagne erstellen",
+  "name": "Name",
+  "example": "z.B. Messe Berlin 2026",
+  "expiry": "Ablaufdatum (optional)",
+  "create": "Kampagne erstellen",
+  "empty": "Noch keine Kampagnen. Erstelle deinen ersten Link oben.",
+  "expired": "Abgelaufen",
+  "clicks": "Klicks",
+  "until": "bis",
+  "copyLink": "URL kopieren",
+  "testLink": "Link testen",
+  "delete": "Loeschen"
+}

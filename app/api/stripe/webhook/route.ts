@@ -1,3 +1,4 @@
+import { apiMessage } from "@/lib/i18n/api";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import Stripe from "stripe";
@@ -28,7 +29,7 @@ function subIdFromInvoice(invoice: Stripe.Invoice): string | null {
 export async function POST(req: NextRequest) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "");
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
-  if (!secret) return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 });
+  if (!secret) return NextResponse.json({ error: await apiMessage("webhookSecretMissing") }, { status: 500 });
 
   const body = await req.text();
   const sig  = req.headers.get("stripe-signature") ?? "";
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
     event = stripe.webhooks.constructEvent(body, sig, secret);
   } catch (err) {
     console.error("[stripe webhook] signature verification failed:", err);
-    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+    return NextResponse.json({ error: await apiMessage("invalidSignature") }, { status: 400 });
   }
 
   // SECURITY: Stripe retries can deliver the same event multiple times.

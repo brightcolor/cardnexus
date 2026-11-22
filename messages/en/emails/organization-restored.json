@@ -1,0 +1,9 @@
+{
+  "title": "Organization reactivated – {org}",
+  "subject": "Organization reactivated: {org}",
+  "heading": "Your organization is active again",
+  "intro": "Hi {name}, your Business plan is active again. All features for {org} are available.",
+  "description": "Your team and settings have been restored.",
+  "team": "Go to your team",
+  "reason": "You received this email because you administer this organization."
+}

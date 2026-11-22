@@ -1,0 +1,8 @@
+{
+  "subject": "E-Mail-Adresse geändert – {app}",
+  "heading": "E-Mail-Adresse geändert",
+  "intro": "Die E-Mail-Adresse für deinen {app}-Account wurde soeben geändert.",
+  "newAddress": "Neue Adresse: {email}",
+  "security": "Falls du diese Änderung <strong>nicht</strong> selbst vorgenommen hast, kontaktiere uns sofort und ändere dein Passwort.",
+  "reason": "Du erhältst diese Sicherheits-E-Mail an deine bisherige Adresse."
+}

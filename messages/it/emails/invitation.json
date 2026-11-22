@@ -1,0 +1,12 @@
+{
+  "title": "Invito a {orgName}",
+  "subject": "{senderName} ti invita a unirti a {orgName}",
+  "heading": "Hai ricevuto un invito",
+  "admin": "Amministratore",
+  "leader": "Responsabile del team",
+  "member": "Membro",
+  "body": "{sender} ti invita a entrare nell’organizzazione {organization} su {app} con il ruolo di {role}.",
+  "description": "Crea il tuo account gratuito e personalizza il tuo biglietto da visita digitale.",
+  "accept": "Accetta l’invito",
+  "expiry": "Il link è valido per 7 giorni. Se non aspettavi questo invito, puoi ignorare il messaggio.<br/>Link: {url}"
+}

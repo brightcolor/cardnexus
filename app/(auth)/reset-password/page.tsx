@@ -1,5 +1,10 @@
 "use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/pages/reset-password.json";
+import it from "@/messages/it/pages/reset-password.json";
+import en from "@/messages/en/pages/reset-password.json";
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -12,6 +17,8 @@ import {
 import { authClient } from "@/lib/auth-client";
 
 function ResetForm() {
+  const locale = useLocale();
+  const t = translator(locale, de, it, en);
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
@@ -25,17 +32,17 @@ function ResetForm() {
     e.preventDefault();
     setError("");
     if (password !== confirm) {
-      setError("Passwörter stimmen nicht überein.");
+      setError(t("passwordMismatch"));
       return;
     }
     if (!token) {
-      setError("Reset-Link ungültig oder abgelaufen.");
+      setError(t("missingToken"));
       return;
     }
     setLoading(true);
     const res = await authClient.resetPassword({ token, newPassword: password });
     if (res.error) {
-      setError("Reset-Link ist ungültig oder abgelaufen.");
+      setError(t("invalidToken"));
       setLoading(false);
       return;
     }
@@ -45,13 +52,13 @@ function ResetForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Neues Passwort setzen</CardTitle>
-        <CardDescription>Wähle ein sicheres Passwort mit mindestens 8 Zeichen.</CardDescription>
+        <CardTitle>{t("heading")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <form onSubmit={submit}>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="pw">Neues Passwort</Label>
+            <Label htmlFor="pw">{t("newPassword")}</Label>
             <Input
               id="pw" type="password" required autoComplete="new-password"
               minLength={8} value={password}
@@ -59,7 +66,7 @@ function ResetForm() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="pw2">Passwort wiederholen</Label>
+            <Label htmlFor="pw2">{t("confirmPassword")}</Label>
             <Input
               id="pw2" type="password" required autoComplete="new-password"
               minLength={8} value={confirm}
@@ -70,10 +77,10 @@ function ResetForm() {
         </CardContent>
         <CardFooter className="flex flex-col gap-3">
           <Button type="submit" className="w-full" disabled={loading || password.length < 8}>
-            {loading ? "Speichern…" : "Passwort speichern"}
+            {loading ? t("saving") : t("savePassword")}
           </Button>
           <p className="text-sm text-muted-foreground text-center">
-            <Link href="/login" className="hover:underline">Zurück zum Login</Link>
+            <Link href="/login" className="hover:underline">{t("backToLogin")}</Link>
           </p>
         </CardFooter>
       </form>

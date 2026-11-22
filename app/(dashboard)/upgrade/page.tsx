@@ -1,3 +1,8 @@
+import { translator } from "@/lib/i18n/messages";
+import { getLocale } from "@/lib/i18n/server";
+import de from "@/messages/de/pages/billing.json";
+import it from "@/messages/it/pages/billing.json";
+import en from "@/messages/en/pages/billing.json";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -7,29 +12,34 @@ import Link from "next/link";
 import { Check, ArrowLeft, Zap } from "lucide-react";
 import { UpgradeButtons } from "./UpgradeButtons";
 
-export const metadata = { title: "Upgrade – CardNexus" };
-
-const FEATURE_LABELS: Record<string, string | ((v: number | boolean) => string)> = {
-  whiteLabel:             "White Label (kein Badge)",
-  customDomain:           "Eigene Domain",
-  allTemplates:           "Alle 12 Templates",
-  maxCards:               (v) => v === Infinity ? "Unbegrenzte Karten" : `Bis zu ${v} Karte${v === 1 ? "" : "n"}`,
-  pdfExport:              "PDF / Print-Export",
-  appointmentBooking:     "Terminbuchungs-Link",
-  campaigns:              "UTM-Kampagnen",
-  leadCapture:            "Lead-Capture-Formular",
-  eventInvitations:       "Event-Einladungslinks",
-  milestoneNotifications: "Meilenstein-Benachrichtigungen",
-  bulkImport:             "Bulk CSV-Import",
-  orgTemplate:            "Karten-Vorlage für Org",
-  teamDirectory:          "Team-Verzeichnis",
-};
+export async function generateMetadata() {
+  return { title: translator(await getLocale(), de, it, en)("metadata") };
+}
 
 export default async function UpgradePage({
   searchParams,
 }: {
   searchParams: Promise<{ success?: string; canceled?: string }>;
 }) {
+  const locale = await getLocale();
+  const t = translator(locale, de, it, en);
+
+  const FEATURE_LABELS: Record<string, string | ((v: number | boolean) => string)> = {
+    whiteLabel:             t("whiteLabel"),
+    customDomain:           t("customDomain"),
+    allTemplates:           t("allTemplates"),
+    maxCards:               (v) => v === Infinity ? t("unlimited") : t(v === 1 ? "cardLimitOne" : "cardLimitOther", { count: Number(v).toLocaleString(locale) }),
+    pdfExport:              t("pdfExport"),
+    appointmentBooking:     t("booking"),
+    campaigns:              t("campaigns"),
+    leadCapture:            t("leads"),
+    eventInvitations:       t("events"),
+    milestoneNotifications: t("milestones"),
+    bulkImport:             t("bulkImport"),
+    orgTemplate:            t("orgTemplate"),
+    teamDirectory:          t("directory"),
+  };
+
   const sp      = await searchParams;
   const session = await auth.api.getSession({ headers: await headers() });
   const user    = session!.user as { id: string };
@@ -54,15 +64,15 @@ export default async function UpgradePage({
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Zurück zum Dashboard
+          {t("back")}
         </Link>
-        <h1 className="text-2xl font-bold">Plan upgraden</h1>
+        <h1 className="text-2xl font-bold">{t("heading")}</h1>
         <p className="text-muted-foreground mt-1">
-          Aktuell:{" "}
+          {t("currentLabel")}{" "}
           <span className="font-semibold capitalize">{currentPlan}</span>
           {dbUser?.planExpiresAt && (
             <span className="text-xs ml-2 text-muted-foreground">
-              (bis {new Date(dbUser.planExpiresAt).toLocaleDateString("de-DE")})
+              {t("expires", { date: new Date(dbUser.planExpiresAt).toLocaleDateString(locale) })}
             </span>
           )}
         </p>
@@ -70,18 +80,18 @@ export default async function UpgradePage({
 
       {sp.success && (
         <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-700">
-          ✓ Zahlung erfolgreich! Dein Plan wurde aktualisiert.
+          {t("paymentSuccess")}
         </div>
       )}
       {sp.canceled && (
         <div className="rounded-xl bg-muted border border-border px-4 py-3 text-sm text-muted-foreground">
-          Vorgang abgebrochen.
+          {t("paymentCanceled")}
         </div>
       )}
 
       {!stripeReady && !paypalReady && (
         <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-700">
-          Kein Zahlungsanbieter konfiguriert. Bitte Stripe- oder PayPal-Umgebungsvariablen setzen.
+          {t("noProvider")}
         </div>
       )}
 
@@ -103,15 +113,15 @@ export default async function UpgradePage({
                   <span className="font-bold text-lg">{plan.name}</span>
                   {isCurrent && (
                     <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
-                      Aktuell
+                      {t("currentBadge")}
                     </span>
                   )}
                 </div>
                 <div className="mt-2">
-                  <span className="text-3xl font-bold">{plan.monthlyPrice} €</span>
-                  <span className="text-muted-foreground text-sm">/Monat</span>
+                  <span className="text-3xl font-bold">{plan.monthlyPrice.toLocaleString(locale, { style: "currency", currency: "EUR", minimumFractionDigits: 0 })}</span>
+                  <span className="text-muted-foreground text-sm">{t("monthly")}</span>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">{plan.description}</p>
+                <p className="text-sm text-muted-foreground mt-1">{t(planId === "pro" ? "proDescription" : "businessDescription")}</p>
               </div>
 
               <ul className="space-y-2 flex-1">
@@ -143,7 +153,7 @@ export default async function UpgradePage({
       </div>
 
       <p className="text-sm text-muted-foreground text-center">
-        Fragen?{" "}
+        {t("questions")}{" "}
         <a
           href="mailto:sales@cardnexus.app"
           className="underline hover:text-foreground transition-colors"

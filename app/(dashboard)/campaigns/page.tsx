@@ -1,3 +1,8 @@
+import { translator } from "@/lib/i18n/messages";
+import { getLocale } from "@/lib/i18n/server";
+import de from "@/messages/de/pages/campaign-overview.json";
+import it from "@/messages/it/pages/campaign-overview.json";
+import en from "@/messages/en/pages/campaign-overview.json";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -6,9 +11,13 @@ import { CampaignsClient } from "./client";
 import { UpgradePrompt } from "@/components/plan/UpgradePrompt";
 import type { Campaign } from "@/types";
 
-export const metadata = { title: "Kampagnen" };
+export async function generateMetadata() {
+  return { title: translator(await getLocale(), de, it, en)("title") };
+}
 
 export default async function CampaignsPage() {
+  const locale = await getLocale();
+  const t = translator(locale, de, it, en);
   const session = await auth.api.getSession({ headers: await headers() });
   const user = session!.user as { id: string; plan?: string; planExpiresAt?: Date };
 
@@ -39,15 +48,15 @@ export default async function CampaignsPage() {
   return (
     <div className="max-w-4xl space-y-8">
       <div>
-        <h1 className="text-2xl font-bold">UTM-Kampagnen</h1>
+        <h1 className="text-2xl font-bold">{t("heading")}</h1>
         <p className="text-muted-foreground mt-1">
-          Erstelle individuelle Links fur Events, Messen oder Kampagnen &mdash; mit separater Klick-Statistik.
+          {t("description")}
         </p>
       </div>
 
       {!hasCampaigns ? (
         <UpgradePrompt
-          feature="UTM-Kampagnen & Event-Links sind ab dem Pro-Plan verfugbar"
+          feature={t("upgrade")}
           requiredPlan="pro"
         />
       ) : (

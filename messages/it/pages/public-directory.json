@@ -1,0 +1,9 @@
+{
+  "notFound": "Team non trovato",
+  "empty": "Non ci sono biglietti da visita pubblici.",
+  "poweredBy": "Creato con",
+  "noName": "Senza nome",
+  "viewCard": "Visualizza biglietto →",
+  "title": "Team – {name}",
+  "description": "Biglietti da visita digitali del team {name}"
+}

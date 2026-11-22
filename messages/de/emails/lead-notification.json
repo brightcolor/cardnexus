@@ -1,0 +1,12 @@
+{
+  "title": "Neuer Lead – {card}",
+  "subject": "Neuer Lead: {lead} ({card})",
+  "heading": "Neuer Kontakt auf deiner Karte",
+  "body": "{lead} hat auf deiner Karte {card} Kontakt hinterlassen.",
+  "email": "E-Mail",
+  "phone": "Telefon",
+  "message": "Nachricht",
+  "name": "Name",
+  "viewLeads": "Leads ansehen",
+  "reason": "Du erhältst diese E-Mail, weil du sofortige Lead-Benachrichtigungen aktiviert hast. Du kannst dies in deinen Einstellungen ändern."
+}

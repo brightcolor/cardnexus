@@ -1,0 +1,7 @@
+{
+  "notFound": "Karte nicht gefunden",
+  "unavailable": "Karte nicht verfügbar",
+  "expired": "Karte abgelaufen",
+  "protected": "Geschützte Karte",
+  "expiredDescription": "Diese Karte ist nicht mehr verfügbar."
+}

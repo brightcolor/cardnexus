@@ -1,0 +1,15 @@
+{
+  "heading": "Incorpora un biglietto da visita",
+  "intro": "Incorpora il biglietto digitale sul tuo sito tramite iframe.",
+  "choose": "Scegli un biglietto",
+  "multiple": "Più biglietti con il piano",
+  "available": "o superiore.",
+  "width": "Larghezza (px)",
+  "height": "Altezza (px)",
+  "link": "Link diretto",
+  "code": "Codice iframe",
+  "preview": "Anteprima",
+  "empty": "Crea un biglietto da visita per ottenere il codice di incorporamento.",
+  "iframeTitle": "Biglietto da visita digitale",
+  "title": "Incorpora il biglietto"
+}

@@ -1,0 +1,7 @@
+{
+  "notFound": "Card not found",
+  "unavailable": "Card unavailable",
+  "expired": "Card expired",
+  "protected": "Password-protected card",
+  "expiredDescription": "This business card has expired and is no longer available."
+}

@@ -1,0 +1,9 @@
+{
+  "title": "Invito all’organizzazione",
+  "signIn": "Accedi con l’indirizzo email invitato",
+  "register": "Crea un account",
+  "verify": "Invia email di verifica",
+  "sent": "Apri il link di verifica nella tua email e torna all’invito.",
+  "accept": "Accetta l’invito",
+  "error": "Impossibile completare la richiesta."
+}

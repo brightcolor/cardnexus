@@ -1,0 +1,13 @@
+{
+  "title": "Ti diamo il benvenuto su {app}",
+  "subject": "Ti diamo il benvenuto su {app}!",
+  "greeting": "Ciao {name} 👋",
+  "intro": "Il tuo account {app} è pronto.",
+  "description": "Crea il tuo biglietto da visita digitale, aggiungi i recapiti e condividilo tramite link, codice QR o tag NFC.",
+  "dashboard": "Vai al pannello",
+  "nextSteps": "Da dove iniziare:",
+  "customize": "Personalizza il biglietto scegliendo modello e colori",
+  "share": "Scarica il codice QR o configura un tag NFC",
+  "analytics": "Attiva le statistiche per monitorare le visite",
+  "reason": "Ricevi questo messaggio perché hai appena creato un account."
+}

@@ -1,0 +1,7 @@
+{
+  "title": "Dominio della scheda",
+  "description": "Su quale dominio vuoi pubblicare la scheda?",
+  "standard": "Predefinito (dominio della piattaforma)",
+  "custom": "Dominio personalizzato (Pro)",
+  "example": "mio-dominio.it"
+}

@@ -1,3 +1,4 @@
+import { apiMessage } from "@/lib/i18n/api";
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -5,7 +6,7 @@ import { db } from "@/lib/db";
 
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const card = await db.card.findFirst({
     where: { userId: session.user.id },
@@ -26,7 +27,7 @@ export async function GET() {
 
 export async function DELETE(req: Request) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const { id } = await req.json() as { id: string };
 
@@ -36,12 +37,12 @@ export async function DELETE(req: Request) {
     select: { id: true },
   });
 
-  if (!card) return NextResponse.json({ error: "Keine Karte" }, { status: 400 });
+  if (!card) return NextResponse.json({ error: await apiMessage("noCard") }, { status: 400 });
 
   // Verify lead belongs to this user's card before deleting
   const lead = await db.lead.findUnique({ where: { id }, select: { cardId: true } });
   if (!lead || lead.cardId !== card.id) {
-    return NextResponse.json({ error: "Nicht gefunden" }, { status: 404 });
+    return NextResponse.json({ error: await apiMessage("missing") }, { status: 404 });
   }
 
   await db.lead.delete({ where: { id } });

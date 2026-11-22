@@ -1,0 +1,14 @@
+{
+  "views": "Visite totali",
+  "downloads": "Download vCard",
+  "scans": "Scansioni QR",
+  "clicks": "Clic sui link",
+  "leads": "Contatti ricevuti",
+  "members": "Membri del team",
+  "month": "Visite negli ultimi 30 giorni",
+  "topViews": "Biglietti più visitati",
+  "empty": "Nessun dato disponibile.",
+  "topLeads": "Biglietti con più contatti",
+  "noLeads": "Nessun contatto ricevuto.",
+  "viewCount": "Visite"
+}

@@ -1,5 +1,14 @@
+import { PlatformBrandLink } from "@/components/layout/PlatformBrandLink";
+import { getPlatformSettings } from "@/lib/platform";
+import type { Locale } from "@/lib/i18n/locales";
+import { translator } from "@/lib/i18n/messages";
+import { getLocale } from "@/lib/i18n/server";
+import de from "@/messages/de/pages/public-directory.json";
+import it from "@/messages/it/pages/public-directory.json";
+import en from "@/messages/en/pages/public-directory.json";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
+import { publishedCardScope, unexpiredCardScope } from "@/lib/card-publication";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MapPin, Mail, Globe, Phone } from "lucide-react";
@@ -9,18 +18,22 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const locale = await getLocale();
+  const t = translator(locale, de, it, en);
   const { orgSlug } = await params;
-  const org = await db.organization.findUnique({ where: { slug: orgSlug }, select: { name: true } });
-  if (!org) return { title: "Team nicht gefunden" };
-  return { title: `Team – ${org.name}`, description: `Digitale Visitenkarten des Teams ${org.name}` };
+  const org = await db.organization.findUnique({ where: { slug: orgSlug, isActive: true, OR: [{ settings: null }, { settings: { teamDirectoryEnabled: true } }] }, select: { name: true } });
+  if (!org) return { title: t("notFound") };
+  return { title: t("title", { name: org.name }), description: t("description", { name: org.name }) };
 }
 
 export default async function PublicTeamPage({ params }: Props) {
+  const [locale, { appName, logoUrl }] = await Promise.all([getLocale(), getPlatformSettings()]);
+  const t = translator(locale, de, it, en);
   const { orgSlug } = await params;
 
   const [org, orgUsers] = await Promise.all([
     db.organization.findUnique({
-      where: { slug: orgSlug },
+      where: { slug: orgSlug, isActive: true },
       select: { id: true, name: true, slug: true, logo: true, primaryColor: true },
     }),
     db.organization.findUnique({
@@ -31,7 +44,7 @@ export default async function PublicTeamPage({ params }: Props) {
           select: {
             id: true, name: true,
             cards: {
-              where: { isPublic: true, showInTeamDirectory: true, isDefault: true },
+              where: { ...publishedCardScope, ...unexpiredCardScope(), passwordHash: null, showInTeamDirectory: true, isDefault: true },
               select: {
                 slug: true, firstName: true, lastName: true, title: true,
                 department: true, avatarUrl: true, email: true, phone: true,
@@ -81,12 +94,12 @@ export default async function PublicTeamPage({ params }: Props) {
       <div className="max-w-5xl mx-auto px-6 py-10">
         {members.length === 0 ? (
           <div className="text-center py-20 text-gray-400">
-            <p className="text-lg font-medium">Keine öffentlichen Karten vorhanden.</p>
+            <p className="text-lg font-medium">{t("empty")}</p>
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {members.map((member) => (
-              <MemberCard key={member.slug} member={member} orgColor={color} />
+              <MemberCard key={member.slug} member={member} orgColor={color} locale={locale} />
             ))}
           </div>
         )}
@@ -95,8 +108,8 @@ export default async function PublicTeamPage({ params }: Props) {
       {/* Footer */}
       <div className="text-center pb-8">
         <p className="text-xs text-gray-400">
-          Erstellt mit{" "}
-          <a href="/" className="hover:text-gray-600 transition-colors font-medium">CardNexus</a>
+          {t("poweredBy")}{" "}
+          <PlatformBrandLink appName={appName} logoUrl={logoUrl} />
         </p>
       </div>
     </div>
@@ -106,6 +119,7 @@ export default async function PublicTeamPage({ params }: Props) {
 function MemberCard({
   member,
   orgColor,
+  locale,
 }: {
   member: {
     slug: string; firstName?: string | null; lastName?: string | null;
@@ -114,7 +128,9 @@ function MemberCard({
     address?: string | null; primaryColor: string;
   };
   orgColor: string;
+  locale: Locale;
 }) {
+  const t = translator(locale, de, it, en);
   const color = member.primaryColor ?? orgColor;
   const name = `${member.firstName ?? ""} ${member.lastName ?? ""}`.trim();
   const initials = `${member.firstName?.[0] ?? ""}${member.lastName?.[0] ?? ""}`;
@@ -141,7 +157,7 @@ function MemberCard({
 
           <div className="min-w-0">
             <p className="font-bold text-gray-900 dark:text-gray-100 truncate group-hover:text-primary transition-colors">
-              {name || "Kein Name"}
+              {name || t("noName")}
             </p>
             {member.title && (
               <p className="text-xs font-medium mt-0.5 truncate" style={{ color }}>
@@ -175,9 +191,9 @@ function MemberCard({
             </div>
           )}
           {member.address && (
-            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 truncate">
-              <MapPin className="h-3 w-3 shrink-0" />
-              <span className="truncate">{member.address}</span>
+            <div className="flex items-start gap-2 text-xs text-gray-500 dark:text-gray-400">
+              <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
+              <span className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]">{member.address}</span>
             </div>
           )}
         </div>
@@ -185,7 +201,7 @@ function MemberCard({
 
       <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
         <span className="text-xs font-medium text-primary group-hover:underline">
-          Karte ansehen →
+          {t("viewCard")}
         </span>
       </div>
     </Link>

@@ -1,0 +1,8 @@
+{
+  "upload": "Upload image",
+  "uploadError": "Could not upload the image.",
+  "error": "An error occurred.",
+  "uploading": "Uploading…",
+  "urlAlternative": "Or paste an image URL",
+  "remove": "Remove image"
+}

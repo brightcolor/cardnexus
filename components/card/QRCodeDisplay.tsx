@@ -1,22 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/components/card-qr-code.json";
+import it from "@/messages/it/components/card-qr-code.json";
+import en from "@/messages/en/components/card-qr-code.json";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface QRCodeDisplayProps {
   slug: string;
-  color?: string;
   size?: number;
 }
 
-export function QRCodeDisplay({ slug, color = "#000000", size = 200 }: QRCodeDisplayProps) {
-  const [src, setSrc] = useState<string>("");
-
-  useEffect(() => {
-    const params = new URLSearchParams({ color });
-    setSrc(`/api/qr/${slug}?${params}`);
-  }, [slug, color]);
+export function QRCodeDisplay({ slug, size = 200 }: QRCodeDisplayProps) {
+  const locale = useLocale();
+  const t = translator(locale, de, it, en);
+  const src = `/api/qr/${slug}`;
 
   function downloadQR() {
     const link = document.createElement("a");
@@ -25,14 +25,12 @@ export function QRCodeDisplay({ slug, color = "#000000", size = 200 }: QRCodeDis
     link.click();
   }
 
-  if (!src) return <div className="h-48 w-48 bg-muted rounded-xl animate-pulse" />;
-
   return (
     <div className="flex flex-col items-center gap-3">
       <div className="rounded-xl border border-border p-3 bg-white dark:bg-gray-900">
         <img
           src={src}
-          alt="QR Code"
+          alt={t("alt")}
           width={size}
           height={size}
           className="rounded-lg"
@@ -40,7 +38,7 @@ export function QRCodeDisplay({ slug, color = "#000000", size = 200 }: QRCodeDis
       </div>
       <Button variant="outline" size="sm" onClick={downloadQR}>
         <Download className="h-4 w-4" />
-        QR-Code herunterladen
+        {t("download")}
       </Button>
     </div>
   );

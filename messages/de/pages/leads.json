@@ -1,0 +1,22 @@
+{
+  "noCard": "Noch keine Karte erstellt",
+  "cardRequired": "Erstelle zuerst deine Visitenkarte, um Leads zu sammeln.",
+  "createCard": "Karte erstellen",
+  "search": "Suchen…",
+  "exportCsv": "CSV Export",
+  "empty": "Noch keine Leads",
+  "emptyHint": "Wenn jemand auf deiner Karte auf „Kontakt hinterlassen\" tippt, erscheint er hier.",
+  "hideMessage": "Nachricht verbergen",
+  "showMessage": "Nachricht anzeigen",
+  "delete": "Lead löschen",
+  "noResults": "Keine Ergebnisse für „{query}\"",
+  "single": "Lead",
+  "multiple": "Leads",
+  "csvDate": "Datum",
+  "csvName": "Name",
+  "csvEmail": "E-Mail",
+  "csvPhone": "Telefon",
+  "csvMessage": "Nachricht",
+  "csvCard": "Karte",
+  "csvMember": "Mitglied"
+}

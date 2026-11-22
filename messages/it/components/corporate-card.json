@@ -1,0 +1,9 @@
+{
+  "phone": "Telefono",
+  "mobile": "Cellulare",
+  "email": "Email",
+  "website": "Sito web",
+  "address": "Indirizzo",
+  "qrHint": "Scansiona per aprire il biglietto da visita",
+  "qrAlt": "Codice QR"
+}

@@ -1,3 +1,4 @@
+import { apiMessage } from "@/lib/i18n/api";
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -7,14 +8,14 @@ import { canManageUsers } from "@/lib/utils";
 // PATCH /api/organizations/directory — toggle teamDirectoryEnabled for current user's org
 export async function PATCH(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const user = session.user as { id: string; role?: string; organizationId?: string };
   if (!canManageUsers(user.role ?? "member")) {
-    return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 });
+    return NextResponse.json({ error: await apiMessage("noPermission") }, { status: 403 });
   }
   if (!user.organizationId) {
-    return NextResponse.json({ error: "Keine Organisation" }, { status: 400 });
+    return NextResponse.json({ error: await apiMessage("noOrganization") }, { status: 400 });
   }
 
   const { enabled } = await req.json() as { enabled: boolean };

@@ -1,0 +1,21 @@
+{
+  "fileRequired": "Bitte eine CSV-Datei hochladen.",
+  "unknownError": "Unbekannter Fehler",
+  "format": "CSV-Format",
+  "required": "Pflichtfelder:",
+  "or": "(oder",
+  "optional": ". Optionale Felder:",
+  "description": "Der Import aktualisiert bestehende Mitglieder (gleiche E-Mail in der Org). Neue E-Mails werden als „nicht gefunden\" markiert — nutze dafür Einladungen.",
+  "template": "Vorlage",
+  "drop": "CSV-Datei hierher ziehen oder klicken",
+  "importing": "Wird importiert…",
+  "start": "Import starten",
+  "email": "E-Mail",
+  "status": "Status",
+  "note": "Hinweis",
+  "again": "Weiteren Import starten",
+  "importError": "Fehler beim Import",
+  "created": "Erstellt",
+  "updated": "Aktualisiert",
+  "skipped": "Übersprungen"
+}

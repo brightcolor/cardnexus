@@ -1,3 +1,4 @@
+import { apiMessage, apiValidation } from "@/lib/i18n/api";
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -67,7 +68,7 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const admin = await requireAdmin();
-  if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!admin) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const { slug } = await params;
   const card = await db.card.findUnique({
@@ -75,7 +76,7 @@ export async function GET(
     include: { user: { select: { id: true, name: true, email: true } } },
   });
 
-  if (!card) return NextResponse.json({ error: "Karte nicht gefunden" }, { status: 404 });
+  if (!card) return NextResponse.json({ error: await apiMessage("cardNotFound") }, { status: 404 });
 
   return NextResponse.json({
     data: { ...card, customLinks: JSON.parse(card.customLinks) },
@@ -87,7 +88,7 @@ export async function PATCH(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const admin = await requireAdmin();
-  if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!admin) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const { slug } = await params;
 
@@ -95,7 +96,7 @@ export async function PATCH(
   const parsed = updateSchema.safeParse(body);
   if (!parsed.success) {
     const msg =
-      Object.values(parsed.error.flatten().fieldErrors).flat()[0] ?? "Ungültige Daten";
+      Object.values((await apiValidation(parsed.error)).fieldErrors).flat()[0] ?? await apiMessage("invalidData");
     return NextResponse.json({ error: msg }, { status: 400 });
   }
 
@@ -112,6 +113,6 @@ export async function PATCH(
       data: { ...card, customLinks: JSON.parse(card.customLinks) },
     });
   } catch {
-    return NextResponse.json({ error: "Karte nicht gefunden" }, { status: 404 });
+    return NextResponse.json({ error: await apiMessage("cardNotFound") }, { status: 404 });
   }
 }

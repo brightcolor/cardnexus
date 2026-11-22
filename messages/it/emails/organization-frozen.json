@@ -1,0 +1,19 @@
+{
+  "title": "Organizzazione sospesa – {org}",
+  "subject": "Organizzazione sospesa: {org}",
+  "heading": "La tua organizzazione è stata sospesa",
+  "intro": "Ciao {name}, il piano <strong>Business</strong> dell’organizzazione {org} è scaduto o è stato annullato.",
+  "description": "I dati dell’organizzazione e dei membri saranno conservati. I membri potranno usare {app} con i propri account Free. Le funzioni dell’organizzazione sono sospese.",
+  "suspendedTitle": "Funzioni sospese:",
+  "members": "Gestione dei membri e degli inviti",
+  "design": "Regole grafiche per i biglietti dell’organizzazione",
+  "import": "Importazione in blocco",
+  "directory": "Elenco del team",
+  "retainedTitle": "Dati conservati:",
+  "cards": "Biglietti da visita e recapiti",
+  "analytics": "Statistiche",
+  "membership": "Appartenenza dei membri all’organizzazione",
+  "reactivate": "Riattiva il piano Business per ripristinare subito le funzioni dell’organizzazione.",
+  "subscribe": "Attiva il piano Business",
+  "reason": "Ricevi questo messaggio perché amministri l’organizzazione."
+}

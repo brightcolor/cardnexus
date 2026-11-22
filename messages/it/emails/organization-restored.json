@@ -1,0 +1,9 @@
+{
+  "title": "Organizzazione riattivata – {org}",
+  "subject": "Organizzazione riattivata: {org}",
+  "heading": "La tua organizzazione è di nuovo attiva",
+  "intro": "Ciao {name}, il piano Business è di nuovo attivo. Puoi tornare a usare tutte le funzioni dell’organizzazione {org}.",
+  "description": "Ritroverai tutti i membri, i biglietti da visita e le impostazioni già presenti.",
+  "team": "Vai all’area team",
+  "reason": "Ricevi questo messaggio perché amministri l’organizzazione."
+}

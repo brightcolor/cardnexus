@@ -1,3 +1,9 @@
+import type { Locale } from "./i18n/locales";
+import de from "@/messages/de/components/wallet.json";
+import it from "@/messages/it/components/wallet.json";
+import en from "@/messages/en/components/wallet.json";
+
+const labels = { de, it, en };
 // Apple Wallet and Google Wallet integration
 // Required env vars:
 //   Apple:  APPLE_WALLET_CERT (base64 PEM), APPLE_WALLET_KEY (base64 PEM),
@@ -49,7 +55,7 @@ export function googleWalletEnabled() { return isGoogleConfigured(); }
 
 // ─── Apple Wallet (.pkpass) ───────────────────────────────────────────────────
 
-export async function generateAppleWalletPass(data: WalletCardData): Promise<Buffer> {
+export async function generateAppleWalletPass(data: WalletCardData, locale: Locale): Promise<Buffer> {
   if (!isAppleConfigured()) throw new WalletFeatureDisabledError("apple");
 
   // Dynamic import so missing packages don't crash the server on startup
@@ -80,17 +86,17 @@ export async function generateAppleWalletPass(data: WalletCardData): Promise<Buf
     webServiceURL: data.cardUrl,
     authenticationToken: serialNo,
     generic: {
-      primaryFields:   [{ key: "name",  label: "NAME",     value: `${data.firstName} ${data.lastName}` }],
+      primaryFields:   [{ key: "name",  label: labels[locale].name.toLocaleUpperCase(locale),     value: `${data.firstName} ${data.lastName}` }],
       secondaryFields: [
-        ...(data.title   ? [{ key: "title",   label: "FUNKTION", value: data.title }]   : []),
-        ...(data.company ? [{ key: "company", label: "FIRMA",    value: data.company }] : []),
+        ...(data.title   ? [{ key: "title",   label: labels[locale].title.toLocaleUpperCase(locale), value: data.title }]   : []),
+        ...(data.company ? [{ key: "company", label: labels[locale].company.toLocaleUpperCase(locale),    value: data.company }] : []),
       ],
       auxiliaryFields: [
-        ...(data.email ? [{ key: "email", label: "E-MAIL", value: data.email }] : []),
-        ...(data.phone ? [{ key: "phone", label: "TEL",    value: data.phone }] : []),
+        ...(data.email ? [{ key: "email", label: labels[locale].email.toLocaleUpperCase(locale), value: data.email }] : []),
+        ...(data.phone ? [{ key: "phone", label: labels[locale].phone.toLocaleUpperCase(locale),    value: data.phone }] : []),
       ],
       backFields: [
-        { key: "url", label: "Digitale Karte", value: data.cardUrl },
+        { key: "url", label: labels[locale].card, value: data.cardUrl },
       ],
     },
   };
@@ -131,7 +137,7 @@ export async function generateAppleWalletPass(data: WalletCardData): Promise<Buf
 
 // ─── Google Wallet ────────────────────────────────────────────────────────────
 
-export async function generateGoogleWalletPassUrl(data: WalletCardData): Promise<string> {
+export async function generateGoogleWalletPassUrl(data: WalletCardData, locale: Locale): Promise<string> {
   if (!isGoogleConfigured()) throw new WalletFeatureDisabledError("google");
 
   const issuerId = process.env.GOOGLE_WALLET_ISSUER_ID!;
@@ -144,15 +150,15 @@ export async function generateGoogleWalletPassUrl(data: WalletCardData): Promise
     id: objectId,
     classId,
     genericType: "GENERIC_TYPE_UNSPECIFIED",
-    cardTitle:   { defaultValue: { language: "de", value: data.company ?? "CardNexus" } },
-    subheader:   { defaultValue: { language: "de", value: data.title ?? "" } },
-    header:      { defaultValue: { language: "de", value: `${data.firstName} ${data.lastName}` } },
+    cardTitle:   { defaultValue: { language: locale, value: data.company ?? "CardNexus" } },
+    subheader:   { defaultValue: { language: locale, value: data.title ?? "" } },
+    header:      { defaultValue: { language: locale, value: `${data.firstName} ${data.lastName}` } },
     textModulesData: [
       ...(data.email ? [{ header: "E-Mail", body: data.email, id: "email" }] : []),
       ...(data.phone ? [{ header: "Telefon", body: data.phone, id: "phone" }] : []),
     ],
     linksModuleData: {
-      uris: [{ uri: data.cardUrl, description: "Digitale Visitenkarte", id: "card_url" }],
+      uris: [{ uri: data.cardUrl, description: labels[locale].card, id: "card_url" }],
     },
     hexBackgroundColor: data.primaryColor,
     state: "ACTIVE",

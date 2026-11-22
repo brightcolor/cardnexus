@@ -1,5 +1,10 @@
 "use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/components/settings-integrations.json";
+import it from "@/messages/it/components/settings-integrations.json";
+import en from "@/messages/en/components/settings-integrations.json";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,6 +26,8 @@ interface Webhook {
 }
 
 export function WebhooksCard() {
+  const locale = useLocale();
+  const t = translator(locale, de, it, en);
   const [items, setItems] = useState<Webhook[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -40,6 +47,8 @@ export function WebhooksCard() {
   useEffect(() => { void load(); }, []);
 
   async function create(e: React.FormEvent) {
+  const locale = useLocale();
+  const t = translator(locale, de, it, en);
     e.preventDefault();
     setErr("");
     setBusy(true);
@@ -50,12 +59,12 @@ export function WebhooksCard() {
     });
     if (!res.ok) {
       const d = await res.json().catch(() => ({}));
-      const msg = typeof d.error === "string" ? d.error : "URL muss mit https:// beginnen";
+      const msg = typeof d.error === "string" ? d.error : t("httpsRequired");
       setErr(msg);
-      toast.error("Webhook konnte nicht angelegt werden", { description: msg });
+      toast.error(t("hookCreateFailure"), { description: msg });
     } else {
       setShowForm(false); setName(""); setUrl("");
-      toast.success("Webhook angelegt");
+      toast.success(t("hookCreated"));
       await load();
     }
     setBusy(false);
@@ -71,13 +80,15 @@ export function WebhooksCard() {
   }
 
   async function remove(id: string) {
-    if (!confirm("Webhook wirklich löschen?")) return;
+  const locale = useLocale();
+  const t = translator(locale, de, it, en);
+    if (!confirm(t("deleteHook"))) return;
     const res = await fetch("/api/webhooks", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
-    if (res.ok) toast.success("Webhook gelöscht");
+    if (res.ok) toast.success(t("hookDeleted"));
     await load();
   }
 
@@ -87,15 +98,14 @@ export function WebhooksCard() {
         <div className="flex items-start gap-3">
           <WebhookIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
           <div className="flex-1">
-            <CardTitle className="text-base">Webhooks</CardTitle>
+            <CardTitle className="text-base">{t("webhooks")}</CardTitle>
             <CardDescription>
-              Erhalte HTTP-POSTs in Echtzeit, wenn neue Leads über deine Karten kommen.
-              Signatur via <code className="text-xs">X-FreddieCard-Signature</code> (HMAC-SHA256).
+              {t("webhookIntro")} <code className="text-xs">X-FreddieCard-Signature</code> (HMAC-SHA256).
             </CardDescription>
           </div>
           <Button variant="outline" size="sm" onClick={() => setShowForm((v) => !v)}>
             <Plus className="h-4 w-4" />
-            Neu
+            {t("new")}
           </Button>
         </div>
       </CardHeader>
@@ -104,11 +114,11 @@ export function WebhooksCard() {
           <form onSubmit={create} className="rounded-lg border border-border p-4 space-y-3 bg-muted/30">
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label htmlFor="wh-name">Name</Label>
-                <Input id="wh-name" required value={name} onChange={(e) => setName(e.target.value)} placeholder="z.B. Slack Notifier" />
+                <Label htmlFor="wh-name">{t("name")}</Label>
+                <Input id="wh-name" required value={name} onChange={(e) => setName(e.target.value)} placeholder={t("hookExample")} />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="wh-url">Endpoint-URL</Label>
+                <Label htmlFor="wh-url">{t("endpoint")}</Label>
                 <Input id="wh-url" required type="url" placeholder="https://…" value={url} onChange={(e) => setUrl(e.target.value)} />
               </div>
             </div>
@@ -116,19 +126,19 @@ export function WebhooksCard() {
             <div className="flex gap-2">
               <Button type="submit" size="sm" disabled={busy}>
                 {busy && <Loader2 className="h-4 w-4 animate-spin" />}
-                Anlegen
+                {t("create")}
               </Button>
               <Button type="button" size="sm" variant="ghost" onClick={() => setShowForm(false)}>
-                Abbrechen
+                {t("cancel")}
               </Button>
             </div>
           </form>
         )}
 
         {loading ? (
-          <div className="text-sm text-muted-foreground">Lädt…</div>
+          <div className="text-sm text-muted-foreground">{t("loading")}</div>
         ) : items.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Noch keine Webhooks angelegt.</p>
+          <p className="text-sm text-muted-foreground">{t("noHooks")}</p>
         ) : (
           <ul className="divide-y divide-border rounded-lg border border-border">
             {items.map((w) => (
@@ -137,9 +147,9 @@ export function WebhooksCard() {
                   <div className="flex items-center gap-2">
                     <span className="font-medium truncate">{w.name}</span>
                     {w.active ? (
-                      <Badge variant="success" className="text-xs">Aktiv</Badge>
+                      <Badge variant="success" className="text-xs">{t("active")}</Badge>
                     ) : (
-                      <Badge variant="secondary" className="text-xs">Pausiert</Badge>
+                      <Badge variant="secondary" className="text-xs">{t("paused")}</Badge>
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground truncate">{w.url}</p>
@@ -168,6 +178,8 @@ interface ApiKey {
 }
 
 export function ApiKeysCard() {
+  const locale = useLocale();
+  const t = translator(locale, de, it, en);
   const [items, setItems] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -186,6 +198,8 @@ export function ApiKeysCard() {
   useEffect(() => { void load(); }, []);
 
   async function create(e: React.FormEvent) {
+  const locale = useLocale();
+  const t = translator(locale, de, it, en);
     e.preventDefault();
     setBusy(true);
     const res = await fetch("/api/api-keys", {
@@ -198,22 +212,24 @@ export function ApiKeysCard() {
       setRevealed(data.data);
       setName("");
       setShowForm(false);
-      toast.success("API-Key erstellt", { description: "Notiere ihn — er wird nicht erneut angezeigt." });
+      toast.success(t("keyCreated"), { description: t("keyWarning") });
       await load();
     } else {
-      toast.error("Konnte API-Key nicht erstellen");
+      toast.error(t("keyFailure"));
     }
     setBusy(false);
   }
 
   async function remove(id: string) {
-    if (!confirm("API-Key wirklich widerrufen?")) return;
+  const locale = useLocale();
+  const t = translator(locale, de, it, en);
+    if (!confirm(t("revokeKey"))) return;
     const res = await fetch("/api/api-keys", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
-    if (res.ok) toast.success("API-Key widerrufen");
+    if (res.ok) toast.success(t("keyRevoked"));
     await load();
   }
 
@@ -230,15 +246,14 @@ export function ApiKeysCard() {
         <div className="flex items-start gap-3">
           <KeyRound className="h-5 w-5 text-muted-foreground mt-0.5" />
           <div className="flex-1">
-            <CardTitle className="text-base">API-Keys</CardTitle>
+            <CardTitle className="text-base">{t("apiKeys")}</CardTitle>
             <CardDescription>
-              Authentifiziere externe Skripte über die HTTP-API. Keys sind nur bei der
-              Erstellung sichtbar.
+              {t("apiKeyIntro")}
             </CardDescription>
           </div>
           <Button variant="outline" size="sm" onClick={() => setShowForm((v) => !v)}>
             <Plus className="h-4 w-4" />
-            Neu
+            {t("new")}
           </Button>
         </div>
       </CardHeader>
@@ -246,15 +261,15 @@ export function ApiKeysCard() {
         {showForm && (
           <form onSubmit={create} className="rounded-lg border border-border p-4 bg-muted/30 flex gap-2 items-end">
             <div className="flex-1 space-y-1.5">
-              <Label htmlFor="ak-name">Name</Label>
-              <Input id="ak-name" required value={name} onChange={(e) => setName(e.target.value)} placeholder="z.B. CI Pipeline" />
+              <Label htmlFor="ak-name">{t("name")}</Label>
+              <Input id="ak-name" required value={name} onChange={(e) => setName(e.target.value)} placeholder={t("apiKeyExample")} />
             </div>
             <Button type="submit" size="sm" disabled={busy}>
               {busy && <Loader2 className="h-4 w-4 animate-spin" />}
-              Anlegen
+              {t("create")}
             </Button>
             <Button type="button" size="sm" variant="ghost" onClick={() => setShowForm(false)}>
-              Abbrechen
+              {t("cancel")}
             </Button>
           </form>
         )}
@@ -262,7 +277,7 @@ export function ApiKeysCard() {
         {revealed?.key && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 space-y-2">
             <p className="text-sm font-semibold text-amber-900">
-              Notiere diesen Key jetzt — er wird nicht erneut angezeigt:
+              {t("saveKey")}
             </p>
             <div className="flex gap-2 items-center">
               <code className="flex-1 rounded bg-white dark:bg-gray-900 px-3 py-2 font-mono text-sm break-all border border-amber-200">
@@ -270,19 +285,19 @@ export function ApiKeysCard() {
               </code>
               <Button type="button" size="sm" variant="outline" onClick={copyKey}>
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                {copied ? "Kopiert" : "Kopieren"}
+                {copied ? t("copied") : t("copy")}
               </Button>
             </div>
             <Button type="button" size="sm" variant="ghost" onClick={() => setRevealed(null)}>
-              Schließen
+              {t("close")}
             </Button>
           </div>
         )}
 
         {loading ? (
-          <div className="text-sm text-muted-foreground">Lädt…</div>
+          <div className="text-sm text-muted-foreground">{t("loading")}</div>
         ) : items.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Noch keine API-Keys angelegt.</p>
+          <p className="text-sm text-muted-foreground">{t("noKeys")}</p>
         ) : (
           <ul className="divide-y divide-border rounded-lg border border-border">
             {items.map((k) => (
@@ -293,7 +308,7 @@ export function ApiKeysCard() {
                     {k.prefix}…
                     {k.lastUsedAt && (
                       <span className="ml-2">
-                        zuletzt verwendet: {new Date(k.lastUsedAt).toLocaleDateString("de-DE")}
+                        {t("used")} {new Date(k.lastUsedAt).toLocaleDateString(locale)}
                       </span>
                     )}
                   </p>
@@ -313,6 +328,8 @@ export function ApiKeysCard() {
 /* ─── Referrals ────────────────────────────────────────────────────────── */
 
 export function ReferralsCard() {
+  const locale = useLocale();
+  const t = translator(locale, de, it, en);
   const [data, setData] = useState<{ code: string; signupCount: number; referralUrl: string } | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -336,25 +353,25 @@ export function ReferralsCard() {
         <div className="flex items-start gap-3">
           <Users className="h-5 w-5 text-muted-foreground mt-0.5" />
           <div>
-            <CardTitle className="text-base">Empfehlungen</CardTitle>
+            <CardTitle className="text-base">{t("referrals")}</CardTitle>
             <CardDescription>
-              Teile deinen persönlichen Link und werbe andere Nutzer an.
+              {t("referralIntro")}
             </CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent>
         {!data ? (
-          <p className="text-sm text-muted-foreground">Lädt…</p>
+          <p className="text-sm text-muted-foreground">{t("loading")}</p>
         ) : (
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3 max-w-sm">
               <div className="rounded-lg border border-border p-3">
-                <p className="text-xs text-muted-foreground">Dein Code</p>
+                <p className="text-xs text-muted-foreground">{t("referralCode")}</p>
                 <p className="font-mono font-semibold">{data.code}</p>
               </div>
               <div className="rounded-lg border border-border p-3">
-                <p className="text-xs text-muted-foreground">Geworben</p>
+                <p className="text-xs text-muted-foreground">{t("referred")}</p>
                 <p className="font-semibold">{data.signupCount}</p>
               </div>
             </div>
@@ -362,7 +379,7 @@ export function ReferralsCard() {
               <Input readOnly value={data.referralUrl} className="font-mono text-sm" />
               <Button type="button" variant="outline" onClick={copyUrl} size="sm">
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                {copied ? "Kopiert" : "Kopieren"}
+                {copied ? t("copied") : t("copy")}
               </Button>
             </div>
           </div>

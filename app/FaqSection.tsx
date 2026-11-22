@@ -1,44 +1,51 @@
 "use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/components/faq.json";
+import it from "@/messages/it/components/faq.json";
+import en from "@/messages/en/components/faq.json";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-const faqs = [
-  {
-    q: "Ist CardNexus wirklich kostenlos?",
-    a: "Ja. Der Free-Plan ist dauerhaft kostenlos und enthält eine vollständige digitale Visitenkarte mit QR-Code, vCard-Download und Lead Capture. Ohne Kreditkarte.",
-  },
-  {
-    q: "Brauche ich eine App um meine Karte zu teilen?",
-    a: "Nein. Deine Karte ist eine normale Webseite und öffnet sich in jedem Browser. Besucher benötigen keine App. Für NFC-Tags wird eine einmalige Schreib-App benötigt, danach funktioniert es ohne alles.",
-  },
-  {
-    q: "Wie funktioniert NFC?",
-    a: "Du beschreibst einen günstigen NFC-Tag (ca. 0,50–2 €) einmalig mit deiner Karten-URL. Hält jemand sein Smartphone an den Tag, öffnet sich deine digitale Karte sofort – bei iPhone ab iPhone 7, bei Android ab Version 4.4.",
-  },
-  {
-    q: "Kann ich CardNexus für mein Team einsetzen?",
-    a: "Ja. Mit dem Business-Plan verwaltest du beliebig viele Mitglieder, vergibst Rollen, importierst per CSV und setzt ein einheitliches Firmendesign für alle Karten.",
-  },
-  {
-    q: "Was passiert wenn mein Plan ausläuft?",
-    a: "Dein Account wird auf den Free-Plan zurückgestuft. Deine Karte bleibt aktiv, Pro/Business-Features wie Whitelabel oder Kampagnen sind nicht mehr nutzbar bis du verlängerst.",
-  },
-  {
-    q: "Wie kündige ich?",
-    a: "Schreib uns einfach eine E-Mail. Es gibt keine Mindestlaufzeit – du kannst monatlich kündigen.",
-  },
-  {
-    q: "Sind meine Daten sicher?",
-    a: "Ja. Server und Datenbank liegen in Deutschland. Wir verwenden keine Tracking-Cookies von Drittanbietern und sind vollständig DSGVO-konform.",
-  },
-  {
-    q: "Kann ich meine eigene Domain verwenden?",
-    a: "Ab dem Pro-Plan ja. Du kannst deine Karte unter deiner eigenen Domain (z.B. karte.meinefirma.de) erreichbar machen.",
-  },
-];
+export function FaqSection({ appName }: { appName: string }) {
+  const locale = useLocale();
+  const t = translator(locale, de, it, en);
+  const faqs = [
+    {
+      q: t("freeQuestion", { appName }),
+      a: t("freeAnswer"),
+    },
+    {
+      q: t("appQuestion"),
+      a: t("appAnswer"),
+    },
+    {
+      q: t("nfcQuestion"),
+      a: t("nfcAnswer"),
+    },
+    {
+      q: t("teamQuestion", { appName }),
+      a: t("teamAnswer"),
+    },
+    {
+      q: t("expiryQuestion"),
+      a: t("expiryAnswer"),
+    },
+    {
+      q: t("cancelQuestion"),
+      a: t("cancelAnswer"),
+    },
+    {
+      q: t("safetyQuestion"),
+      a: t("safetyAnswer"),
+    },
+    {
+      q: t("domainQuestion"),
+      a: t("domainAnswer"),
+    },
+  ];
 
-export function FaqSection() {
   const [open, setOpen] = useState<number | null>(null);
 
   return (

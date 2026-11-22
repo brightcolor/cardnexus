@@ -1,0 +1,9 @@
+{
+  "current": "Current plan",
+  "manageStripe": "Manage Stripe subscription",
+  "managePaypalPrefix": "Manage your subscription in",
+  "managePaypalSuffix": "PayPal.",
+  "contactByEmail": "Contact us by email",
+  "cardOrSepa": "Card or SEPA",
+  "upgradeSubject": "Upgrade to the {plan} plan"
+}

@@ -1,0 +1,12 @@
+{
+  "invalidCredentials": "Email o password errata.",
+  "heading": "Bentornato",
+  "description": "Accedi al tuo account.",
+  "email": "Email",
+  "password": "Password",
+  "submitting": "Accesso in corso…",
+  "submit": "Accedi",
+  "forgotPassword": "Hai dimenticato la password?",
+  "noAccount": "Non hai un account?",
+  "register": "Registrati"
+}

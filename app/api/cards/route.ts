@@ -1,8 +1,16 @@
+import { apiCardLimit } from "@/lib/i18n/api";
+import { apiMessage, apiValidation } from "@/lib/i18n/api";
+import { getLocale } from "@/lib/i18n/server";
+import { translator } from "@/lib/i18n/messages";
+import de from "@/messages/de/pages/card-editor.json";
+import it from "@/messages/it/pages/card-editor.json";
+import en from "@/messages/en/pages/card-editor.json";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { headers } from "next/headers";
-import { nanoid } from "nanoid";
+import { Prisma } from "@prisma/client";
+import { CARD_SLUG_MAX_LENGTH, CARD_SLUG_PATTERN, generateCardSlug } from "@/lib/card-slug";
 import { z } from "zod";
 import { hashPassword } from "@/lib/password-hash";
 import { getPlanFeatures, effectivePlan } from "@/lib/plans";
@@ -95,14 +103,17 @@ const CardPatch = z.object({
   cardDomain:          z.string().max(200).optional().nullable(),
 
   // slug change (creates an alias for the old slug)
-  slug: z.string().min(2).max(120).regex(/^[a-z0-9-]+$/, "Nur Kleinbuchstaben, Ziffern und Bindestriche").optional(),
+  slug: z.string().optional(),
 });
+
+const NewSlug = z.string().min(2).max(CARD_SLUG_MAX_LENGTH)
+  .regex(CARD_SLUG_PATTERN, "Nur Kleinbuchstaben, Ziffern und Bindestriche");
 
 /* ─── Routes ───────────────────────────────────────────────────────────── */
 
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const cards = await db.card.findMany({
     where: { userId: session.user.id },
@@ -117,44 +128,43 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const parsed = CardCreate.safeParse(await req.json().catch(() => ({})));
-  if (!parsed.success) return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+  if (!parsed.success) return NextResponse.json({ error: await apiMessage("invalidInput") }, { status: 400 });
   const body = parsed.data;
 
   // Enforce per-plan card limit
   const dbUser = await db.user.findUnique({
     where: { id: session.user.id },
-    select: { plan: true, planExpiresAt: true, role: true },
+    select: { plan: true, planExpiresAt: true, role: true, organization: { select: { settings: { select: { managerApproval: true } } } } },
   });
   const plan = effectivePlan(dbUser?.plan ?? "free", dbUser?.planExpiresAt);
   const { maxCards } = getPlanFeatures(plan);
   const existingCount = await db.card.count({ where: { userId: session.user.id } });
   if (existingCount >= maxCards) {
     return NextResponse.json(
-      { error: `Dein Plan erlaubt maximal ${maxCards} Karte${maxCards === 1 ? "" : "n"}. Upgrade für mehr.` },
+      { error: await apiCardLimit(maxCards, true) },
       { status: 403 }
     );
   }
   const isDefault = existingCount === 0;
+  const name = body.name ?? await apiMessage("defaultCardName");
 
   // Generate a unique slug by inserting and retrying on unique-constraint
   // violations (P2002). This is race-condition-safe — no gap between check
   // and insert where a concurrent request could claim the same slug.
-  const base = [body.firstName, body.lastName].filter(Boolean).join("-").toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "karte";
-
   let card: Awaited<ReturnType<typeof db.card.create>> | null = null;
   for (let attempt = 0; attempt < 5; attempt++) {
     try {
       card = await db.card.create({
         data: {
           userId:       session.user.id,
-          slug:         `${base}-${nanoid(6)}`,
-          name:         body.name ?? "Meine Karte",
+          slug:         generateCardSlug(body.firstName, body.lastName),
+          name:         name,
           isDefault,
-          isPublic:     body.isPublic ?? true,
+          isPublic:     body.isPublic ?? false,
+          approvalStatus: dbUser?.organization?.settings?.managerApproval ? "pending" : "approved",
           firstName:    body.firstName ?? "",
           lastName:     body.lastName ?? "",
           templateId:   body.templateId ?? "classic",
@@ -174,37 +184,38 @@ export async function POST(req: NextRequest) {
     }
   }
   if (!card) {
-    return NextResponse.json({ error: "Slug-Konflikt — bitte erneut versuchen." }, { status: 500 });
+    return NextResponse.json({ error: await apiMessage("slugConflict") }, { status: 500 });
   }
 
   return NextResponse.json({ ...card, customLinks: [] }, { status: 201 });
 }
 
 export async function PATCH(req: NextRequest) {
+  const locale = await getLocale();
+  const t = translator(locale, de, it, en);
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const parsed = CardPatch.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid input", details: parsed.error.flatten() }, { status: 400 });
+    return NextResponse.json({ error: t("invalidCardInput"), details: await apiValidation(parsed.error) }, { status: 400 });
   }
   const { id, customLinks, password, slug: newSlug, ...rest } = parsed.data;
 
   // Ownership check
   const existing = await db.card.findFirst({ where: { id, userId: session.user.id } });
-  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!existing) return NextResponse.json({ error: await apiMessage("notFound") }, { status: 404 });
 
-  // Slug change: validate uniqueness and create alias for old slug
-  if (newSlug && newSlug !== existing.slug) {
-    const taken = await db.card.findUnique({ where: { slug: newSlug } });
-    if (taken) return NextResponse.json({ error: "Dieser Slug ist bereits vergeben." }, { status: 409 });
-    // Save alias so the old URL keeps working
-    await db.cardSlugAlias.upsert({
-      where: { oldSlug: existing.slug },
-      update: { cardSlug: newSlug },
-      create: { id: `alias-${Date.now()}`, oldSlug: existing.slug, cardSlug: newSlug },
-    });
-    (rest as Record<string, unknown>).slug = newSlug;
+  const changedSlug = newSlug === existing.slug ? undefined : newSlug;
+  if (changedSlug !== undefined) {
+    const slug = NewSlug.safeParse(changedSlug);
+    if (!slug.success) {
+      const issue = slug.error.issues[0];
+      const error = locale === "de" ? issue.message : issue.code === "too_small"
+        ? t("slugTooShort")
+        : issue.code === "too_big" ? t("slugTooLong", { max: CARD_SLUG_MAX_LENGTH }) : t("invalidSlug");
+      return NextResponse.json({ error }, { status: 400 });
+    }
   }
 
   // Load user once for permission checks
@@ -230,14 +241,6 @@ export async function PATCH(req: NextRequest) {
     approvalUpdate = { approvalStatus: "pending" };
   }
 
-  // If setting as default, unset others
-  if (rest.isDefault === true) {
-    await db.card.updateMany({
-      where: { userId: session.user.id, id: { not: id } },
-      data: { isDefault: false },
-    });
-  }
-
   // Hash password into passwordHash; null/empty clears protection.
   let passwordHashUpdate: string | null | undefined;
   if (password === null || password === "") {
@@ -246,38 +249,77 @@ export async function PATCH(req: NextRequest) {
     passwordHashUpdate = hashPassword(password);
   }
 
-  const updated = await db.card.update({
-    where: { id },
-    data: {
-      ...rest,
-      ...(rest.expiresAt !== undefined
-        ? { expiresAt: rest.expiresAt ? new Date(rest.expiresAt) : null }
-        : {}),
-      ...(customLinks !== undefined ? { customLinks: JSON.stringify(customLinks) } : {}),
-      ...(passwordHashUpdate !== undefined ? { passwordHash: passwordHashUpdate } : {}),
-      ...approvalUpdate,
-    },
-  });
+  try {
+    const updated = await db.$transaction(async (tx) => {
+      if (changedSlug !== undefined) {
+        const alias = await tx.cardSlugAlias.findUnique({ where: { oldSlug: changedSlug } });
+        if (alias && alias.cardSlug !== existing.slug) return null;
+        if (alias) await tx.cardSlugAlias.delete({ where: { oldSlug: changedSlug } });
+      }
 
-  // Never leak passwordHash to the client.
-  const { passwordHash: _ph, ...safe } = updated;
-  return NextResponse.json({ ...safe, customLinks: parseLinks(updated.customLinks) });
+      if (rest.isDefault === true) {
+        await tx.card.updateMany({
+          where: { userId: session.user.id, id: { not: id } },
+          data: { isDefault: false },
+        });
+      }
+
+      const card = await tx.card.update({
+        where: { id, ...(changedSlug !== undefined ? { slug: existing.slug } : {}) },
+        data: {
+          ...rest,
+          ...(changedSlug !== undefined ? { slug: changedSlug } : {}),
+          ...(rest.expiresAt !== undefined
+            ? { expiresAt: rest.expiresAt ? new Date(rest.expiresAt) : null }
+            : {}),
+          ...(customLinks !== undefined ? { customLinks: JSON.stringify(customLinks) } : {}),
+          ...(passwordHashUpdate !== undefined ? { passwordHash: passwordHashUpdate } : {}),
+          ...approvalUpdate,
+        },
+      });
+
+      // The new slug must exist before the alias can reference it.
+      if (changedSlug !== undefined) {
+        await tx.cardSlugAlias.upsert({
+          where: { oldSlug: existing.slug },
+          update: { cardSlug: changedSlug },
+          create: { oldSlug: existing.slug, cardSlug: changedSlug },
+        });
+      }
+      return card;
+    });
+
+    if (!updated) return NextResponse.json({ error: t("slugConflict") }, { status: 409 });
+    const { passwordHash: _ph, ...safe } = updated;
+    return NextResponse.json({ ...safe, customLinks: parseLinks(updated.customLinks) });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2002") {
+        return NextResponse.json({ error: t("slugConflict") }, { status: 409 });
+      }
+      if (error.code === "P2025") {
+        return NextResponse.json({ error: t("staleCard") }, { status: 409 });
+      }
+    }
+    console.error("Failed to update card", error);
+    return NextResponse.json({ error: t("saveFailed") }, { status: 500 });
+  }
 }
 
 export async function DELETE(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const body = z.object({ id: z.string().min(1) }).safeParse(await req.json().catch(() => ({})));
-  if (!body.success) return NextResponse.json({ error: "Card ID required" }, { status: 400 });
+  if (!body.success) return NextResponse.json({ error: await apiMessage("cardIdRequired") }, { status: 400 });
   const { id } = body.data;
 
   const card = await db.card.findFirst({ where: { id, userId: session.user.id } });
-  if (!card) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!card) return NextResponse.json({ error: await apiMessage("notFound") }, { status: 404 });
 
   // Cannot delete the only card
   const count = await db.card.count({ where: { userId: session.user.id } });
-  if (count <= 1) return NextResponse.json({ error: "Letzte Karte kann nicht gelöscht werden" }, { status: 400 });
+  if (count <= 1) return NextResponse.json({ error: await apiMessage("lastCard") }, { status: 400 });
 
   await db.card.delete({ where: { id } });
 

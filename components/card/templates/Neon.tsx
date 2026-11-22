@@ -1,9 +1,18 @@
+"use client";
+
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/components/neon-card.json";
+import it from "@/messages/it/components/neon-card.json";
+import en from "@/messages/en/components/neon-card.json";
 import { Phone, Mail, Globe, MapPin } from "lucide-react";
 import type { CardData } from "@/types";
 import { fontClass, radiusClass, shadowClass, avatarBorderStyle } from "../CardPreview";
 import { SocialLinks } from "./SocialLinks";
 
 export function NeonTemplate({ card }: { card: Partial<CardData> }) {
+  const locale = useLocale();
+  const t = translator(locale, de, it, en);
   const color   = card.primaryColor ?? "#22d3ee";
   const accent  = card.accentColor  ?? color;
   const font    = fontClass(card.fontFamily);
@@ -98,7 +107,7 @@ export function NeonTemplate({ card }: { card: Partial<CardData> }) {
             <NeonRow icon={Globe} value={card.website.replace(/^https?:\/\//, "")} href={card.website} color={color} external />
           )}
           {card.address && (
-            <NeonRow icon={MapPin} value={card.address} color={color} />
+            <NeonRow icon={MapPin} value={card.address} color={color} multiline />
           )}
         </div>
 
@@ -123,9 +132,9 @@ export function NeonTemplate({ card }: { card: Partial<CardData> }) {
 
         {card.showQrOnCard && card.slug && (
           <div className="mt-4 flex items-center gap-3">
-            <img src={`/api/qr/${card.slug}`} alt="QR Code" className="h-12 w-12"
+            <img src={`/api/qr/${card.slug}`} alt={t("qrAlt")} className="h-12 w-12"
               style={{ filter: `invert(1) sepia(1) saturate(5) hue-rotate(${color === "#22d3ee" ? "160deg" : "0deg"})`, opacity: 0.7 }} />
-            <p className="text-xs font-mono" style={{ color: `${color}50` }}>SCAN_FOR_CARD</p>
+            <p className="text-xs font-mono" style={{ color: `${color}50` }}>{t("scan")}</p>
           </div>
         )}
       </div>
@@ -137,9 +146,9 @@ export function NeonTemplate({ card }: { card: Partial<CardData> }) {
 }
 
 function NeonRow({
-  icon: Icon, value, href, color, external,
+  icon: Icon, value, href, color, external, multiline,
 }: {
-  icon: React.ElementType; value: string; href?: string; color: string; external?: boolean;
+  icon: React.ElementType; value: string; href?: string; color: string; external?: boolean; multiline?: boolean;
 }) {
   const content = (
     <div className="flex items-center gap-3 group">
@@ -149,7 +158,7 @@ function NeonRow({
       >
         <Icon className="h-3.5 w-3.5" style={{ color }} />
       </div>
-      <span className="text-xs font-mono text-white/60 group-hover:text-white/90 transition-colors truncate">{value}</span>
+      <span className={`text-xs font-mono text-white/60 group-hover:text-white/90 transition-colors ${multiline ? "min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]" : "truncate"}`}>{value}</span>
     </div>
   );
   if (href) {

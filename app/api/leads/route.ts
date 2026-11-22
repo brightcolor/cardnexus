@@ -1,5 +1,12 @@
+import { apiValidation } from "@/lib/i18n/api";
+import { translator } from "@/lib/i18n/messages";
+import { getLocale } from "@/lib/i18n/server";
+import de from "@/messages/de/api/lead-capture.json";
+import it from "@/messages/it/api/lead-capture.json";
+import en from "@/messages/en/api/lead-capture.json";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { canReadCard, publishedCardScope, unexpiredCardScope } from "@/lib/card-publication";
 import { fireWebhooks } from "@/lib/webhooks";
 import { sendLeadNotificationEmail } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
@@ -16,31 +23,33 @@ const schema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  const locale = await getLocale();
+  const t = translator(locale, de, it, en);
   try {
     const body = await req.json();
     const data = schema.parse(body);
 
     const card = await db.card.findUnique({
-      where: { id: data.cardId },
+      where: { id: data.cardId, ...publishedCardScope, ...unexpiredCardScope() },
       select: {
-        id: true, isPublic: true, name: true, slug: true,
+        id: true, passwordHash: true, name: true, slug: true,
         user: { select: { id: true, email: true, name: true, leadNotification: true, plan: true, planExpiresAt: true } },
       },
     });
 
-    if (!card || !card.isPublic) {
-      return NextResponse.json({ error: "Karte nicht gefunden" }, { status: 404 });
+    if (!card || !await canReadCard(card)) {
+      return NextResponse.json({ error: t("notFound") }, { status: 404 });
     }
 
     const ownerPlan = effectivePlan(card.user.plan ?? "free", card.user.planExpiresAt);
     if (!canUseFeature("leadCapture", ownerPlan)) {
-      return NextResponse.json({ error: "Nicht verfügbar" }, { status: 403 });
+      return NextResponse.json({ error: t("unavailable") }, { status: 403 });
     }
 
     const ip = clientIp(req);
     if (!rateLimit({ key: `lead:${ip}:${data.cardId}`, max: 3, windowMs: 60 * 60_000 })) {
       return NextResponse.json(
-        { error: "Zu viele Anfragen — bitte später erneut versuchen." },
+        { error: t("rateLimit") },
         { status: 429 }
       );
     }
@@ -76,9 +85,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, id: lead.id });
   } catch (err) {
     if (err instanceof z.ZodError) {
-      return NextResponse.json({ error: "Ungültige Eingabe", details: err.flatten() }, { status: 400 });
+      return NextResponse.json({ error: t("invalidInput"), details: await apiValidation(err) }, { status: 400 });
     }
     console.error("[leads POST]", err);
-    return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
+    return NextResponse.json({ error: t("serverError") }, { status: 500 });
   }
 }

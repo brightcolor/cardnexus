@@ -1,0 +1,16 @@
+{
+  "createError": "Creazione dell’organizzazione non riuscita",
+  "unknownError": "Si è verificato un errore.",
+  "organizationName": "Nome dell’organizzazione",
+  "nameExample": "La mia azienda Srl",
+  "slug": "Indirizzo dell’elenco",
+  "slugExample": "la-mia-azienda",
+  "slugHint": "Indirizzo pubblico dell’elenco del team",
+  "color": "Colore del marchio",
+  "colorHint": "Colore principale dei biglietti dei membri",
+  "creating": "Creazione in corso…",
+  "create": "Crea organizzazione",
+  "nextSteps": "Diventerai automaticamente amministratore dell’organizzazione. Potrai definire lo stile dei biglietti nelle",
+  "settings": "impostazioni",
+  "nextStepsEnd": "."
+}

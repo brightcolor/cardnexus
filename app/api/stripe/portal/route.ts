@@ -1,3 +1,5 @@
+import { apiMessage } from "@/lib/i18n/api";
+import { getLocale } from "@/lib/i18n/server";
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -7,11 +9,11 @@ export async function POST(req: NextRequest) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "");
 
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const user = session.user as { stripeCustomerId?: string };
   if (!user.stripeCustomerId) {
-    return NextResponse.json({ error: "Kein Stripe-Account" }, { status: 400 });
+    return NextResponse.json({ error: await apiMessage("noStripeAccount") }, { status: 400 });
   }
 
   const hdrs = await headers();
@@ -19,6 +21,7 @@ export async function POST(req: NextRequest) {
   const proto = hdrs.get("x-forwarded-proto") ?? "http";
 
   const portalSession = await stripe.billingPortal.sessions.create({
+    locale: await getLocale(),
     customer:   user.stripeCustomerId,
     return_url: `${proto}://${host}/upgrade`,
   });

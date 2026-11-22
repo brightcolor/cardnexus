@@ -1,0 +1,19 @@
+{
+  "title": "Organisation eingefroren – {org}",
+  "subject": "Organisation eingefroren: {org}",
+  "heading": "Deine Organisation wurde eingefroren",
+  "intro": "Hallo {name}, dein <strong>Business-Plan</strong> für die Organisation {org} ist ausgelaufen oder wurde gekündigt.",
+  "description": "Deine Organisation und alle Mitglieder-Daten bleiben erhalten. Die Mitglieder können {app} weiterhin mit ihren eigenen Free-Accounts nutzen – jedoch ohne Organisations-Features.",
+  "suspendedTitle": "Was eingefroren ist:",
+  "members": "Mitgliederverwaltung &amp; Einladungen",
+  "design": "Org-Design-Vorgaben für Karten",
+  "import": "Bulk-Import",
+  "directory": "Team-Verzeichnis",
+  "retainedTitle": "Was erhalten bleibt:",
+  "cards": "Alle Karten und Kontaktdaten",
+  "analytics": "Alle Analytics-Daten",
+  "membership": "Org-Zuordnung aller Mitglieder",
+  "reactivate": "Buche erneut den Business-Plan um die Organisation sofort wieder zu aktivieren.",
+  "subscribe": "Business-Plan buchen",
+  "reason": "Du erhältst diese E-Mail als Administrator der Organisation."
+}

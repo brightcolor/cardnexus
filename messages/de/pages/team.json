@@ -1,0 +1,17 @@
+{
+  "title": "Team",
+  "manageUsers": "Nutzerverwaltung",
+  "adminHint": "Als Super-Admin verwaltest du alle Nutzer und Organisationen im Admin-Panel. Das Team-Tab ist für Nutzer innerhalb einer Organisation gedacht.",
+  "adminPanel": "Zum Admin-Panel",
+  "suspended": "Organisation eingefroren",
+  "subscribe": "Business-Plan buchen",
+  "directory": "Team-Verzeichnis",
+  "upgrade": "Auf Business upgraden",
+  "createOrg": "Erstelle deine Organisation",
+  "createOrgHint": "Gib deiner Organisation einen Namen, lade Mitglieder ein und lege Design-Vorgaben für alle Visitenkarten fest.",
+  "suspendedAdmin": "Der Business-Plan für {organization} ist abgelaufen. Alle Daten sind erhalten — buche den Plan erneut um die Organisation sofort wieder zu aktivieren.",
+  "suspendedMember": "Die Organisation {organization} ist derzeit eingefroren. Bitte wende dich an deinen Administrator.",
+  "suspendedSince": "Eingefroren seit {date}",
+  "businessHint": "Das Team-Verzeichnis ist ab dem {plan} verfügbar. Verwalte Mitglieder, versende Einladungen und behalte den Überblick über dein Team.",
+  "businessPlan": "Business-Plan"
+}

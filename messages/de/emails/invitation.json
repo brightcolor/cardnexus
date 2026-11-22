@@ -1,0 +1,12 @@
+{
+  "title": "Einladung zu {orgName}",
+  "subject": "{senderName} lädt dich zu {orgName} ein",
+  "heading": "Du wurdest eingeladen",
+  "admin": "Administrator",
+  "leader": "Team Leader",
+  "member": "Mitglied",
+  "body": "{sender} hat dich eingeladen, {app} als {role} der Organisation {organization} beizutreten.",
+  "description": "Erstelle deinen kostenlosen Account und gestalte sofort deine digitale Visitenkarte.",
+  "accept": "Einladung annehmen",
+  "expiry": "Dieser Link ist 7 Tage gültig. Falls du diese E-Mail nicht erwartet hast, kannst du sie ignorieren.<br/>Link: {url}"
+}

@@ -1,5 +1,11 @@
 "use client";
 
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import { translator } from "@/lib/i18n/messages";
+import de from "@/messages/de/pages/dashboard.json";
+import it from "@/messages/it/pages/dashboard.json";
+import en from "@/messages/en/pages/dashboard.json";
+
 import { useEffect, useRef, useState } from "react";
 import { Eye } from "lucide-react";
 
@@ -9,6 +15,8 @@ interface Props {
 }
 
 export function LiveViews({ initialViews, cardSlug }: Props) {
+  const locale = useLocale();
+  const t = translator(locale, de, it, en);
   const [views, setViews] = useState(initialViews);
   const [pulse, setPulse] = useState(false);
   const prevRef = useRef(initialViews);
@@ -36,9 +44,9 @@ export function LiveViews({ initialViews, cardSlug }: Props) {
   return (
     <div className="flex items-center justify-between">
       <div>
-        <p className="text-sm text-muted-foreground">Aufrufe gesamt</p>
+        <p className="text-sm text-muted-foreground">{t("viewsTotal")}</p>
         <p className={`text-3xl font-bold mt-1 transition-colors duration-300 ${pulse ? "text-green-600" : ""}`}>
-          {views.toLocaleString("de-DE")}
+          {views.toLocaleString(locale)}
         </p>
       </div>
       <div className={`h-10 w-10 rounded-full bg-muted flex items-center justify-center transition-all duration-300 ${pulse ? "ring-2 ring-green-400" : ""}`}>

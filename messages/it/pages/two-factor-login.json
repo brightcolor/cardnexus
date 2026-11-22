@@ -1,0 +1,15 @@
+{
+  "invalidCode": "Il codice è errato o scaduto.",
+  "invalidBackupCode": "Il codice di recupero non è valido o è già stato usato.",
+  "heading": "Autenticazione a due fattori",
+  "totpInstructions": "Inserisci il codice a 6 cifre dell’app di autenticazione.",
+  "backupInstructions": "Inserisci uno dei codici di recupero che hai salvato.",
+  "totpCode": "Codice a 6 cifre",
+  "backupCode": "Codice di recupero",
+  "trustDevice": "Considera attendibile questo dispositivo per 30 giorni",
+  "verifying": "Verifica in corso…",
+  "verify": "Conferma",
+  "switchToBackup": "Usa un codice di recupero",
+  "switchToTotp": "Torna all’app di autenticazione",
+  "backToLogin": "Torna alla pagina di accesso"
+}

@@ -1,3 +1,8 @@
+import { translator } from "@/lib/i18n/messages";
+import { getLocale } from "@/lib/i18n/server";
+import de from "@/messages/de/pages/team.json";
+import it from "@/messages/it/pages/team.json";
+import en from "@/messages/en/pages/team.json";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -8,10 +13,17 @@ import Link from "next/link";
 import { Users, Zap, LayoutDashboard, Building2, SnowflakeIcon } from "lucide-react";
 import { CreateOrgForm } from "./CreateOrgForm";
 
-export const metadata = { title: "Team" };
+export async function generateMetadata() {
+  return { title: translator(await getLocale(), de, it, en)("title") };
+}
 
 export default async function TeamPage() {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const locale = await getLocale();
+  const t = translator(locale, de, it, en);
+  const session = await auth.api.getSession({
+    headers: await headers(),
+    query: { disableCookieCache: true },
+  });
   const user = session!.user as { id: string; role?: string; organizationId?: string };
   const role = user.role ?? "member";
   const orgId = user.organizationId;
@@ -24,10 +36,9 @@ export default async function TeamPage() {
           <LayoutDashboard className="h-8 w-8 text-muted-foreground" />
         </div>
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold">Nutzerverwaltung</h1>
+          <h1 className="text-2xl font-bold">{t("manageUsers")}</h1>
           <p className="text-muted-foreground max-w-sm">
-            Als Super-Admin verwaltest du alle Nutzer und Organisationen im Admin-Panel.
-            Das Team-Tab ist für Nutzer innerhalb einer Organisation gedacht.
+            {t("adminHint")}
           </p>
         </div>
         <Link
@@ -35,7 +46,7 @@ export default async function TeamPage() {
           className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
         >
           <Users className="h-4 w-4" />
-          Zum Admin-Panel
+          {t("adminPanel")}
         </Link>
       </div>
     );
@@ -65,16 +76,16 @@ export default async function TeamPage() {
           <SnowflakeIcon className="h-8 w-8 text-amber-600" />
         </div>
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold">Organisation eingefroren</h1>
+          <h1 className="text-2xl font-bold">{t("suspended")}</h1>
           <p className="text-muted-foreground max-w-sm">
             {isAdmin
-              ? <>Der Business-Plan für <strong>{frozenOrg.name}</strong> ist abgelaufen. Alle Daten sind erhalten — buche den Plan erneut um die Organisation sofort wieder zu aktivieren.</>
-              : <>Die Organisation <strong>{frozenOrg.name}</strong> ist derzeit eingefroren. Bitte wende dich an deinen Administrator.</>
+              ? t("suspendedAdmin", { organization: frozenOrg.name })
+              : t("suspendedMember", { organization: frozenOrg.name })
             }
           </p>
           {frozenOrg.frozenAt && (
             <p className="text-xs text-muted-foreground">
-              Eingefroren seit {new Date(frozenOrg.frozenAt).toLocaleDateString("de-DE")}
+              {t("suspendedSince", { date: new Date(frozenOrg.frozenAt).toLocaleDateString(locale) })}
             </p>
           )}
         </div>
@@ -84,7 +95,7 @@ export default async function TeamPage() {
             className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             <Zap className="h-4 w-4" />
-            Business-Plan buchen
+            {t("subscribe")}
           </Link>
         )}
       </div>
@@ -98,10 +109,9 @@ export default async function TeamPage() {
           <Users className="h-8 w-8 text-muted-foreground" />
         </div>
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold">Team-Verzeichnis</h1>
+          <h1 className="text-2xl font-bold">{t("directory")}</h1>
           <p className="text-muted-foreground max-w-sm">
-            Das Team-Verzeichnis ist ab dem <strong>Business-Plan</strong> verfügbar.
-            Verwalte Mitglieder, versende Einladungen und behalte den Überblick über dein Team.
+            {t("businessHint", { plan: t("businessPlan") })}
           </p>
         </div>
         <Link
@@ -109,7 +119,7 @@ export default async function TeamPage() {
           className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
         >
           <Zap className="h-4 w-4" />
-          Auf Business upgraden
+          {t("upgrade")}
         </Link>
       </div>
     );
@@ -123,10 +133,9 @@ export default async function TeamPage() {
           <Building2 className="h-8 w-8 text-primary" />
         </div>
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold">Erstelle deine Organisation</h1>
+          <h1 className="text-2xl font-bold">{t("createOrg")}</h1>
           <p className="text-muted-foreground">
-            Gib deiner Organisation einen Namen, lade Mitglieder ein und lege
-            Design-Vorgaben für alle Visitenkarten fest.
+            {t("createOrgHint")}
           </p>
         </div>
         <CreateOrgForm />
@@ -147,7 +156,10 @@ export default async function TeamPage() {
     canManageUsers(role)
       ? db.invitation.findMany({
           where: { organizationId: orgId, acceptedAt: null },
-          include: { sender: { select: { name: true } } },
+          select: {
+            id: true, email: true, role: true, expiresAt: true, createdAt: true,
+            sender: { select: { name: true } },
+          },
           orderBy: { createdAt: "desc" },
         })
       : [],

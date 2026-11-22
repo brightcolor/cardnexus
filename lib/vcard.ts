@@ -2,22 +2,27 @@ import type { CardData } from "@/types";
 
 /** Fold long vCard lines at 75 octets (RFC 6350 §3.2) */
 function fold(line: string): string {
-  if (line.length <= 75) return line;
+  if (Buffer.byteLength(line) <= 75) return line;
   const parts: string[] = [];
-  let pos = 0;
-  let first = true;
-  while (pos < line.length) {
-    const max = first ? 75 : 74;
-    parts.push((first ? "" : " ") + line.slice(pos, pos + max));
-    pos += max;
-    first = false;
+  let part = "";
+  let bytes = 0;
+  for (const character of line) {
+    const size = Buffer.byteLength(character);
+    if (bytes + size > 75) {
+      parts.push(part);
+      part = " ";
+      bytes = 1;
+    }
+    part += character;
+    bytes += size;
   }
+  parts.push(part);
   return parts.join("\r\n");
 }
 
 /** Escape special vCard 4.0 text characters */
 function esc(value: string): string {
-  return value.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+  return value.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r\n?|\n/g, "\\n");
 }
 
 /** Map free-text gender to vCard 4.0 GENDER value */
@@ -32,7 +37,7 @@ function mapGender(g: string): string {
   return `O;${esc(g)}`;
 }
 
-export function generateVCard(card: CardData): string {
+export function generateVCard(card: CardData, cardUrl: string, embeddedPhoto?: string): string {
   const first = card.firstName ?? "";
   const last  = card.lastName  ?? "";
   const fullName = `${first} ${last}`.trim() || card.email || "Kontakt";
@@ -70,15 +75,12 @@ export function generateVCard(card: CardData): string {
   if (card.instagram) add(`X-SOCIALPROFILE;TYPE=instagram:${card.instagram}`);
   if (card.github)    add(`X-SOCIALPROFILE;TYPE=github:${card.github}`);
 
-  // vCard 4.0: PHOTO is just a URI
-  if (card.avatarUrl?.startsWith("http")) {
-    add(`PHOTO:${card.avatarUrl}`);
-  }
+  const photo = embeddedPhoto ?? (/^https?:\/\//i.test(card.avatarUrl ?? "") ? card.avatarUrl : null);
+  if (photo) add(`PHOTO:${photo}`);
 
   if (card.bio) add(`NOTE:${esc(card.bio)}`);
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  add(`URL;TYPE=x-card:${appUrl}/c/${card.slug}`);
+  add(`URL;TYPE=x-card:${cardUrl}`);
   add(`REV:${new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "")}`);
   add("END:VCARD");
 

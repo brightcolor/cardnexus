@@ -1,14 +1,13 @@
 "use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/pages/admin-access-log.json";
+import it from "@/messages/it/pages/admin-access-log.json";
+import en from "@/messages/en/pages/admin-access-log.json";
 import { useRouter, usePathname } from "next/navigation";
 
-const EVENT_LABELS: Record<string, { label: string; color: string }> = {
-  view:           { label: "Aufruf",     color: "bg-blue-100 text-blue-700" },
-  vcard_download: { label: "vCard",      color: "bg-green-100 text-green-700" },
-  qr_scan:        { label: "QR-Scan",    color: "bg-purple-100 text-purple-700" },
-  link_click:     { label: "Link-Klick", color: "bg-amber-100 text-amber-700" },
-  wallet_save:    { label: "Wallet",     color: "bg-pink-100 text-pink-700" },
-};
+
 
 interface Entry {
   id: string;
@@ -40,6 +39,16 @@ interface Props {
 }
 
 export function AccessLogClient({ entries, total, page, pageSize, cards, filters }: Props) {
+  const locale = useLocale();
+  const t = translator(locale, de, it, en);
+
+  const EVENT_LABELS: Record<string, { label: string; color: string }> = {
+    view:           { label: t("view"),     color: "bg-blue-100 text-blue-700" },
+    vcard_download: { label: "vCard",      color: "bg-green-100 text-green-700" },
+    qr_scan:        { label: t("qr"),    color: "bg-purple-100 text-purple-700" },
+    link_click:     { label: t("click"), color: "bg-amber-100 text-amber-700" },
+    wallet_save:    { label: "Wallet",     color: "bg-pink-100 text-pink-700" },
+  };
   const router = useRouter();
   const pathname = usePathname();
 
@@ -57,9 +66,9 @@ export function AccessLogClient({ entries, total, page, pageSize, cards, filters
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Access Log</h1>
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
         <p className="text-muted-foreground mt-1">
-          {total.toLocaleString("de-DE")} Einträge
+          {total.toLocaleString(locale)} {t("entries")}
         </p>
       </div>
 
@@ -70,7 +79,7 @@ export function AccessLogClient({ entries, total, page, pageSize, cards, filters
           onChange={(e) => applyFilter("event", e.target.value)}
           className="rounded-md border border-input bg-background px-3 py-1.5 text-sm"
         >
-          <option value="">Alle Events</option>
+          <option value="">{t("events")}</option>
           {Object.entries(EVENT_LABELS).map(([k, v]) => (
             <option key={k} value={k}>{v.label}</option>
           ))}
@@ -81,7 +90,7 @@ export function AccessLogClient({ entries, total, page, pageSize, cards, filters
           onChange={(e) => applyFilter("cardSlug", e.target.value)}
           className="rounded-md border border-input bg-background px-3 py-1.5 text-sm"
         >
-          <option value="">Alle Karten</option>
+          <option value="">{t("cards")}</option>
           {cards.map((c) => (
             <option key={c.slug} value={c.slug}>{c.name ?? c.slug} ({c.slug})</option>
           ))}
@@ -92,11 +101,11 @@ export function AccessLogClient({ entries, total, page, pageSize, cards, filters
           onChange={(e) => applyFilter("days", e.target.value)}
           className="rounded-md border border-input bg-background px-3 py-1.5 text-sm"
         >
-          <option value="">Alle Zeit</option>
-          <option value="1">Letzte 24h</option>
-          <option value="7">Letzte 7 Tage</option>
-          <option value="30">Letzte 30 Tage</option>
-          <option value="90">Letzte 90 Tage</option>
+          <option value="">{t("allTime")}</option>
+          <option value="1">{t("lastDay")}</option>
+          <option value="7">{t("lastWeek")}</option>
+          <option value="30">{t("lastMonth")}</option>
+          <option value="90">{t("lastQuarter")}</option>
         </select>
       </div>
 
@@ -105,22 +114,22 @@ export function AccessLogClient({ entries, total, page, pageSize, cards, filters
         <table className="w-full text-sm">
           <thead className="border-b border-border">
             <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground">
-              <th className="px-4 py-3 font-medium">Zeit</th>
-              <th className="px-4 py-3 font-medium">Event</th>
-              <th className="px-4 py-3 font-medium">Karte</th>
+              <th className="px-4 py-3 font-medium">{t("time")}</th>
+              <th className="px-4 py-3 font-medium">{t("event")}</th>
+              <th className="px-4 py-3 font-medium">{t("card")}</th>
               <th className="px-4 py-3 font-medium">IP</th>
-              <th className="px-4 py-3 font-medium">Land / Stadt</th>
-              <th className="px-4 py-3 font-medium">Gerät</th>
-              <th className="px-4 py-3 font-medium">Browser / OS</th>
-              <th className="px-4 py-3 font-medium">Referrer</th>
-              <th className="px-4 py-3 font-medium">Quelle / UTM</th>
+              <th className="px-4 py-3 font-medium">{t("location")}</th>
+              <th className="px-4 py-3 font-medium">{t("device")}</th>
+              <th className="px-4 py-3 font-medium">{t("browser")}</th>
+              <th className="px-4 py-3 font-medium">{t("referrer")}</th>
+              <th className="px-4 py-3 font-medium">{t("source")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {entries.length === 0 && (
               <tr>
                 <td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">
-                  Keine Einträge gefunden.
+                  {t("empty")}
                 </td>
               </tr>
             )}
@@ -129,7 +138,7 @@ export function AccessLogClient({ entries, total, page, pageSize, cards, filters
               return (
                 <tr key={e.id} className="hover:bg-muted/30 transition-colors">
                   <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground whitespace-nowrap">
-                    {new Date(e.createdAt).toLocaleString("de-DE", {
+                    {new Date(e.createdAt).toLocaleString(locale, {
                       day: "2-digit", month: "2-digit", year: "numeric",
                       hour: "2-digit", minute: "2-digit", second: "2-digit",
                     })}
@@ -172,7 +181,7 @@ export function AccessLogClient({ entries, total, page, pageSize, cards, filters
       {totalPages > 1 && (
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">
-            Seite {page} von {totalPages}
+            {t("page")} {page} {t("of")} {totalPages}
           </span>
           <div className="flex gap-2">
             {page > 1 && (
@@ -180,7 +189,7 @@ export function AccessLogClient({ entries, total, page, pageSize, cards, filters
                 onClick={() => applyFilter("page", String(page - 1))}
                 className="px-3 py-1.5 rounded-lg border border-border hover:bg-muted transition-colors"
               >
-                ← Zurück
+                {t("previous")}
               </button>
             )}
             {page < totalPages && (
@@ -188,7 +197,7 @@ export function AccessLogClient({ entries, total, page, pageSize, cards, filters
                 onClick={() => applyFilter("page", String(page + 1))}
                 className="px-3 py-1.5 rounded-lg border border-border hover:bg-muted transition-colors"
               >
-                Weiter →
+                {t("next")}
               </button>
             )}
           </div>

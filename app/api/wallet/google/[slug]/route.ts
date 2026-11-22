@@ -1,20 +1,23 @@
+import { apiMessage, apiProviderError } from "@/lib/i18n/api";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { canReadCard, publishedCardScope, unexpiredCardScope } from "@/lib/card-publication";
 import { generateGoogleWalletPassUrl, WalletFeatureDisabledError } from "@/lib/wallet";
 import { headers } from "next/headers";
+import { getLocale } from "@/lib/i18n/server";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
   const card = await db.card.findUnique({
-    where: { slug, isPublic: true },
+    where: { slug, ...publishedCardScope, ...unexpiredCardScope() },
     select: {
-      slug: true, firstName: true, lastName: true, title: true,
+      slug: true, passwordHash: true, firstName: true, lastName: true, title: true,
       company: true, email: true, phone: true, primaryColor: true, avatarUrl: true,
     },
   });
 
-  if (!card) return NextResponse.json({ error: "Nicht gefunden" }, { status: 404 });
+  if (!card || !await canReadCard(card)) return NextResponse.json({ error: await apiMessage("missing") }, { status: 404 });
 
   const hdrs  = await headers();
   const host  = hdrs.get("x-forwarded-host") ?? hdrs.get("host") ?? "localhost:3000";
@@ -32,14 +35,14 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ slu
       primaryColor: card.primaryColor,
       avatarUrl:    card.avatarUrl,
       cardUrl:      `${proto}://${host}/c/${card.slug}`,
-    });
+    }, await getLocale());
 
-    return NextResponse.json({ url: saveUrl });
+    return NextResponse.json({ url: saveUrl }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (err) {
     if (err instanceof WalletFeatureDisabledError) {
-      return NextResponse.json({ error: err.message }, { status: 503 });
+      return NextResponse.json({ error: await apiProviderError(err.message, "walletUnavailable") }, { status: 503 });
     }
     console.error("[wallet/google]", err);
-    return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
+    return NextResponse.json({ error: await apiMessage("serverError") }, { status: 500 });
   }
 }

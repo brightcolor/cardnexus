@@ -1,0 +1,19 @@
+{
+  "title": "Configura un tag NFC",
+  "intro": "Con un tag NFC puoi condividere il biglietto da visita avvicinando uno smartphone.",
+  "cardUrl": "Indirizzo del biglietto da scrivere sul tag NFC:",
+  "instructions": "Come funziona",
+  "buy": "Acquista un tag NFC",
+  "buyHint": "Scegli un tag NFC scrivibile (NTAG213 o NTAG215). Puoi usare un adesivo, un biglietto o un braccialetto NFC. Prezzo indicativo: 0,50–2,00 € a tag.",
+  "install": "Installa un’app",
+  "installHint": "Installa sullo smartphone un’app per scrivere sui tag NFC:",
+  "write": "Scrivi l’indirizzo sul tag",
+  "open": "Apri l’app e seleziona «Scrivi» o «Write»",
+  "record": "Aggiungi un record di tipo URL/URI",
+  "paste": "Incolla l’indirizzo del biglietto mostrato sopra",
+  "tap": "Tocca «Scrivi» e avvicina il tag allo smartphone",
+  "test": "Prova il tag",
+  "testHint": "Avvicina uno smartphone al tag. Il biglietto si apre direttamente nel browser, senza app. NFC è supportato da iPhone 7 e da Android 4.4.",
+  "sources": "Dove trovare i tag NFC",
+  "androidTools": "NFC Tools o NFC TagWriter di NXP"
+}

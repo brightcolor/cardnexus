@@ -1,3 +1,8 @@
+import { translator } from "@/lib/i18n/messages";
+import { getLocale } from "@/lib/i18n/server";
+import de from "@/messages/de/pages/my-card.json";
+import it from "@/messages/it/pages/my-card.json";
+import en from "@/messages/en/pages/my-card.json";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -12,13 +17,17 @@ import type { CardData } from "@/types";
 import Link from "next/link";
 import { BarChart2 } from "lucide-react";
 
-export const metadata = { title: "Meine Karte" };
+export async function generateMetadata() {
+  return { title: translator(await getLocale(), de, it, en)("heading") };
+}
 
 export default async function CardPage({
   searchParams,
 }: {
   searchParams: Promise<{ card?: string }>;
 }) {
+  const locale = await getLocale();
+  const t = translator(locale, de, it, en);
   const session = await auth.api.getSession({ headers: await headers() });
   const user = session!.user as {
     id: string;
@@ -76,11 +85,11 @@ export default async function CardPage({
     <div className="space-y-8 max-w-5xl">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold">Meine Karte</h1>
+          <h1 className="text-2xl font-bold">{t("heading")}</h1>
           <p className="text-muted-foreground mt-1">
             {activeCard
-              ? "Bearbeite deine digitale Visitenkarte."
-              : "Erstelle jetzt deine Karte."}
+              ? t("editDescription")
+              : t("createDescription")}
           </p>
         </div>
 
@@ -91,7 +100,7 @@ export default async function CardPage({
               className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
             >
               <BarChart2 className="h-4 w-4" />
-              Analytics
+              {t("analytics")}
             </Link>
           )}
           {cards.length > 0 && (
@@ -120,8 +129,8 @@ export default async function CardPage({
 
       {activeCard && (
         <div className="border-t border-border pt-8">
-          <h2 className="text-lg font-semibold mb-4">QR-Code</h2>
-          <QRCodeDisplay slug={activeCard.slug} color={activeCard.primaryColor} />
+          <h2 className="text-lg font-semibold mb-4">{t("qr")}</h2>
+          <QRCodeDisplay slug={activeCard.slug} />
         </div>
       )}
     </div>

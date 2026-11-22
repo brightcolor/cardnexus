@@ -1,7 +1,14 @@
+import { apiMessage } from "@/lib/i18n/api";
+import { defaultLocale, parseLocale } from "@/lib/i18n/locales";
+import { translator } from "@/lib/i18n/messages";
+import deMilestone from "@/messages/de/components/milestone-notification.json";
+import itMilestone from "@/messages/it/components/milestone-notification.json";
+import enMilestone from "@/messages/en/components/milestone-notification.json";
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { canReadCard, publishedCardScope, unexpiredCardScope } from "@/lib/card-publication";
 import { getDeviceType } from "@/lib/utils";
 import { canUseFeature } from "@/lib/plans";
 import { clientIp } from "@/lib/client-ip";
@@ -32,13 +39,13 @@ export async function POST(request: NextRequest) {
   // Anti-spam: 60 events / 60s per anonymized IP. Stops accidental loops &
   // simple flooding without affecting normal users.
   if (!rateLimit({ key: `track:${ip || "anon"}`, max: 60, windowMs: 60_000 })) {
-    return NextResponse.json({ error: "rate limited" }, { status: 429 });
+    return NextResponse.json({ error: await apiMessage("rateLimited") }, { status: 429 });
   }
 
   const body = await request.json().catch(() => null);
   const parsed = trackSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid" }, { status: 400 });
+    return NextResponse.json({ error: await apiMessage("invalid") }, { status: 400 });
   }
 
   const { cardSlug, event, linkLabel, source, utmSource, utmMedium, utmCampaign, referrer } = parsed.data;
@@ -46,11 +53,11 @@ export async function POST(request: NextRequest) {
   // Make sure the cardSlug actually exists (and is public) before logging,
   // so attackers can't bloat the analytics table with garbage.
   const card = await db.card.findUnique({
-    where: { slug: cardSlug },
-    select: { id: true, isPublic: true },
+    where: { slug: cardSlug, ...publishedCardScope, ...unexpiredCardScope() },
+    select: { slug: true, passwordHash: true },
   });
-  if (!card || !card.isPublic) {
-    return NextResponse.json({ error: "not found" }, { status: 404 });
+  if (!card || !await canReadCard(card)) {
+    return NextResponse.json({ error: await apiMessage("resourceNotFound") }, { status: 404 });
   }
 
   const userAgent = request.headers.get("user-agent") ?? "";
@@ -108,11 +115,13 @@ async function checkMilestone(cardSlug: string) {
 
   const user = await db.user.findUnique({
     where: { id: card.userId },
-    select: { email: true, name: true, plan: true, planExpiresAt: true },
+    select: { email: true, name: true, plan: true, planExpiresAt: true, locale: true },
   });
   if (!user) return;
   if (!canUseFeature("milestoneNotifications", user.plan ?? "free", user.planExpiresAt)) return;
 
+  const locale = parseLocale(user.locale) ?? defaultLocale();
+  const t = translator(locale, deMilestone, itMilestone, enMilestone);
   await db.notification.upsert({
     where: { userId_type_value: { userId: card.userId, type: "milestone", value: String(milestone) } },
     update: {},
@@ -120,14 +129,14 @@ async function checkMilestone(cardSlug: string) {
       userId: card.userId,
       type: "milestone",
       value: String(milestone),
-      message: `Deine Karte hat ${milestone.toLocaleString("de-DE")} Aufrufe erreicht!`,
+      message: t(milestone === 1 ? "viewsOne" : "viewsOther", { count: milestone.toLocaleString(locale) }),
     },
   }).catch(() => {});
 }
 
 export async function GET(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const url = new URL(request.url);
   const cardId = url.searchParams.get("cardId");

@@ -1,0 +1,13 @@
+{
+  "credentials": "E-Mail oder Passwort falsch.",
+  "invalidEmail": "Gib eine gültige E-Mail-Adresse ein.",
+  "emailInUse": "Diese E-Mail-Adresse wird bereits verwendet.",
+  "shortPassword": "Das Passwort ist zu kurz.",
+  "longPassword": "Das Passwort ist zu lang.",
+  "invalidPassword": "Das Passwort ist ungültig.",
+  "invalidToken": "Der Link oder die Sitzung ist abgelaufen.",
+  "invalidCode": "Der Code ist ungültig oder abgelaufen.",
+  "rateLimit": "Zu viele Anfragen. Bitte versuche es später erneut.",
+  "generic": "Der Vorgang konnte nicht abgeschlossen werden.",
+  "proxyRateLimit": "Zu viele Anmeldeversuche. Bitte in 1 Minute erneut versuchen."
+}

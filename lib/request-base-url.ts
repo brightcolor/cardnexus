@@ -6,7 +6,11 @@ import type { NextRequest } from "next/server";
  * the internal bind address (0.0.0.0:3000) to the browser.
  */
 export function requestBaseUrl(req: NextRequest): string {
-  const host  = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? "localhost:3000";
-  const proto = req.headers.get("x-forwarded-proto") ?? "http";
+  const host = req.headers.get("x-forwarded-host")?.split(",")[0].trim()
+    || req.headers.get("host") || req.nextUrl.host;
+  const forwardedProto = req.headers.get("x-forwarded-proto")?.split(",")[0].trim();
+  const proto = forwardedProto === "https" || forwardedProto === "http"
+    ? forwardedProto
+    : req.nextUrl.protocol.replace(/:$/, "");
   return `${proto}://${host}`;
 }

@@ -1,0 +1,7 @@
+{
+  "title": "Karten-Domain",
+  "description": "Unter welcher Domain soll deine Karte erreichbar sein?",
+  "standard": "Standard (Plattform-Domain)",
+  "custom": "Eigene Domain (Pro)",
+  "example": "meine-domain.de"
+}

@@ -1,0 +1,14 @@
+{
+  "views": "Aufrufe gesamt",
+  "downloads": "vCard-Downloads",
+  "scans": "QR-Scans",
+  "clicks": "Link-Klicks",
+  "leads": "Leads erhalten",
+  "members": "Teammitglieder",
+  "month": "Aufrufe – letzte 30 Tage",
+  "topViews": "Top-Karten nach Aufrufen",
+  "empty": "Noch keine Daten.",
+  "topLeads": "Top-Karten nach Leads",
+  "noLeads": "Noch keine Leads.",
+  "viewCount": "Aufrufe"
+}

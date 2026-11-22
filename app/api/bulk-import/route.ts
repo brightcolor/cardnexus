@@ -1,10 +1,11 @@
+import { apiMessage, apiProviderError } from "@/lib/i18n/api";
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { canManageUsers, slugify } from "@/lib/utils";
+import { canManageUsers } from "@/lib/utils";
 import { canUseFeature } from "@/lib/plans";
-import { nanoid } from "nanoid";
+import { generateCardSlug } from "@/lib/card-slug";
 
 interface CsvRow {
   firstName: string;
@@ -76,29 +77,29 @@ function parseCsv(text: string): CsvRow[] {
 
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const user = session.user as { id: string; role?: string; organizationId?: string; plan?: string };
 
   if (!canManageUsers(user.role ?? "member")) {
-    return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 });
+    return NextResponse.json({ error: await apiMessage("noPermission") }, { status: 403 });
   }
   if (!canUseFeature("bulkImport", user.plan ?? "free")) {
-    return NextResponse.json({ error: "Business-Plan erforderlich" }, { status: 403 });
+    return NextResponse.json({ error: await apiMessage("businessRequired") }, { status: 403 });
   }
   if (!user.organizationId) {
-    return NextResponse.json({ error: "Keine Organisation" }, { status: 400 });
+    return NextResponse.json({ error: await apiMessage("noOrganization") }, { status: 400 });
   }
 
   const formData = await req.formData();
   const file = formData.get("file") as File | null;
-  if (!file) return NextResponse.json({ error: "Keine Datei" }, { status: 400 });
+  if (!file) return NextResponse.json({ error: await apiMessage("noFile") }, { status: 400 });
 
   const text = await file.text();
   const rows = parseCsv(text);
 
   if (rows.length === 0) {
-    return NextResponse.json({ error: "Keine verwertbaren Zeilen in der CSV-Datei" }, { status: 400 });
+    return NextResponse.json({ error: await apiMessage("noCsvRows") }, { status: 400 });
   }
 
   const org = await db.organization.findUnique({
@@ -127,7 +128,7 @@ export async function POST(req: NextRequest) {
         const existingCard = existing.cards[0] ?? null;
         const slug = existingCard
           ? undefined
-          : `${slugify(row.firstName + "-" + row.lastName)}-${nanoid(4)}`;
+          : generateCardSlug(row.firstName, row.lastName, 4);
 
         if (existingCard) {
           await db.card.update({
@@ -147,6 +148,7 @@ export async function POST(req: NextRequest) {
           await db.card.create({
             data: {
               userId:      existing.id,
+              isPublic:    false,
               slug,
               firstName:   row.firstName,
               lastName:    row.lastName,
@@ -163,10 +165,10 @@ export async function POST(req: NextRequest) {
           results.push({ email: row.email, status: "created" });
         }
       } else {
-        results.push({ email: row.email, status: "skipped", error: "Benutzer nicht gefunden" });
+        results.push({ email: row.email, status: "skipped", error: await apiMessage("userNotFound") });
       }
     } catch (e) {
-      results.push({ email: row.email, status: "skipped", error: (e as Error).message });
+      results.push({ email: row.email, status: "skipped", error: await apiProviderError(e instanceof Error ? e.message : String(e), "importRowError") });
     }
   }
 

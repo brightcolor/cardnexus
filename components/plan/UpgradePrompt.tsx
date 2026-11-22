@@ -1,3 +1,10 @@
+"use client";
+
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/components/upgrade-prompt.json";
+import it from "@/messages/it/components/upgrade-prompt.json";
+import en from "@/messages/en/components/upgrade-prompt.json";
 import Link from "next/link";
 import { Lock, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +22,8 @@ const PLAN_LABELS: Record<string, string> = {
 };
 
 export function UpgradePrompt({ feature, requiredPlan = "pro", compact }: Props) {
+  const locale = useLocale();
+  const t = translator(locale, de, it, en);
   if (compact) {
     return (
       <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
@@ -35,11 +44,11 @@ export function UpgradePrompt({ feature, requiredPlan = "pro", compact }: Props)
       <div>
         <p className="font-semibold text-sm">{feature}</p>
         <p className="text-xs text-muted-foreground mt-1">
-          Verfügbar ab dem {PLAN_LABELS[requiredPlan]}-Plan
+          {t("available", { plan: PLAN_LABELS[requiredPlan] ?? requiredPlan })}
         </p>
       </div>
       <Button asChild size="sm">
-        <Link href="/upgrade">Jetzt upgraden</Link>
+        <Link href="/upgrade">{t("upgrade")}</Link>
       </Button>
     </div>
   );

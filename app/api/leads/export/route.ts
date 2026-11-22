@@ -1,12 +1,17 @@
+import { apiMessage } from "@/lib/i18n/api";
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { buildCsv } from "@/lib/csv";
+import { getLocale } from "@/lib/i18n/server";
+import de from "@/messages/de/pages/leads.json";
+import it from "@/messages/it/pages/leads.json";
+import en from "@/messages/en/pages/leads.json";
 
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const cards = await db.card.findMany({
     where: { userId: session.user.id },
@@ -21,10 +26,12 @@ export async function GET() {
     orderBy: { createdAt: "desc" },
   });
 
+  const locale = await getLocale();
+  const labels = { de, it, en }[locale];
   const csv = buildCsv(
-    ["Datum", "Name", "E-Mail", "Telefon", "Nachricht", "Karte"],
+    [labels.csvDate, labels.csvName, labels.csvEmail, labels.csvPhone, labels.csvMessage, labels.csvCard],
     leads.map((l) => [
-      l.createdAt.toLocaleDateString("de-DE"),
+      l.createdAt.toLocaleDateString(locale),
       l.name,
       l.email,
       l.phone,

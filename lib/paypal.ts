@@ -60,6 +60,7 @@ export interface PayPalSubscription {
 /** Create a PayPal subscription and return the approval URL + subscription ID. */
 export async function createSubscription(opts: {
   planId:    string;
+  locale:    string;
   userId:    string;
   plan:      string;
   returnUrl: string;
@@ -79,7 +80,7 @@ export async function createSubscription(opts: {
       custom_id: `${opts.userId}|${opts.plan}`, // we read this in the webhook
       application_context: {
         brand_name:  "CardNexus",
-        locale:      "de-DE",
+        locale:      opts.locale,
         shipping_preference: "NO_SHIPPING",
         user_action: "SUBSCRIBE_NOW",
         payment_method: {

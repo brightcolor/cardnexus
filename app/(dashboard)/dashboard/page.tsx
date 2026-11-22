@@ -1,6 +1,12 @@
+import { translator } from "@/lib/i18n/messages";
+import { getLocale } from "@/lib/i18n/server";
+import de from "@/messages/de/pages/dashboard.json";
+import it from "@/messages/it/pages/dashboard.json";
+import en from "@/messages/en/pages/dashboard.json";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getPlatformSettings } from "@/lib/platform";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,13 +16,11 @@ import { LiveViews } from "./LiveViews";
 import { CardSparkline } from "./CardSparkline";
 
 export default async function DashboardPage() {
+  const locale = await getLocale();
+  const t = translator(locale, de, it, en);
   const hdrs   = await headers();
   const session = await auth.api.getSession({ headers: hdrs });
   const user = session!.user as { id: string; name: string; role?: string };
-
-  const proto  = hdrs.get("x-forwarded-proto") ?? "https";
-  const host   = hdrs.get("x-forwarded-host") ?? hdrs.get("host") ?? "localhost:3000";
-  const appUrl = `${proto}://${host}`;
 
   const cards = await db.card.findMany({
     where: { userId: user.id },
@@ -58,14 +62,19 @@ export default async function DashboardPage() {
 
   const firstName = user.name.split(" ")[0];
   const defaultCard = cards.find((c) => c.isDefault) ?? cards[0] ?? null;
+  const cardUrl = defaultCard
+    ? new URL(`/c/${encodeURIComponent(defaultCard.slug)}`, (await getPlatformSettings()).appUrl).href
+    : null;
 
   return (
     <div className="space-y-8">
       {/* Greeting */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Hallo, {firstName} 👋</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t("greeting")} {firstName} 👋</h1>
         <p className="text-muted-foreground mt-1">
-          {cards.length > 0 ? `Du hast ${cards.length} Karte${cards.length > 1 ? "n" : ""}.` : "Erstelle jetzt deine erste digitale Visitenkarte."}
+          {cards.length === 0
+            ? t("firstCard")
+            : t(cards.length === 1 ? "cardCountOne" : "cardCountMany", { count: cards.length.toLocaleString(locale) })}
         </p>
       </div>
 
@@ -75,11 +84,11 @@ export default async function DashboardPage() {
           <div className="mx-auto h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
             <Plus className="h-6 w-6 text-muted-foreground" />
           </div>
-          <h2 className="text-lg font-semibold mb-2">Keine Karte vorhanden</h2>
-          <p className="text-sm text-muted-foreground mb-6">Erstelle jetzt deine digitale Visitenkarte in wenigen Minuten.</p>
+          <h2 className="text-lg font-semibold mb-2">{t("noCard")}</h2>
+          <p className="text-sm text-muted-foreground mb-6">{t("noCardHint")}</p>
           <Button asChild>
             <Link href="/card">
-              Karte erstellen
+              {t("createCard")}
               <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
@@ -90,11 +99,11 @@ export default async function DashboardPage() {
       {cards.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold">Deine Karten</h2>
+            <h2 className="text-base font-semibold">{t("yourCards")}</h2>
             <Button asChild variant="outline" size="sm">
               <Link href="/card">
                 <Plus className="h-4 w-4" />
-                Neue Karte
+                {t("newCard")}
               </Link>
             </Button>
           </div>
@@ -119,29 +128,29 @@ export default async function DashboardPage() {
                     <div className="flex items-center gap-2">
                       <span className="font-medium truncate">{c.name ?? c.slug}</span>
                       {c.isDefault && (
-                        <Badge variant="outline" className="text-xs shrink-0">Standard</Badge>
+                        <Badge variant="outline" className="text-xs shrink-0">{t("defaultCard")}</Badge>
                       )}
                       <Badge variant={c.isPublic ? "success" : "outline"} className="text-xs shrink-0">
-                        {c.isPublic ? "Öffentlich" : "Privat"}
+                        {c.isPublic ? t("publicCard") : t("privateCard")}
                       </Badge>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">/c/{c.slug}</p>
                   </div>
 
                   {/* Sparkline — 7 days */}
-                  <div className="hidden md:block shrink-0" title="Aufrufe letzte 7 Tage">
+                  <div className="hidden md:block shrink-0" title={t("viewsLastWeek")}>
                     <CardSparkline data={sparkData} color={c.primaryColor ?? "#0F172A"} />
                   </div>
 
                   {/* Stats */}
                   <div className="hidden sm:flex items-center gap-6 text-sm text-muted-foreground shrink-0">
-                    <div className="flex items-center gap-1.5" title="Aufrufe gesamt">
+                    <div className="flex items-center gap-1.5" title={t("viewsTotal")}>
                       <Eye className="h-3.5 w-3.5" />
-                      <span className="font-medium text-foreground">{c.totalViews.toLocaleString("de-DE")}</span>
+                      <span className="font-medium text-foreground">{c.totalViews.toLocaleString(locale)}</span>
                     </div>
-                    <div className="flex items-center gap-1.5" title="Aufrufe letzte 30 Tage">
+                    <div className="flex items-center gap-1.5" title={t("viewsLastMonth")}>
                       <MousePointer className="h-3.5 w-3.5" />
-                      <span>{recentCount.toLocaleString("de-DE")} <span className="text-xs">/ 30d</span></span>
+                      <span>{recentCount.toLocaleString(locale)} <span className="text-xs">/ 30d</span></span>
                     </div>
                   </div>
 
@@ -150,18 +159,18 @@ export default async function DashboardPage() {
                     <Link
                       href={`/card?card=${c.id}`}
                       className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-                      title="Karte bearbeiten"
+                      title={t("editCard")}
                     >
                       <Pencil className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline">Bearbeiten</span>
+                      <span className="hidden sm:inline">{t("edit")}</span>
                     </Link>
                     <Link
                       href={`/analytics?cardId=${c.id}`}
                       className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-                      title="Analytics ansehen"
+                      title={t("viewAnalytics")}
                     >
                       <BarChart2 className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline">Analytics</span>
+                      <span className="hidden sm:inline">{t("analytics")}</span>
                     </Link>
                   </div>
                 </div>
@@ -172,39 +181,30 @@ export default async function DashboardPage() {
       )}
 
       {/* Quick actions for default card */}
-      {defaultCard && (
+      {defaultCard && cardUrl && (
         <div className="grid sm:grid-cols-2 gap-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Karte teilen</CardTitle>
+              <CardTitle className="text-base">{t("share")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {/* Prefer custom domain, then app URL derived from request headers */}
-              {(({ cardUrl }: { cardUrl: string }) => (
-                <>
-                  <div className="flex items-center gap-2 rounded-lg bg-muted p-3 text-sm font-mono text-muted-foreground overflow-hidden">
-                    <span className="truncate">{cardUrl}</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button asChild variant="outline" size="sm" className="flex-1">
-                      <Link href={cardUrl} target="_blank">Öffnen</Link>
-                    </Button>
-                    <Button asChild variant="outline" size="sm" className="flex-1">
-                      <Link href={`/api/vcard/${defaultCard.slug}`}>vCard</Link>
-                    </Button>
-                  </div>
-                </>
-              ))({
-                cardUrl: defaultCard.cardDomain
-                  ? `https://${defaultCard.cardDomain}/c/${defaultCard.slug}`
-                  : `${appUrl}/c/${defaultCard.slug}`,
-              })}
+              <div className="flex items-center gap-2 rounded-lg bg-muted p-3 text-sm font-mono text-muted-foreground overflow-hidden">
+                <span className="truncate">{cardUrl}</span>
+              </div>
+              <div className="flex gap-2">
+                <Button asChild variant="outline" size="sm" className="flex-1">
+                  <Link href={cardUrl} target="_blank">{t("open")}</Link>
+                </Button>
+                <Button asChild variant="outline" size="sm" className="flex-1">
+                  <Link href={`/api/vcard/${defaultCard.slug}`}>vCard</Link>
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Live-Aufrufe</CardTitle>
+              <CardTitle className="text-base">{t("liveViews")}</CardTitle>
             </CardHeader>
             <CardContent className="pt-2">
               <LiveViews initialViews={defaultCard.totalViews} cardSlug={defaultCard.slug} />

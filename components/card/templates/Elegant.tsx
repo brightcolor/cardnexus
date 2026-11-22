@@ -1,9 +1,18 @@
+"use client";
+
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/components/elegant-card.json";
+import it from "@/messages/it/components/elegant-card.json";
+import en from "@/messages/en/components/elegant-card.json";
 import { Phone, Mail, Globe, MapPin } from "lucide-react";
 import type { CardData } from "@/types";
 import { fontClass, shadowClass, avatarBorderStyle } from "../CardPreview";
 import { SocialLinks } from "./SocialLinks";
 
 export function ElegantTemplate({ card }: { card: Partial<CardData> }) {
+  const locale = useLocale();
+  const t = translator(locale, de, it, en);
   const color   = card.primaryColor ?? "#0F172A";
   const accent  = card.accentColor  ?? color;
   const font    = fontClass(card.fontFamily);
@@ -75,7 +84,7 @@ export function ElegantTemplate({ card }: { card: Partial<CardData> }) {
           {card.mobile && (
             <a href={`tel:${card.mobile}`} className="flex items-center gap-3 text-sm text-gray-600 hover:text-gray-900 transition-colors group">
               <Phone className="h-3.5 w-3.5 shrink-0 group-hover:scale-110 transition-transform" style={{ color: accent }} />
-              <span>{card.mobile} (Mobil)</span>
+              <span>{card.mobile} {t("mobile")}</span>
             </a>
           )}
           {card.email && (
@@ -93,7 +102,7 @@ export function ElegantTemplate({ card }: { card: Partial<CardData> }) {
           {card.address && (
             <div className="flex items-start gap-3 text-sm text-gray-600">
               <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5" style={{ color: accent }} />
-              <span>{card.address}</span>
+              <span className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]">{card.address}</span>
             </div>
           )}
         </div>
@@ -115,8 +124,8 @@ export function ElegantTemplate({ card }: { card: Partial<CardData> }) {
 
         {card.showQrOnCard && card.slug && (
           <div className="mt-5 flex items-center gap-3">
-            <img src={`/api/qr/${card.slug}`} alt="QR" className="h-10 w-10" />
-            <p className="text-xs text-gray-400">Scan für digitale Karte</p>
+            <img src={`/api/qr/${card.slug}`} alt={t("qrAlt")} className="h-10 w-10" />
+            <p className="text-xs text-gray-400">{t("scan")}</p>
           </div>
         )}
       </div>

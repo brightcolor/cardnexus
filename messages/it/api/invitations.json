@@ -1,0 +1,7 @@
+{
+  "unauthorized": "Accedi per gestire gli inviti.",
+  "forbidden": "Non hai i permessi per gestire gli inviti.",
+  "leaderRestriction": "I responsabili del team possono invitare soltanto nuovi membri.",
+  "alreadyInvited": "È già stato inviato un invito a questo indirizzo.",
+  "notFound": "Invito non trovato"
+}

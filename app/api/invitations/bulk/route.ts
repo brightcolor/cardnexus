@@ -1,3 +1,4 @@
+import { apiMessage, apiValidation } from "@/lib/i18n/api";
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -8,7 +9,7 @@ import { nanoid } from "nanoid";
 import { z } from "zod";
 
 const bulkSchema = z.object({
-  emails: z.array(z.string().email()).min(1).max(50),
+  emails: z.array(z.string().trim().toLowerCase().email()).min(1).max(50),
   role: z.enum(["company_admin", "team_leader", "member"]).optional().default("member"),
 });
 
@@ -22,7 +23,7 @@ async function createInvite(
   senderName: string
 ) {
   const existing = await db.invitation.findFirst({
-    where: { email, organizationId: orgId, acceptedAt: null },
+    where: { email, organizationId: orgId, acceptedAt: null, expiresAt: { gt: new Date() } },
   });
   if (existing) return { skipped: true };
 
@@ -41,25 +42,23 @@ async function createInvite(
 
 export async function POST(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const role = (session.user as { role?: string }).role ?? "member";
   const orgId = (session.user as { organizationId?: string }).organizationId;
 
   if (!canManageUsers(role) || !orgId) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return NextResponse.json({ error: await apiMessage("forbidden") }, { status: 403 });
   }
 
   const org = await db.organization.findUnique({
-    where: { id: orgId },
+    where: { id: orgId, isActive: true },
     select: { name: true },
   });
-  if (!org) return NextResponse.json({ error: "Org not found" }, { status: 404 });
+  if (!org) return NextResponse.json({ error: await apiMessage("orgNotFound") }, { status: 404 });
 
-  const reqHeaders = await headers();
-  const host = reqHeaders.get("x-forwarded-host") ?? reqHeaders.get("host") ?? "localhost:3000";
-  const proto = reqHeaders.get("x-forwarded-proto") ?? "http";
-  const inviteUrlBase = `${proto}://${host}/register`;
+  const base = process.env.APP_URL ?? process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
+  const inviteUrlBase = new URL("/invite", base).toString();
 
   let emails: string[];
   let inviteRole = "member";
@@ -70,25 +69,25 @@ export async function POST(request: NextRequest) {
   if (contentType.includes("multipart/form-data")) {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
-    if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    if (!file) return NextResponse.json({ error: await apiMessage("noFileProvided") }, { status: 400 });
 
     const text = await file.text();
     emails = text
       .split("\n")
       .map((line) => {
         const parts = line.split(",");
-        return parts[0].trim();
+        return parts[0].trim().toLowerCase();
       })
-      .filter((e) => e.includes("@"));
+      .filter((e) => z.string().email().safeParse(e).success);
 
     if (emails.length > 50) {
-      return NextResponse.json({ error: "Max 50 Einladungen pro Anfrage" }, { status: 400 });
+      return NextResponse.json({ error: await apiMessage("invitationLimit") }, { status: 400 });
     }
   } else {
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
     const parsed = bulkSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+      return NextResponse.json({ error: await apiValidation(parsed.error) }, { status: 400 });
     }
     emails = parsed.data.emails;
     inviteRole = parsed.data.role;
@@ -97,15 +96,18 @@ export async function POST(request: NextRequest) {
   // SECURITY: team_leader may only invite members.
   if (role === "team_leader" && inviteRole !== "member") {
     return NextResponse.json(
-      { error: "Team-Leader können nur Mitglieder einladen" },
+      { error: await apiMessage("leaderInvite") },
       { status: 403 }
     );
+  }
+  if (inviteRole === "company_admin" && role !== "super_admin") {
+    return NextResponse.json({ error: await apiMessage("forbidden") }, { status: 403 });
   }
 
   let sent = 0;
   let skipped = 0;
 
-  for (const email of emails) {
+  for (const email of new Set(emails)) {
     try {
       const result = await createInvite(
         email,

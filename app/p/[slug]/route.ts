@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { canReadCard, publishedCardScope, unexpiredCardScope } from "@/lib/card-publication";
 import { requestBaseUrl } from "@/lib/request-base-url";
 
 // /p/[slug] — friendly campaign URL.
@@ -13,16 +14,20 @@ export async function GET(
   const base = requestBaseUrl(req);
 
   const campaign = await db.campaign.findUnique({
-    where: { urlSlug: slug },
-    include: { card: { select: { slug: true, isPublic: true } } },
+    where: { urlSlug: slug, card: { ...publishedCardScope, ...unexpiredCardScope() } },
+    include: { card: { select: { slug: true, passwordHash: true } } },
   });
 
-  if (!campaign || !campaign.card.isPublic) {
+  if (!campaign) {
     return NextResponse.redirect(`${base}/`, { status: 302 });
   }
 
   if (campaign.expiresAt && campaign.expiresAt < new Date()) {
     return NextResponse.redirect(`${base}/`, { status: 302 });
+  }
+
+  if (!await canReadCard(campaign.card)) {
+    return NextResponse.redirect(new URL(`/c/${campaign.card.slug}`, base), { status: 302 });
   }
 
   await db.campaign.update({

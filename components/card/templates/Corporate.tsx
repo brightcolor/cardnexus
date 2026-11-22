@@ -1,9 +1,18 @@
+"use client";
+
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/components/corporate-card.json";
+import it from "@/messages/it/components/corporate-card.json";
+import en from "@/messages/en/components/corporate-card.json";
 import { Phone, Mail, Globe, MapPin } from "lucide-react";
 import type { CardData } from "@/types";
 import { fontClass, radiusClass, shadowClass, avatarBorderStyle } from "../CardPreview";
 import { SocialLinks } from "./SocialLinks";
 
 export function CorporateTemplate({ card }: { card: Partial<CardData> }) {
+  const locale = useLocale();
+  const t = translator(locale, de, it, en);
   const color   = card.primaryColor ?? "#1e3a5f";
   const accent  = card.accentColor  ?? color;
   const font    = fontClass(card.fontFamily);
@@ -85,19 +94,19 @@ export function CorporateTemplate({ card }: { card: Partial<CardData> }) {
         {/* Contact table */}
         <div className="space-y-0 divide-y divide-gray-50">
           {card.phone && (
-            <CorpRow icon={Phone} label="Telefon" value={card.phone} href={`tel:${card.phone}`} color={color} />
+            <CorpRow icon={Phone} label={t("phone")} value={card.phone} href={`tel:${card.phone}`} color={color} />
           )}
           {card.mobile && (
-            <CorpRow icon={Phone} label="Mobil" value={card.mobile} href={`tel:${card.mobile}`} color={color} />
+            <CorpRow icon={Phone} label={t("mobile")} value={card.mobile} href={`tel:${card.mobile}`} color={color} />
           )}
           {card.email && (
-            <CorpRow icon={Mail} label="E-Mail" value={card.email} href={`mailto:${card.email}`} color={color} />
+            <CorpRow icon={Mail} label={t("email")} value={card.email} href={`mailto:${card.email}`} color={color} />
           )}
           {card.website && (
-            <CorpRow icon={Globe} label="Web" value={card.website.replace(/^https?:\/\//, "")} href={card.website} color={color} external />
+            <CorpRow icon={Globe} label={t("website")} value={card.website.replace(/^https?:\/\//, "")} href={card.website} color={color} external />
           )}
           {card.address && (
-            <CorpRow icon={MapPin} label="Adresse" value={card.address} color={color} />
+            <CorpRow icon={MapPin} label={t("address")} value={card.address} color={color} multiline />
           )}
         </div>
 
@@ -117,8 +126,8 @@ export function CorporateTemplate({ card }: { card: Partial<CardData> }) {
 
         {card.showQrOnCard && card.slug && (
           <div className="mt-5 pt-5 border-t border-gray-100 flex items-center gap-3">
-            <img src={`/api/qr/${card.slug}`} alt="QR Code" className="h-12 w-12" />
-            <p className="text-xs text-gray-400">Scan für digitale Karte</p>
+            <img src={`/api/qr/${card.slug}`} alt={t("qrAlt")} className="h-12 w-12" />
+            <p className="text-xs text-gray-400">{t("qrHint")}</p>
           </div>
         )}
       </div>
@@ -130,17 +139,17 @@ export function CorporateTemplate({ card }: { card: Partial<CardData> }) {
 }
 
 function CorpRow({
-  icon: Icon, label, value, href, color, external,
+  icon: Icon, label, value, href, color, external, multiline,
 }: {
   icon: React.ElementType; label: string; value: string;
-  href?: string; color: string; external?: boolean;
+  href?: string; color: string; external?: boolean; multiline?: boolean;
 }) {
   const content = (
     <div className="flex items-start gap-3 py-2.5 group">
       <Icon className="h-3.5 w-3.5 mt-0.5 shrink-0" style={{ color }} />
       <div className="min-w-0">
         <p className="text-[9px] font-bold tracking-widest uppercase text-gray-400 leading-none mb-0.5">{label}</p>
-        <p className="text-xs text-gray-700 group-hover:text-gray-900 transition-colors truncate">{value}</p>
+        <p className={`text-xs text-gray-700 group-hover:text-gray-900 transition-colors ${multiline ? "min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]" : "truncate"}`}>{value}</p>
       </div>
     </div>
   );

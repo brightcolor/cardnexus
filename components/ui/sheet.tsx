@@ -1,5 +1,12 @@
 "use client";
 
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/common.json";
+import it from "@/messages/it/common.json";
+import en from "@/messages/en/common.json";
+
+const labels = { de, it, en };
+
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
@@ -55,7 +62,7 @@ const SheetContent = React.forwardRef<
       {children}
       <DialogPrimitive.Close className="absolute right-3 top-3 rounded-md p-1 hover:bg-accent">
         <X className="h-4 w-4" />
-        <span className="sr-only">Schließen</span>
+        <span className="sr-only">{labels[useLocale()].close}</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
   </SheetPortal>
