@@ -1,5 +1,5 @@
 {
-  "title": "Datenschutz – CardNexus",
+  "title": "Datenschutz",
   "home": "Zurück zur Startseite",
   "heading": "Datenschutzerklärung",
   "controller": "1. Verantwortlicher",
@@ -11,7 +11,7 @@
   "analyticsData": "Nutzungsstatistiken (Aufrufe, Gerättyp, Quelle – ohne persönliche Identifikation)",
   "leadData": "Lead-Kontaktdaten die Besucher freiwillig hinterlassen",
   "purpose": "3. Zweck der Verarbeitung",
-  "purposeDescription": "Die Daten werden ausschließlich zur Bereitstellung des CardNexus-Dienstes verarbeitet. Keine Weitergabe an Dritte zu Werbezwecken.",
+  "purposeDescription": "Die Daten werden ausschließlich zur Bereitstellung des {appName}-Dienstes verarbeitet. Keine Weitergabe an Dritte zu Werbezwecken.",
   "location": "4. Speicherort",
   "locationDescription": "Alle Daten werden ausschließlich auf Servern in Deutschland gespeichert.",
   "cookies": "5. Cookies",

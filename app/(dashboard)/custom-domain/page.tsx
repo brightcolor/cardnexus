@@ -1,3 +1,4 @@
+import { getPlatformSettings } from "@/lib/platform";
 import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/pages/custom-domain.json";
@@ -13,7 +14,7 @@ export async function generateMetadata() {
 }
 
 export default async function CustomDomainPage() {
-  const locale = await getLocale();
+  const [locale, { appName }] = await Promise.all([getLocale(), getPlatformSettings()]);
   const t = translator(locale, de, it);
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
@@ -88,7 +89,7 @@ export default async function CustomDomainPage() {
             <div className="space-y-3 flex-1">
               <h2 className="font-semibold">{t("proxy")}</h2>
               <p className="text-sm text-muted-foreground">
-                {t("proxyHint")}
+                {t("proxyHint", { appName })}
               </p>
               <div className="space-y-2">
                 <p className="text-xs font-semibold text-muted-foreground">{t("caddy")}</p>
@@ -135,7 +136,7 @@ export default async function CustomDomainPage() {
           <Server className="h-4 w-4 shrink-0 mt-0.5" />
           <div>
             <p className="font-medium">{t("routing")}</p>
-            <p className="mt-0.5">{t("routingStart")} <code className="font-mono text-xs">Host</code>{t("routingEnd")}</p>
+            <p className="mt-0.5">{t("routingStart", { appName })} <code className="font-mono text-xs">Host</code>{t("routingEnd")}</p>
           </div>
         </div>
       </div>

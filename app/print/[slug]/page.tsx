@@ -1,3 +1,4 @@
+import { getPlatformSettings } from "@/lib/platform";
 import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/pages/print.json";
@@ -20,7 +21,7 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function PrintPage({ params }: Props) {
-  const locale = await getLocale();
+  const [locale, { appName }] = await Promise.all([getLocale(), getPlatformSettings()]);
   const t = translator(locale, de, it);
   const { slug } = await params;
   const raw = await db.card.findUnique({
@@ -81,7 +82,7 @@ export default async function PrintPage({ params }: Props) {
         </div>
         {!isPro && (
           <p style={{ marginTop: 12, fontSize: 10, color: '#9ca3af', textAlign: 'center' }}>
-            {t("credit")}
+            {t("credit", { appName })}
           </p>
         )}
     </main>

@@ -1,5 +1,5 @@
 {
-  "title": "Privacy – CardNexus",
+  "title": "Privacy",
   "home": "Torna alla pagina iniziale",
   "heading": "Informativa sulla privacy",
   "controller": "1. Titolare del trattamento",
@@ -11,7 +11,7 @@
   "analyticsData": "Statistiche di utilizzo (visite, tipo di dispositivo e origine, senza identificazione personale)",
   "leadData": "Recapiti lasciati volontariamente dai visitatori",
   "purpose": "3. Finalità del trattamento",
-  "purposeDescription": "Trattiamo i dati solo per fornire il servizio CardNexus. Non li condividiamo con terzi per scopi pubblicitari.",
+  "purposeDescription": "Trattiamo i dati solo per fornire il servizio {appName}. Non li condividiamo con terzi per scopi pubblicitari.",
   "location": "4. Luogo di conservazione",
   "locationDescription": "Tutti i dati sono conservati esclusivamente su server in Germania.",
   "cookies": "5. Cookie",

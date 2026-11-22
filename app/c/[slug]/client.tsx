@@ -7,6 +7,7 @@ import it from "@/messages/it/pages/public-card.json";
 import { useEffect, useState } from "react";
 import { CardPreview } from "@/components/card/CardPreview";
 import { QRCodeDisplay } from "@/components/card/QRCodeDisplay";
+import { PlatformBrandLink } from "@/components/layout/PlatformBrandLink";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +19,8 @@ interface Props {
   source?: string;
   showBadge?: boolean;
   showLeadForm?: boolean;
+  appName: string;
+  logoUrl: string | null;
 }
 
 interface TrackOpts {
@@ -48,7 +51,7 @@ function readUtmFromUrl(): { utmSource?: string; utmMedium?: string; utmCampaign
   };
 }
 
-export function PublicCardView({ card, source, showBadge = true, showLeadForm = false }: Props) {
+export function PublicCardView({ card, source, showBadge = true, showLeadForm = false, appName, logoUrl }: Props) {
   const locale = useLocale();
   const t = translator(locale, de, it);
   const [showQR, setShowQR] = useState(false);
@@ -284,7 +287,7 @@ export function PublicCardView({ card, source, showBadge = true, showLeadForm = 
       {showBadge && (
         <p className="mt-8 text-xs text-gray-400 dark:text-gray-500">
           {t("poweredBy")}{" "}
-          <a href="/" className="hover:text-gray-600 dark:hover:text-gray-400 transition-colors font-medium">CardNexus</a>
+          <PlatformBrandLink appName={appName} logoUrl={logoUrl} />
         </p>
       )}
     </div>

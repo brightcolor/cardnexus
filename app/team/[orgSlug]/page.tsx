@@ -1,3 +1,5 @@
+import { PlatformBrandLink } from "@/components/layout/PlatformBrandLink";
+import { getPlatformSettings } from "@/lib/platform";
 import type { Locale } from "@/lib/i18n/locales";
 import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
@@ -24,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function PublicTeamPage({ params }: Props) {
-  const locale = await getLocale();
+  const [locale, { appName, logoUrl }] = await Promise.all([getLocale(), getPlatformSettings()]);
   const t = translator(locale, de, it);
   const { orgSlug } = await params;
 
@@ -106,7 +108,7 @@ export default async function PublicTeamPage({ params }: Props) {
       <div className="text-center pb-8">
         <p className="text-xs text-gray-400">
           {t("poweredBy")}{" "}
-          <a href="/" className="hover:text-gray-600 transition-colors font-medium">CardNexus</a>
+          <PlatformBrandLink appName={appName} logoUrl={logoUrl} />
         </p>
       </div>
     </div>

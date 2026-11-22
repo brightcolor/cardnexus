@@ -1,5 +1,5 @@
 {
-  "title": "Domain einrichten – CardNexus",
+  "title": "Domain einrichten",
   "back": "Zurück zur Karte",
   "heading": "Eigene Domain einrichten",
   "intro": "So verlinkst du deine eigene Domain mit deiner digitalen Visitenkarte.",
@@ -17,7 +17,7 @@
   "recordA": "A-Eintrag",
   "rootEnd": "auf die IP-Adresse des Servers.",
   "proxy": "Reverse Proxy konfigurieren",
-  "proxyHint": "Damit HTTPS funktioniert, muss der Reverse Proxy (z. B. Caddy) die Domain akzeptieren und an CardNexus weiterleiten.",
+  "proxyHint": "Damit HTTPS funktioniert, muss der Reverse Proxy (z. B. Caddy) die Domain akzeptieren und an {appName} weiterleiten.",
   "caddy": "Caddy (empfohlen — HTTPS automatisch):",
   "add": "Domain in den Karteneinstellungen eintragen",
   "addStart": "Trage deine Domain im Tab",
@@ -25,6 +25,6 @@
   "addEnd": "deines Karteneditors ein. Deine QR-Codes, NFC-Links und Kampagnen-URLs verwenden dann automatisch diese Domain.",
   "open": "Zur Karte",
   "routing": "Middleware-Routing",
-  "routingStart": "CardNexus erkennt automatisch Anfragen über deine Domain und leitet sie an die richtige Karte weiter — vorausgesetzt, der Reverse Proxy sendet den korrekten",
+  "routingStart": "{appName} erkennt automatisch Anfragen über deine Domain und leitet sie an die richtige Karte weiter — vorausgesetzt, der Reverse Proxy sendet den korrekten",
   "routingEnd": "-Header."
 }

@@ -1,5 +1,5 @@
 {
-  "title": "Configura un dominio – CardNexus",
+  "title": "Configura un dominio",
   "back": "Torna al biglietto",
   "heading": "Configura un dominio personalizzato",
   "intro": "Collega il tuo dominio al biglietto da visita digitale.",
@@ -17,7 +17,7 @@
   "recordA": "record A",
   "rootEnd": "che punti all’indirizzo IP del server.",
   "proxy": "Configura il reverse proxy",
-  "proxyHint": "Per usare HTTPS, il reverse proxy (ad es. Caddy) deve accettare le richieste per il dominio e inoltrarle a CardNexus.",
+  "proxyHint": "Per usare HTTPS, il reverse proxy (ad es. Caddy) deve accettare le richieste per il dominio e inoltrarle a {appName}.",
   "caddy": "Caddy (consigliato, con HTTPS automatico):",
   "add": "Inserisci il dominio nelle impostazioni della scheda",
   "addStart": "Inserisci il tuo dominio in",
@@ -25,6 +25,6 @@
   "addEnd": "nell’editor. I codici QR, i link NFC e gli indirizzi delle campagne useranno automaticamente questo dominio.",
   "open": "Vai al biglietto",
   "routing": "Instradamento delle richieste",
-  "routingStart": "CardNexus riconosce le richieste per il tuo dominio e le inoltra al biglietto corretto, se il reverse proxy invia l’intestazione",
+  "routingStart": "{appName} riconosce le richieste per il tuo dominio e le inoltra al biglietto corretto, se il reverse proxy invia l’intestazione",
   "routingEnd": "corretta."
 }

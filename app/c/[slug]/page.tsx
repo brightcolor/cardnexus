@@ -8,6 +8,7 @@ import type { CardData } from "@/types";
 import { PublicCardView } from "./client";
 import { CardPasswordGate } from "./PasswordGate";
 import { canUseFeature } from "@/lib/plans";
+import { getPlatformSettings } from "@/lib/platform";
 import { canReadCard, publicCardFields, publishedCardScope, unexpiredCardScope } from "@/lib/card-publication";
 import type { Metadata } from "next";
 
@@ -84,5 +85,6 @@ export default async function PublicCardPage({ params, searchParams }: Props) {
   const whiteLabel   = canUseFeature("whiteLabel",   ownerPlan, ownerExpiry);
   const showLeadForm = canUseFeature("leadCapture",  ownerPlan, ownerExpiry);
 
-  return <PublicCardView card={card} source={source} showBadge={!whiteLabel} showLeadForm={showLeadForm} />;
+  const { appName, logoUrl } = await getPlatformSettings();
+  return <PublicCardView card={card} source={source} showBadge={!whiteLabel} showLeadForm={showLeadForm} appName={appName} logoUrl={logoUrl} />;
 }

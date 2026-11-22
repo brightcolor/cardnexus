@@ -1,3 +1,4 @@
+import { getPlatformSettings } from "@/lib/platform";
 import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/pages/privacy.json";
@@ -10,7 +11,7 @@ export async function generateMetadata() {
 }
 
 export default async function DatenschutzPage() {
-  const locale = await getLocale();
+  const [locale, { appName }] = await Promise.all([getLocale(), getPlatformSettings()]);
   const t = translator(locale, de, it);
   return (
     <div className="min-h-screen bg-background">
@@ -43,7 +44,7 @@ export default async function DatenschutzPage() {
 
           <section>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">{t("purpose")}</h2>
-            <p>{t("purposeDescription")}</p>
+            <p>{t("purposeDescription", { appName })}</p>
           </section>
 
           <section>
