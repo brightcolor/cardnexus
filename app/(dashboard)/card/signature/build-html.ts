@@ -9,13 +9,28 @@ export type SigStyle = "standard" | "compact" | "rich" | "modern" | "minimal" | 
 export interface SigOptions {
   color: string;
   showAvatar: boolean;
+  showLogo: boolean;
   showSocials: boolean;
   showCardLink: boolean;
   footerText: string;
 }
 
-function abs(url: string, base: string) {
-  return url.startsWith("http") ? url : base + url;
+function escapeHtml(text: string) {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function multilineHtml(text: string) {
+  return escapeHtml(text).replace(/\r\n?|\n/g, "<br>");
+}
+
+function imageUrl(value: string | null | undefined, base: string) {
+  if (!value) return "";
+  try {
+    const url = new URL(value, base);
+    return url.protocol === "http:" || url.protocol === "https:" ? escapeHtml(url.href) : "";
+  } catch {
+    return "";
+  }
 }
 
 function getSocials(card: CardData): { label: string; url: string }[] {
@@ -34,21 +49,19 @@ function socialLinks(socials: { label: string; url: string }[], color: string) {
     .join("");
 }
 
-function footerRow(text: string, cols = 1) {
+function footerRow(text: string, cols = 1, dark = false) {
   if (!text.trim()) return "";
-  return `<tr><td colspan="${cols}" style="padding-top:10px;font-size:10px;color:#999999;border-top:1px solid #eeeeee;">${text.replace(/\n/g, "<br>")}</td></tr>`;
+  const color = dark ? "#cbd5e1" : "#666666";
+  const border = dark ? "#334155" : "#eeeeee";
+  return `<tr><td colspan="${cols}" style="padding-top:10px;font-size:10px;color:${color};border-top:1px solid ${border};">${multilineHtml(text)}</td></tr>`;
 }
 
 function addressHtml(address?: string | null) {
   if (!address) return "";
-  return "📍 " + address
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/\r\n?|\n/g, "<br>");
+  return "📍 " + multilineHtml(address);
 }
 
-export function buildPlainText(card: CardData, locale: Locale = "de"): string {
+export function buildPlainText(card: CardData, locale: Locale = "de", footerText = ""): string {
   const labels = { de: de, it: it, en: en }[locale];
   const name = `${card.firstName ?? ""} ${card.lastName ?? ""}`.trim();
   const header = [name, [card.title, card.company].filter(Boolean).join(" | ")].filter(Boolean);
@@ -59,15 +72,33 @@ export function buildPlainText(card: CardData, locale: Locale = "de"): string {
     card.website && `${labels.website.padEnd(8)}${card.website}`,
     card.address && `${labels.address.padEnd(8)}${card.address.replace(/\r\n?/g, "\n")}`,
   ].filter(Boolean) as string[];
-  return [...header, "", ...contact].join("\n");
+  const signature = [...header, "", ...contact].join("\n");
+  return footerText.trim() ? `${signature.trimEnd()}\n\n${footerText.replace(/\r\n?/g, "\n")}` : signature;
 }
 
 export function buildHtml(card: CardData, style: SigStyle, baseUrl: string, opts: SigOptions, locale: Locale = "de"): string {
   const labels = { de: de, it: it, en: en }[locale];
-  const { color, showAvatar, showSocials, showCardLink, footerText } = opts;
+  const { color, showAvatar, showLogo, showSocials, showCardLink, footerText } = opts;
   const name    = `${card.firstName ?? ""} ${card.lastName ?? ""}`.trim();
-  const avatar  = card.avatarUrl && showAvatar ? abs(card.avatarUrl, baseUrl) : null;
-  const cardUrl = `${baseUrl}/c/${card.slug}`;
+  const avatar = showAvatar ? imageUrl(card.avatarUrl, baseUrl) : "";
+  const logo = showLogo ? imageUrl(card.logoUrl, baseUrl) : "";
+  const cardUrl = `${baseUrl}/c/${encodeURIComponent(card.slug)}`;
+  const hasImages = !!(avatar || logo);
+  const imageSize = { standard: 64, compact: 36, rich: 72, modern: 60, minimal: 44, dark: 60 }[style];
+  const logoSize = { standard: 72, compact: 48, rich: 80, modern: 68, minimal: 56, dark: 68 }[style];
+  const avatarStyle = style === "modern" ? "border-radius:8px;" : "border-radius:50%;";
+  const photo = avatar
+    ? `<img src="${avatar}" alt="${escapeHtml(name)}" width="${imageSize}" height="${imageSize}" style="display:block;object-fit:cover;${avatarStyle}" />`
+    : "";
+  const logoImage = logo
+    ? `<img src="${logo}" alt="${escapeHtml(card.company || labels.logo)}" width="${logoSize}" style="display:block;height:auto;${style === "dark" ? "background-color:#ffffff;padding:4px;border-radius:4px;" : ""}" />`
+    : "";
+  const images = hasImages
+    ? `<table cellpadding="0" cellspacing="0" border="0" role="presentation">
+        ${photo ? `<tr><td align="center">${style === "rich" ? `<a href="${cardUrl}">${photo}</a>` : photo}</td></tr>` : ""}
+        ${logoImage ? `<tr><td align="center"${photo ? ' style="padding-top:6px;"' : ""}>${logoImage}</td></tr>` : ""}
+      </table>`
+    : "";
   const socials = showSocials ? getSocials(card) : [];
   const address = addressHtml(card.address);
   const btn     = showCardLink
@@ -86,6 +117,7 @@ export function buildHtml(card: CardData, style: SigStyle, baseUrl: string, opts
     return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#333333;">
   <tr>
     <td style="padding-right:12px;border-right:2px solid ${color};vertical-align:top;">
+      ${images ? `<div style="padding-bottom:5px;">${images}</div>` : ""}
       <strong style="font-size:15px;color:#111111;">${name}</strong><br>
       ${card.title   ? `<span style="color:${color};font-size:12px;">${card.title}</span><br>` : ""}
       ${card.company ? `<span style="color:#666666;font-size:12px;">${card.company}</span>`    : ""}
@@ -106,7 +138,7 @@ export function buildHtml(card: CardData, style: SigStyle, baseUrl: string, opts
   if (style === "rich") {
     return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#333333;">
   <tr>
-    ${avatar ? `<td style="padding-right:16px;vertical-align:top;"><a href="${cardUrl}"><img src="${avatar}" alt="${name}" width="72" height="72" style="border-radius:50%;display:block;object-fit:cover;" /></a></td>` : ""}
+    ${images ? `<td style="padding-right:16px;vertical-align:top;">${images}</td>` : ""}
     <td style="vertical-align:top;border-left:3px solid ${color};padding-left:14px;">
       <table cellpadding="0" cellspacing="0" border="0">
         <tr><td>
@@ -126,9 +158,9 @@ export function buildHtml(card: CardData, style: SigStyle, baseUrl: string, opts
 
   if (style === "modern") {
     return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#333333;">
-  <tr><td colspan="2" style="background-color:${color};height:3px;font-size:0;line-height:0;">&nbsp;</td></tr>
+  <tr><td colspan="${hasImages ? 2 : 1}" style="background-color:${color};height:3px;font-size:0;line-height:0;">&nbsp;</td></tr>
   <tr>
-    ${avatar ? `<td style="padding:12px 14px 12px 0;vertical-align:top;width:68px;"><img src="${avatar}" alt="${name}" width="60" height="60" style="border-radius:8px;display:block;object-fit:cover;" /></td>` : ""}
+    ${images ? `<td style="padding:12px 14px 12px 0;vertical-align:top;">${images}</td>` : ""}
     <td style="padding-top:12px;vertical-align:top;">
       <strong style="font-size:16px;color:#111111;">${name}</strong>${card.title ? `<span style="color:${color};font-size:13px;"> · ${card.title}</span>` : ""}
       ${card.company ? `<br><span style="color:#666666;font-size:12px;">${card.company}${card.department ? ` · ${card.department}` : ""}</span>` : ""}
@@ -149,7 +181,7 @@ export function buildHtml(card: CardData, style: SigStyle, baseUrl: string, opts
       ${btn ? `<div style="margin-top:8px;">${btn}</div>` : ""}
     </td>
   </tr>
-  ${footerRow(footerText, avatar ? 2 : 1)}
+  ${footerRow(footerText, hasImages ? 2 : 1)}
 </table>`;
   }
 
@@ -167,6 +199,7 @@ export function buildHtml(card: CardData, style: SigStyle, baseUrl: string, opts
       <span style="font-size:14px;color:#111111;font-weight:600;">${parts}</span><br>
       <span style="font-size:12px;color:#888888;">${contacts}</span>
       ${address ? `<br><span style="font-size:12px;color:#888888;">${address}</span>` : ""}
+      ${images ? `<div style="padding-top:5px;">${images}</div>` : ""}
       ${socials.length > 0 ? `<br><span style="font-size:11px;">${socialLinks(socials, color)}</span>` : ""}
       ${btn ? `<br><span style="font-size:11px;display:inline-block;margin-top:6px;">${btn}</span>` : ""}
     </td>
@@ -181,7 +214,7 @@ export function buildHtml(card: CardData, style: SigStyle, baseUrl: string, opts
     <td style="padding:16px;">
       <table cellpadding="0" cellspacing="0" border="0">
         <tr>
-          ${avatar ? `<td style="padding-right:14px;vertical-align:top;"><img src="${avatar}" alt="${name}" width="60" height="60" style="border-radius:50%;display:block;object-fit:cover;border:2px solid ${color};" /></td>` : ""}
+          ${images ? `<td style="padding-right:14px;vertical-align:top;">${images}</td>` : ""}
           <td style="vertical-align:top;border-left:3px solid ${color};padding-left:14px;">
             <strong style="font-size:16px;color:#f8fafc;">${name}</strong><br>
             ${card.title   ? `<span style="color:${color};font-size:13px;font-weight:600;">${card.title}</span><br>` : ""}
@@ -197,7 +230,7 @@ export function buildHtml(card: CardData, style: SigStyle, baseUrl: string, opts
             ${btn ? `<div style="margin-top:10px;">${btn}</div>` : ""}
           </td>
         </tr>
-        ${footerText.trim() ? `<tr><td colspan="2" style="padding-top:10px;font-size:10px;color:#475569;border-top:1px solid #334155;">${footerText.replace(/\n/g, "<br>")}</td></tr>` : ""}
+        ${footerRow(footerText, hasImages ? 2 : 1, true)}
       </table>
     </td>
   </tr>
@@ -207,7 +240,7 @@ export function buildHtml(card: CardData, style: SigStyle, baseUrl: string, opts
   // standard (default) — with optional avatar
   return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#333333;">
   <tr>
-    ${avatar ? `<td style="padding-right:16px;vertical-align:top;"><img src="${avatar}" alt="${name}" width="64" height="64" style="border-radius:50%;display:block;object-fit:cover;" /></td>` : ""}
+    ${images ? `<td style="padding-right:16px;vertical-align:top;">${images}</td>` : ""}
     <td style="border-left:3px solid ${color};padding-left:14px;vertical-align:top;">
       <strong style="font-size:16px;color:#111111;">${name}</strong><br>
       ${card.title   ? `<span style="color:${color};font-size:13px;font-weight:600;">${card.title}</span><br>` : ""}
@@ -218,6 +251,6 @@ export function buildHtml(card: CardData, style: SigStyle, baseUrl: string, opts
       ${btn ? `<div style="margin-top:10px;">${btn}</div>` : ""}
     </td>
   </tr>
-  ${footerRow(footerText, avatar ? 2 : 1)}
+  ${footerRow(footerText, hasImages ? 2 : 1)}
 </table>`;
 }

@@ -270,8 +270,17 @@ model Card {
   leads        Lead[]
   campaigns    Campaign[]
   slugAliases  CardSlugAlias[]
+  emailSignature CardEmailSignature?
 
   @@index([userId])
+}
+
+model CardEmailSignature {
+  cardId     String  @id
+  card       Card    @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  footerText String  @default("")
+  showAvatar Boolean?
+  showLogo   Boolean @default(false)
 }
 
 model Campaign {

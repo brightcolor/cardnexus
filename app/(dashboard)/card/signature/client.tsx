@@ -15,12 +15,23 @@ import { Check, Copy, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buildHtml, buildPlainText, type SigStyle } from "./build-html";
 
-interface Props {
-  card: CardData;
-  allCards?: CardData[];
+interface SignatureSettings {
+  footerText: string;
+  showAvatar: boolean | null;
+  showLogo: boolean;
 }
 
-export function SignatureClient({ card: initialCard, allCards = [] }: Props) {
+export type SignatureCard = CardData & { emailSignature: SignatureSettings | null };
+
+interface Props {
+  card: SignatureCard;
+  allCards: SignatureCard[];
+  baseUrl: string;
+}
+
+const defaultSettings: SignatureSettings = { footerText: "", showAvatar: null, showLogo: false };
+
+export function SignatureClient({ card: initialCard, allCards: cards, baseUrl }: Props) {
   const locale = useLocale();
   const t = translator(locale, de, it, en);
 
@@ -76,28 +87,57 @@ export function SignatureClient({ card: initialCard, allCards = [] }: Props) {
     },
   };
 
-  const cards = allCards.length > 0 ? allCards : [initialCard];
-
   const [activeCardId, setActiveCardId] = useState(initialCard.id);
   const [style,       setStyle]        = useState<SigStyle>("standard");
   const [color,       setColor]        = useState(initialCard.primaryColor ?? "#0F172A");
-  const [showAvatar,  setShowAvatar]   = useState(true);
   const [showSocials, setShowSocials]  = useState(true);
   const [showCardLink,setShowCardLink] = useState(true);
-  const [footerText,  setFooterText]   = useState("");
+  const [drafts, setDrafts] = useState<Record<string, SignatureSettings>>({});
+  const [saved, setSaved] = useState<Record<string, SignatureSettings>>({});
+  const [saving, setSaving] = useState(false);
+  const [feedback, setFeedback] = useState<{ id: string; success: boolean } | null>(null);
   const [copied,      setCopied]       = useState(false);
   const [copiedTxt,   setCopiedTxt]    = useState(false);
   const [guide,       setGuide]        = useState<string | null>(null);
 
   const card = cards.find((c) => c.id === activeCardId) ?? initialCard;
+  const persisted = saved[card.id] ?? card.emailSignature ?? defaultSettings;
+  const settings = drafts[card.id] ?? persisted;
+  const { footerText, showLogo } = settings;
+  const showAvatar = settings.showAvatar ?? (style !== "compact" && style !== "minimal");
+  const dirty = settings.footerText !== persisted.footerText
+    || settings.showAvatar !== persisted.showAvatar || settings.showLogo !== persisted.showLogo;
 
   useEffect(() => {
     setColor(card.primaryColor ?? "#0F172A");
   }, [card.primaryColor]);
 
-  const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
-  const opts    = { color, showAvatar, showSocials, showCardLink, footerText };
+  const opts    = { color, showAvatar, showLogo, showSocials, showCardLink, footerText };
   const html    = buildHtml(card, style, baseUrl, opts, locale);
+
+  function updateSettings(changes: Partial<SignatureSettings>) {
+    setDrafts((current) => ({ ...current, [card.id]: { ...(current[card.id] ?? persisted), ...changes } }));
+    setFeedback(null);
+  }
+
+  async function saveSettings() {
+    setSaving(true);
+    setFeedback(null);
+    try {
+      const response = await fetch(`/api/cards/${encodeURIComponent(card.id)}/signature`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(settings),
+      });
+      if (!response.ok) throw new Error();
+      setSaved((current) => ({ ...current, [card.id]: settings }));
+      setFeedback({ id: card.id, success: true });
+    } catch {
+      setFeedback({ id: card.id, success: false });
+    } finally {
+      setSaving(false);
+    }
+  }
 
   async function copy() {
     await navigator.clipboard.writeText(html);
@@ -106,7 +146,7 @@ export function SignatureClient({ card: initialCard, allCards = [] }: Props) {
   }
 
   async function copyPlain() {
-    await navigator.clipboard.writeText(buildPlainText(card, locale));
+    await navigator.clipboard.writeText(buildPlainText(card, locale, footerText));
     setCopiedTxt(true);
     setTimeout(() => setCopiedTxt(false), 2500);
   }
@@ -169,10 +209,17 @@ export function SignatureClient({ card: initialCard, allCards = [] }: Props) {
           </div>
 
           <div className="flex items-center justify-between">
-            <Label className="text-sm font-normal">
+            <Label htmlFor="signature-photo" className="text-sm font-normal">
               {t("photo")}{!card.avatarUrl && <span className="text-xs text-muted-foreground ml-1">{t("noPhoto")}</span>}
             </Label>
-            <Switch checked={showAvatar} onCheckedChange={setShowAvatar} disabled={!card.avatarUrl} />
+            <Switch id="signature-photo" checked={showAvatar && !!card.avatarUrl} onCheckedChange={(checked) => updateSettings({ showAvatar: checked })} disabled={!card.avatarUrl} />
+          </div>
+
+          <div className="flex items-center justify-between gap-4">
+            <Label htmlFor="signature-logo" className="text-sm font-normal">
+              {t("companyLogo")}{!card.logoUrl && <span className="text-xs text-muted-foreground ml-1">{t("noCompanyLogo")}</span>}
+            </Label>
+            <Switch id="signature-logo" checked={showLogo && !!card.logoUrl} onCheckedChange={(checked) => updateSettings({ showLogo: checked })} disabled={!card.logoUrl} />
           </div>
 
           <div className="flex items-center justify-between">
@@ -186,17 +233,25 @@ export function SignatureClient({ card: initialCard, allCards = [] }: Props) {
           </div>
 
           <div className="space-y-1">
-            <Label className="text-sm font-normal">
+            <Label htmlFor="signature-footer" className="text-sm font-normal">
               {t("footer")} <span className="text-xs text-muted-foreground">{t("footerHint")}</span>
             </Label>
             <Textarea
+              id="signature-footer"
               value={footerText}
-              onChange={(e) => setFooterText(e.target.value)}
+              onChange={(e) => updateSettings({ footerText: e.target.value })}
               placeholder={t("footerPlaceholder")}
               rows={2}
-              className="text-xs resize-none"
+              maxLength={5000}
+              className="text-xs resize-y"
             />
           </div>
+          <Button size="sm" variant="outline" onClick={saveSettings} disabled={!dirty || saving}>
+            {saving ? t("savingSettings") : t("saveSettings")}
+          </Button>
+          <p role="status" className="text-xs text-muted-foreground">
+            {feedback?.id === card.id && t(feedback.success ? "settingsSaved" : "settingsSaveFailed")}
+          </p>
         </div>
 
         {/* Copy buttons */}

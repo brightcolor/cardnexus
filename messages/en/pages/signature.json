@@ -39,10 +39,16 @@
   "compactStyleDescription": "Compact two-column layout",
   "richStyleDescription": "Photo and social links",
   "modernStyleDescription": "Colored header bar",
-  "minimalStyleDescription": "Text only, no icons",
+  "minimalStyleDescription": "Simple text with optional images",
   "darkStyleDescription": "Dark background",
   "from": "From:",
   "to": "To:",
   "subject": "Subject:",
-  "exampleSubject": "My message"
+  "exampleSubject": "My message",
+  "companyLogo": "Company logo",
+  "noCompanyLogo": "(no logo on this card)",
+  "saveSettings": "Save notes and image options",
+  "savingSettings": "Saving…",
+  "settingsSaved": "Notes and image preferences saved.",
+  "settingsSaveFailed": "Could not save. Try again."
 }

@@ -39,10 +39,16 @@
   "compactStyleDescription": "Due colonne, compatto",
   "richStyleDescription": "Foto e link social",
   "modernStyleDescription": "Barra colorata in alto",
-  "minimalStyleDescription": "Solo testo, senza icone",
+  "minimalStyleDescription": "Testo essenziale, immagini facoltative",
   "darkStyleDescription": "Sfondo scuro",
   "from": "Da:",
   "to": "A:",
   "subject": "Oggetto:",
-  "exampleSubject": "Il mio messaggio"
+  "exampleSubject": "Il mio messaggio",
+  "companyLogo": "Logo aziendale",
+  "noCompanyLogo": "(nessun logo nel biglietto)",
+  "saveSettings": "Salva note e immagini",
+  "savingSettings": "Salvataggio…",
+  "settingsSaved": "Note e preferenze delle immagini salvate.",
+  "settingsSaveFailed": "Non è stato possibile salvare. Riprova."
 }

@@ -267,6 +267,17 @@ async function migrate() {
   await addColumn("Card", "birthday", "TEXT");
   await addColumn("Card", "fax",      "TEXT");
 
+  await db.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "CardEmailSignature" (
+      "cardId" TEXT NOT NULL PRIMARY KEY,
+      "footerText" TEXT NOT NULL DEFAULT '',
+      "showAvatar" BOOLEAN,
+      "showLogo" BOOLEAN NOT NULL DEFAULT false,
+      CONSTRAINT "CardEmailSignature_cardId_fkey" FOREIGN KEY ("cardId")
+        REFERENCES "Card" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    )
+  `);
+
   // ── CardAnalytic UTM columns ────────────────────────────────────────────
   await addColumn("CardAnalytic", "utmSource",   "TEXT");
   await addColumn("CardAnalytic", "utmMedium",   "TEXT");

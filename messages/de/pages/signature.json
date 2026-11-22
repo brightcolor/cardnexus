@@ -39,10 +39,16 @@
   "compactStyleDescription": "Zweispaltig, klein",
   "richStyleDescription": "Foto und Social-Links",
   "modernStyleDescription": "Farbiger Headerstreifen",
-  "minimalStyleDescription": "Nur Text, keine Icons",
+  "minimalStyleDescription": "Schlichter Text, Bilder optional",
   "darkStyleDescription": "Dunkler Hintergrund",
   "from": "Von:",
   "to": "An:",
   "subject": "Betr.:",
-  "exampleSubject": "Meine Nachricht"
+  "exampleSubject": "Meine Nachricht",
+  "companyLogo": "Firmenlogo",
+  "noCompanyLogo": "(kein Logo auf der Karte)",
+  "saveSettings": "Hinweise und Bildoptionen speichern",
+  "savingSettings": "Wird gespeichert…",
+  "settingsSaved": "Hinweise und Bildoptionen gespeichert.",
+  "settingsSaveFailed": "Speichern fehlgeschlagen. Versuche es erneut."
 }
