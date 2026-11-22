@@ -1,7 +1,11 @@
 "use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/pages/register.json";
+import it from "@/messages/it/pages/register.json";
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +15,8 @@ import { signUp } from "@/lib/auth-client";
 import { Suspense } from "react";
 
 function RegisterForm() {
-  const router = useRouter();
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   const searchParams = useSearchParams();
   const inviteToken = searchParams.get("invite");
 
@@ -29,43 +34,32 @@ function RegisterForm() {
     const result = await signUp.email({ name, email, password });
 
     if (result.error) {
-      setError(result.error.message ?? "Registrierung fehlgeschlagen.");
+      setError(result.error.message ?? t("failure"));
       setLoading(false);
       return;
     }
 
-    // Run in parallel: accept invite (if present) + trigger welcome email
-    await Promise.allSettled([
-      inviteToken
-        ? fetch("/api/invitations/accept", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token: inviteToken }),
-          })
-        : Promise.resolve(),
-      fetch("/api/auth/welcome", { method: "POST" }),
-    ]);
-
-    router.push("/dashboard");
+    await fetch("/api/auth/welcome", { method: "POST" }).catch(() => {});
+    window.location.assign(inviteToken ? `/invite?${new URLSearchParams({ invite: inviteToken })}` : "/dashboard");
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Account erstellen</CardTitle>
+        <CardTitle>{t("heading")}</CardTitle>
         <CardDescription>
           {inviteToken
-            ? "Du wurdest eingeladen. Erstelle deinen Account."
-            : "Starte kostenlos mit deiner digitalen Visitenkarte."}
+            ? t("invited")
+            : t("description")}
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{t("name")}</Label>
             <Input
               id="name"
-              placeholder="Max Mustermann"
+              placeholder={t("nameExample")}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -73,7 +67,7 @@ function RegisterForm() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="email">E-Mail</Label>
+            <Label htmlFor="email">{t("email")}</Label>
             <Input
               id="email"
               type="email"
@@ -85,11 +79,11 @@ function RegisterForm() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="password">Passwort</Label>
+            <Label htmlFor="password">{t("password")}</Label>
             <Input
               id="password"
               type="password"
-              placeholder="Mindestens 8 Zeichen"
+              placeholder={t("passwordHint")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -101,12 +95,12 @@ function RegisterForm() {
         </CardContent>
         <CardFooter className="flex flex-col gap-3">
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Wird erstellt…" : "Account erstellen"}
+            {loading ? t("submitting") : t("heading")}
           </Button>
           <p className="text-sm text-muted-foreground text-center">
-            Bereits registriert?{" "}
-            <Link href="/login" className="text-foreground font-medium hover:underline">
-              Anmelden
+            {t("alreadyRegistered")}{" "}
+            <Link href={inviteToken ? `/login?${new URLSearchParams({ invite: inviteToken })}` : "/login"} className="text-foreground font-medium hover:underline">
+              {t("signIn")}
             </Link>
           </p>
         </CardFooter>

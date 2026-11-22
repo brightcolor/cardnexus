@@ -1,0 +1,15 @@
+{
+  "heading": "Karte einbetten",
+  "intro": "Bette deine digitale Karte per iFrame direkt auf deiner Website ein.",
+  "choose": "Karte auswählen",
+  "multiple": "Mehrere Karten ab",
+  "available": "verfügbar.",
+  "width": "Breite (px)",
+  "height": "Höhe (px)",
+  "link": "Direktlink",
+  "code": "iFrame-Code",
+  "preview": "Vorschau",
+  "empty": "Keine Karte gefunden. Erstelle zuerst eine Karte.",
+  "iframeTitle": "Digitale Visitenkarte",
+  "title": "Widget – CardNexus"
+}

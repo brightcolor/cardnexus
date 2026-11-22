@@ -1,7 +1,10 @@
 "use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/pages/login.json";
+import it from "@/messages/it/pages/login.json";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +13,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { signIn } from "@/lib/auth-client";
 
 export default function LoginPage() {
-  const router = useRouter();
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -24,7 +28,7 @@ export default function LoginPage() {
     const result = await signIn.email({ email, password });
 
     if (result.error) {
-      setError("E-Mail oder Passwort falsch.");
+      setError(t("invalidCredentials"));
       setLoading(false);
       return;
     }
@@ -35,19 +39,20 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/dashboard");
+    const invite = new URLSearchParams(window.location.search).get("invite");
+    window.location.assign(invite ? `/invite?${new URLSearchParams({ invite })}` : "/dashboard");
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Willkommen zurück</CardTitle>
-        <CardDescription>Melde dich mit deinem Account an.</CardDescription>
+        <CardTitle>{t("heading")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="email">E-Mail</Label>
+            <Label htmlFor="email">{t("email")}</Label>
             <Input
               id="email"
               type="email"
@@ -59,7 +64,7 @@ export default function LoginPage() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="password">Passwort</Label>
+            <Label htmlFor="password">{t("password")}</Label>
             <Input
               id="password"
               type="password"
@@ -73,18 +78,18 @@ export default function LoginPage() {
         </CardContent>
         <CardFooter className="flex flex-col gap-3">
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Anmelden…" : "Anmelden"}
+            {loading ? t("submitting") : t("submit")}
           </Button>
           <Link
             href="/forgot-password"
             className="text-xs text-muted-foreground hover:text-foreground hover:underline text-center"
           >
-            Passwort vergessen?
+            {t("forgotPassword")}
           </Link>
           <p className="text-sm text-muted-foreground text-center">
-            Noch kein Account?{" "}
+            {t("noAccount")}{" "}
             <Link href="/register" className="text-foreground font-medium hover:underline">
-              Registrieren
+              {t("register")}
             </Link>
           </p>
         </CardFooter>

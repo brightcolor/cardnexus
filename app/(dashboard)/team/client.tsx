@@ -1,5 +1,9 @@
 "use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/pages/organization-members.json";
+import it from "@/messages/it/pages/organization-members.json";
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -8,7 +12,7 @@ import { InviteModal } from "@/components/team/InviteModal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { formatDate } from "@/lib/utils";
+import { getRoleLabel, formatDate } from "@/lib/utils";
 import type { Role } from "@/types";
 import {
   Search, X, Globe, Eye, EyeOff, ExternalLink, ToggleLeft, ToggleRight,
@@ -51,6 +55,8 @@ export function TeamClientPage({
   pendingCards: initialPendingCards = [],
   canImport = false,
 }: Props) {
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   const router = useRouter();
   const [users, setUsers] = useState(initialUsers);
   const [invitations, setInvitations] = useState(initialInvitations);
@@ -155,16 +161,16 @@ export function TeamClientPage({
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Team</h1>
+          <h1 className="text-2xl font-bold">{t("heading")}</h1>
           <p className="text-muted-foreground mt-1">
-            {orgName ? `${orgName} · ` : ""}{memberCount} Mitglieder
+            {orgName ? `${orgName} · ` : ""}{t(memberCount === 1 ? "singleMember" : "memberCount", { count: memberCount.toLocaleString(locale) })}
           </p>
         </div>
         <div className="flex items-center gap-2">
           {canImport && canManage && (
             <Link href="/team/import" className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
               <Upload className="h-3.5 w-3.5" />
-              CSV importieren
+              {t("importCsv")}
             </Link>
           )}
           {canManage && <InviteModal onInvited={() => router.refresh()} />}
@@ -179,11 +185,11 @@ export function TeamClientPage({
               <Globe className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="font-semibold text-sm">Öffentliches Team-Verzeichnis</p>
+              <p className="font-semibold text-sm">{t("publicDirectory")}</p>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {dirEnabled
-                  ? "Aktiv — alle Mitglieder mit öffentlicher Karte sind sichtbar"
-                  : "Deaktiviert — das Verzeichnis ist nicht öffentlich erreichbar"}
+                  ? t("directoryEnabled")
+                  : t("directoryDisabled")}
               </p>
             </div>
           </div>
@@ -197,7 +203,7 @@ export function TeamClientPage({
                 className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
-                Ansehen
+                {t("viewDirectory")}
               </a>
             )}
             {canManage && (
@@ -210,7 +216,7 @@ export function TeamClientPage({
                 {dirEnabled
                   ? <ToggleRight className="h-6 w-6" />
                   : <ToggleLeft className="h-6 w-6" />}
-                {dirEnabled ? "Aktiv" : "Inaktiv"}
+                {dirEnabled ? t("active") : t("inactive")}
               </button>
             )}
           </div>
@@ -221,13 +227,13 @@ export function TeamClientPage({
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Suchen…"
+          placeholder={t("search")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pl-9"
         />
         {search && (
-          <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2">
+          <button onClick={() => setSearch("")} aria-label={t("clearSearch")} className="absolute right-3 top-1/2 -translate-y-1/2">
             <X className="h-4 w-4 text-muted-foreground" />
           </button>
         )}
@@ -239,10 +245,10 @@ export function TeamClientPage({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/40">
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Mitglied</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">Rolle</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Karte</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Im Verzeichnis</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">{t("member")}</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">{t("role")}</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">{t("card")}</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">{t("directory")}</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -256,7 +262,7 @@ export function TeamClientPage({
                     </div>
                   </td>
                   <td className="px-4 py-3 hidden md:table-cell">
-                    <Badge variant="secondary">{u.role}</Badge>
+                    <Badge variant="secondary">{locale === "it" ? getRoleLabel(u.role, locale) : u.role}</Badge>
                   </td>
                   <td className="px-4 py-3">
                     {u.card ? (
@@ -266,7 +272,7 @@ export function TeamClientPage({
                         {u.card.slug}
                       </a>
                     ) : (
-                      <span className="text-xs text-muted-foreground/50">Keine Karte</span>
+                      <span className="text-xs text-muted-foreground/50">{t("noCard")}</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
@@ -276,11 +282,11 @@ export function TeamClientPage({
                         disabled={togglingMember === u.id}
                         className="flex items-center gap-1.5 text-xs transition-colors hover:opacity-70"
                         style={{ color: u.card.showInTeamDirectory ? "var(--primary)" : "var(--muted-foreground)" }}
-                        title={u.card.showInTeamDirectory ? "Aus Verzeichnis entfernen" : "Im Verzeichnis anzeigen"}
+                        title={u.card.showInTeamDirectory ? t("hide") : t("show")}
                       >
                         {u.card.showInTeamDirectory
-                          ? <><Eye className="h-4 w-4" /> Sichtbar</>
-                          : <><EyeOff className="h-4 w-4" /> Versteckt</>}
+                          ? <><Eye className="h-4 w-4" /> {t("visible")}</>
+                          : <><EyeOff className="h-4 w-4" /> {t("hidden")}</>}
                       </button>
                     ) : (
                       <span className="text-xs text-muted-foreground/40">—</span>
@@ -293,7 +299,7 @@ export function TeamClientPage({
                       <Button
                         variant="ghost" size="sm"
                         className="text-destructive hover:text-destructive"
-                        onClick={() => handleDelete(u.id)}
+                        aria-label={t("removeMember")} onClick={() => handleDelete(u.id)}
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -319,7 +325,7 @@ export function TeamClientPage({
         <div>
           <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
             <Clock className="h-5 w-5 text-amber-500" />
-            Karten zur Freigabe
+            {t("pendingApprovals")}
             <span className="ml-1 text-sm font-normal text-muted-foreground">({pendingCards.length})</span>
           </h2>
           <div className="rounded-xl border border-amber-200 bg-amber-50/50 overflow-hidden divide-y divide-amber-100">
@@ -340,7 +346,7 @@ export function TeamClientPage({
                       onClick={() => approveCard(c.slug, "approved")}
                     >
                       <CheckCircle className="h-4 w-4" />
-                      Freigeben
+                      {t("approve")}
                     </Button>
                     <Button
                       size="sm" variant="outline"
@@ -349,14 +355,14 @@ export function TeamClientPage({
                       onClick={() => approveCard(c.slug, "rejected")}
                     >
                       <XCircle className="h-4 w-4" />
-                      Ablehnen
+                      {t("reject")}
                     </Button>
                   </div>
                 </div>
                 <div className="mt-2">
                   <input
                     type="text"
-                    placeholder="Ablehnungsgrund (optional)"
+                    placeholder={t("rejectReason")}
                     value={rejectNote[c.slug] ?? ""}
                     onChange={(e) => setRejectNote((prev) => ({ ...prev, [c.slug]: e.target.value }))}
                     className="w-full text-sm rounded-lg border border-border px-3 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
@@ -371,15 +377,15 @@ export function TeamClientPage({
       {/* Pending invitations */}
       {canManage && invitations.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold mb-3">Offene Einladungen</h2>
+          <h2 className="text-lg font-semibold mb-3">{t("pendingInvites")}</h2>
           <div className="rounded-xl border border-border overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">E-Mail</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Rolle</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">Eingeladen</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">Läuft ab</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">{t("email")}</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">{t("role")}</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">{t("invitedDate")}</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">{t("expiryDate")}</th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
@@ -388,18 +394,18 @@ export function TeamClientPage({
                   <tr key={inv.id} className="hover:bg-muted/20">
                     <td className="px-4 py-3 font-medium">{inv.email}</td>
                     <td className="px-4 py-3">
-                      <Badge variant="secondary">{inv.role}</Badge>
+                      <Badge variant="secondary">{locale === "it" ? getRoleLabel(inv.role, locale) : inv.role}</Badge>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
-                      {formatDate(inv.createdAt)}
+                      {formatDate(inv.createdAt, locale)}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
-                      {formatDate(inv.expiresAt)}
+                      {formatDate(inv.expiresAt, locale)}
                     </td>
                     <td className="px-4 py-3">
                       <Button
                         variant="ghost" size="sm"
-                        onClick={() => handleRevokeInvitation(inv.id)}
+                        aria-label={t("revokeInvite")} onClick={() => handleRevokeInvitation(inv.id)}
                         className="text-destructive hover:text-destructive"
                       >
                         <X className="h-4 w-4" />

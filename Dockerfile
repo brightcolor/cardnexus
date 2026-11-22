@@ -1,15 +1,15 @@
 # syntax=docker/dockerfile:1
 # ─── Stage 1: Install dependencies ──────────────────────────────────────────
-FROM node:20-alpine AS deps
+FROM node:24-alpine AS deps
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 
 COPY package.json package-lock.json ./
 RUN --mount=type=cache,id=npm,target=/root/.npm \
-    npm ci --frozen-lockfile
+    npm ci
 
 # ─── Stage 2: Build ──────────────────────────────────────────────────────────
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 RUN apk add --no-cache openssl
 WORKDIR /app
 
@@ -28,7 +28,6 @@ ENV NEXT_PUBLIC_BUILD_TIME=$BUILD_TIME
 ENV NEXT_PUBLIC_APP_VERSION=$VERSION
 
 # Build-time env placeholders — overridden at runtime via docker-compose
-ENV BETTER_AUTH_SECRET="build-placeholder"
 ENV BETTER_AUTH_URL="http://localhost:3000"
 ENV NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ENV APP_URL="http://localhost:3000"
@@ -42,14 +41,17 @@ RUN mkdir -p /tmp/builddb && \
 
 ENV DATABASE_URL="file:/tmp/builddb/app.db"
 RUN --mount=type=cache,id=nextjs,target=/app/.next/cache \
-    npm run build
+    BETTER_AUTH_SECRET=$(node -p 'require("node:crypto").randomBytes(32).toString("hex")') npm run build
 
 # ─── Stage 3: Runner ─────────────────────────────────────────────────────────
-FROM node:20-alpine AS runner
+FROM alpine:3.24 AS runner
 # su-exec: lightweight setuid helper (same pattern as official postgres/redis images)
-RUN apk add --no-cache openssl curl su-exec \
+RUN apk add --no-cache libstdc++ openssl curl su-exec 'zlib>=1.4-r0' \
  && addgroup -g 1001 -S nodejs \
  && adduser  -u 1001 -S nextjs -G nodejs
+
+# The standalone server and startup scripts need Node only.
+COPY --from=builder /usr/local/bin/node /usr/local/bin/node
 
 WORKDIR /app
 
@@ -73,7 +75,9 @@ COPY --from=builder /app/node_modules/@better-auth ./node_modules/@better-auth
 
 # Entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+# Normalize Windows checkout line endings before Linux executes the script.
+RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh \
+ && chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Persistent volume mount points — owned by nextjs so su-exec drop works
 RUN mkdir -p /app/data /app/public/uploads \
@@ -84,7 +88,7 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD curl -f http://localhost:3000/ || exit 1
+  CMD curl -fsS http://127.0.0.1:3000/api/health/ready || exit 1
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["node", "server.js"]

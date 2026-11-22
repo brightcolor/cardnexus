@@ -1,8 +1,16 @@
+"use client";
+
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/components/minimal-card.json";
+import it from "@/messages/it/components/minimal-card.json";
 import type { CardData } from "@/types";
 import { fontClass, radiusClass, shadowClass, cardBgStyle, avatarBorderStyle } from "../CardPreview";
 import { SocialLinks } from "./SocialLinks";
 
 export function MinimalTemplate({ card }: { card: Partial<CardData> }) {
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   const color   = card.primaryColor ?? "#0F172A";
   const accent  = card.accentColor  ?? color;
   const font    = fontClass(card.fontFamily);
@@ -61,20 +69,20 @@ export function MinimalTemplate({ card }: { card: Partial<CardData> }) {
         <div className="space-y-4">
           {card.email && (
             <div>
-              <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400">E-Mail</p>
+              <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400">{t("email")}</p>
               <a href={`mailto:${card.email}`} className="text-sm text-gray-700 hover:underline mt-0.5 block">{card.email}</a>
             </div>
           )}
           {(card.phone || card.mobile) && (
             <div>
-              <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400">Telefon</p>
+              <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400">{t("phone")}</p>
               {card.phone && <a href={`tel:${card.phone}`} className="text-sm text-gray-700 hover:underline mt-0.5 block">{card.phone}</a>}
               {card.mobile && <a href={`tel:${card.mobile}`} className="text-sm text-gray-700 hover:underline block">{card.mobile}</a>}
             </div>
           )}
           {card.website && (
             <div>
-              <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400">Web</p>
+              <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400">{t("website")}</p>
               <a href={card.website} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-700 hover:underline mt-0.5 block">
                 {card.website.replace(/^https?:\/\//, "")}
               </a>
@@ -82,7 +90,7 @@ export function MinimalTemplate({ card }: { card: Partial<CardData> }) {
           )}
           {card.address && (
             <div>
-              <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400">Adresse</p>
+              <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400">{t("address")}</p>
               <p className="text-sm text-gray-700 mt-0.5">{card.address}</p>
             </div>
           )}

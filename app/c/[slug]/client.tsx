@@ -1,5 +1,9 @@
 "use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/pages/public-card.json";
+import it from "@/messages/it/pages/public-card.json";
 import { useEffect, useState } from "react";
 import { CardPreview } from "@/components/card/CardPreview";
 import { QRCodeDisplay } from "@/components/card/QRCodeDisplay";
@@ -45,6 +49,8 @@ function readUtmFromUrl(): { utmSource?: string; utmMedium?: string; utmCampaign
 }
 
 export function PublicCardView({ card, source, showBadge = true, showLeadForm = false }: Props) {
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   const [showQR, setShowQR] = useState(false);
   const [showLead, setShowLead] = useState(false);
   const [shared, setShared] = useState(false);
@@ -67,7 +73,7 @@ export function PublicCardView({ card, source, showBadge = true, showLeadForm = 
     setDownloading(true);
     try {
       const res = await fetch(`/api/vcard/${card.slug}`);
-      if (!res.ok) throw new Error("Fehler beim Download");
+      if (!res.ok) throw new Error(t("downloadFailure"));
 
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
@@ -117,10 +123,10 @@ export function PublicCardView({ card, source, showBadge = true, showLeadForm = 
         track(card.slug, "wallet_save");
       } else {
         const { error } = await res.json();
-        alert(error ?? "Wallet nicht verfügbar.");
+        alert(error ?? t("walletUnavailable"));
       }
     } catch {
-      alert("Wallet nicht verfügbar.");
+      alert(t("walletUnavailable"));
     } finally {
       setWalletLoading(false);
     }
@@ -128,20 +134,20 @@ export function PublicCardView({ card, source, showBadge = true, showLeadForm = 
 
   function shareViaWhatsApp() {
     const url  = window.location.origin + `/c/${card.slug}`;
-    const name = [card.firstName, card.lastName].filter(Boolean).join(" ") || "Visitenkarte";
+    const name = [card.firstName, card.lastName].filter(Boolean).join(" ") || t("defaultName");
     window.open(`https://wa.me/?text=${encodeURIComponent(`${name} – ${url}`)}`, "_blank");
   }
 
   function shareViaEmail() {
     const url  = window.location.origin + `/c/${card.slug}`;
-    const name = [card.firstName, card.lastName].filter(Boolean).join(" ") || "Visitenkarte";
-    window.location.href = `mailto:?subject=${encodeURIComponent(name)}&body=${encodeURIComponent(`Meine digitale Visitenkarte: ${url}`)}`;
+    const name = [card.firstName, card.lastName].filter(Boolean).join(" ") || t("defaultName");
+    window.location.href = `mailto:?subject=${encodeURIComponent(name)}&body=${encodeURIComponent(t("emailBody", { url }))}`;
 
   }
 
   async function handleShare() {
     const url = window.location.origin + `/c/${card.slug}`;
-    const name = [card.firstName, card.lastName].filter(Boolean).join(" ") || "Visitenkarte";
+    const name = [card.firstName, card.lastName].filter(Boolean).join(" ") || t("defaultName");
 
     // Native share sheet (mobile / supported browsers)
     if (navigator.share) {
@@ -193,8 +199,8 @@ export function PublicCardView({ card, source, showBadge = true, showLeadForm = 
           style={{ backgroundColor: card.primaryColor, borderColor: card.primaryColor }}
         >
           {downloading
-            ? <><Loader2 className="h-4 w-4 animate-spin" /> Wird vorbereitet…</>
-            : <><Download className="h-4 w-4" /> Kontakt speichern</>
+            ? <><Loader2 className="h-4 w-4 animate-spin" /> {t("preparingDownload")}</>
+            : <><Download className="h-4 w-4" /> {t("saveContact")}</>
           }
         </Button>
 
@@ -202,7 +208,7 @@ export function PublicCardView({ card, source, showBadge = true, showLeadForm = 
           <Button asChild className="w-full" size="lg" style={{ backgroundColor: card.primaryColor }}>
             <a href={card.bookingUrl} target="_blank" rel="noopener noreferrer">
               <CalendarDays className="h-4 w-4" />
-              Termin buchen
+              {t("bookAppointment")}
             </a>
           </Button>
         )}
@@ -210,7 +216,7 @@ export function PublicCardView({ card, source, showBadge = true, showLeadForm = 
         {showLeadForm && (
           <Button variant="outline" className="w-full" size="lg" onClick={() => setShowLead(true)}>
             <UserPlus className="h-4 w-4" />
-            Kontakt hinterlassen
+            {t("leaveContact")}
           </Button>
         )}
 
@@ -218,12 +224,12 @@ export function PublicCardView({ card, source, showBadge = true, showLeadForm = 
           {!card.hideShareButton && (
             <Button variant="outline" onClick={handleShare}>
               <Share2 className="h-4 w-4" />
-              {shared ? "Kopiert!" : "Teilen"}
+              {shared ? t("copied") : t("share")}
             </Button>
           )}
           <Button variant="outline" onClick={() => setShowQR(!showQR)}>
             <QrCode className="h-4 w-4" />
-            QR-Code
+            {t("qrCode")}
           </Button>
         </div>
 
@@ -235,15 +241,15 @@ export function PublicCardView({ card, source, showBadge = true, showLeadForm = 
             </Button>
             <Button variant="outline" onClick={shareViaEmail}>
               <Mail className="h-4 w-4" />
-              E-Mail
+              {t("email")}
             </Button>
           </div>
         )}
 
         <Button variant="outline" className="w-full" onClick={saveToWallet} disabled={walletLoading}>
           {walletLoading
-            ? <><Loader2 className="h-4 w-4 animate-spin" /> Wird geladen…</>
-            : <><Wallet className="h-4 w-4" /> In Wallet speichern</>
+            ? <><Loader2 className="h-4 w-4 animate-spin" /> {t("loadingWallet")}</>
+            : <><Wallet className="h-4 w-4" /> {t("saveToWallet")}</>
           }
         </Button>
       </div>
@@ -259,8 +265,8 @@ export function PublicCardView({ card, source, showBadge = true, showLeadForm = 
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold">QR-Code</h3>
-              <button onClick={() => setShowQR(false)} className="text-muted-foreground hover:text-foreground">
+              <h3 className="font-semibold">{t("qrCode")}</h3>
+              <button onClick={() => setShowQR(false)} aria-label={t("close")} className="text-muted-foreground hover:text-foreground">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -277,7 +283,7 @@ export function PublicCardView({ card, source, showBadge = true, showLeadForm = 
       {/* Powered by — only for free plan */}
       {showBadge && (
         <p className="mt-8 text-xs text-gray-400 dark:text-gray-500">
-          Erstellt mit{" "}
+          {t("poweredBy")}{" "}
           <a href="/" className="hover:text-gray-600 dark:hover:text-gray-400 transition-colors font-medium">CardNexus</a>
         </p>
       )}
@@ -288,6 +294,8 @@ export function PublicCardView({ card, source, showBadge = true, showLeadForm = 
 // ── Lead Capture Modal ──────────────────────────────────────────────────────
 
 function LeadModal({ card, onClose }: { card: CardData; onClose: () => void }) {
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -299,7 +307,7 @@ function LeadModal({ card, onClose }: { card: CardData; onClose: () => void }) {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.name.trim()) { setError("Name ist erforderlich."); return; }
+    if (!form.name.trim()) { setError(t("nameRequired")); return; }
     setError(null);
     setLoading(true);
     try {
@@ -310,17 +318,17 @@ function LeadModal({ card, onClose }: { card: CardData; onClose: () => void }) {
       });
       if (!res.ok) {
         const j = await res.json();
-        throw new Error(j.error ?? "Fehler beim Senden");
+        throw new Error(j.error ?? t("submitFailure"));
       }
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unbekannter Fehler");
+      setError(err instanceof Error ? err.message : t("unknownError"));
     } finally {
       setLoading(false);
     }
   }
 
-  const ownerName = [card.firstName, card.lastName].filter(Boolean).join(" ") || "diese Person";
+  const ownerName = [card.firstName, card.lastName].filter(Boolean).join(" ") || t("recipientFallback");
 
   return (
     <div
@@ -334,12 +342,12 @@ function LeadModal({ card, onClose }: { card: CardData; onClose: () => void }) {
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h3 className="font-bold text-lg">Kontakt hinterlassen</h3>
+            <h3 className="font-bold text-lg">{t("leaveContact")}</h3>
             <p className="text-sm text-muted-foreground mt-0.5">
-              {ownerName} erhält deine Daten
+              {t("leadDescription", { ownerName })}
             </p>
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-accent transition-colors">
+          <button onClick={onClose} aria-label={t("close")} className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-accent transition-colors">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -347,27 +355,27 @@ function LeadModal({ card, onClose }: { card: CardData; onClose: () => void }) {
         {success ? (
           <div className="flex flex-col items-center py-6 text-center gap-3">
             <CheckCircle2 className="h-12 w-12" style={{ color: card.primaryColor }} />
-            <p className="font-semibold">Vielen Dank!</p>
+            <p className="font-semibold">{t("thankYou")}</p>
             <p className="text-sm text-muted-foreground">
-              {ownerName} wurde benachrichtigt.
+              {t("leadSuccess", { ownerName })}
             </p>
-            <Button variant="outline" className="mt-2" onClick={onClose}>Schließen</Button>
+            <Button variant="outline" className="mt-2" onClick={onClose}>{t("close")}</Button>
           </div>
         ) : (
           <form onSubmit={submit} className="space-y-4">
             <div>
-              <Label htmlFor="lead-name">Name *</Label>
+              <Label htmlFor="lead-name">{t("requiredName")}</Label>
               <Input
                 id="lead-name"
                 value={form.name}
                 onChange={(e) => set("name", e.target.value)}
-                placeholder="Dein Name"
+                placeholder={t("namePlaceholder")}
                 className="mt-1"
                 required
               />
             </div>
             <div>
-              <Label htmlFor="lead-email">E-Mail</Label>
+              <Label htmlFor="lead-email">{t("email")}</Label>
               <Input
                 id="lead-email"
                 type="email"
@@ -378,7 +386,7 @@ function LeadModal({ card, onClose }: { card: CardData; onClose: () => void }) {
               />
             </div>
             <div>
-              <Label htmlFor="lead-phone">Telefon</Label>
+              <Label htmlFor="lead-phone">{t("phone")}</Label>
               <Input
                 id="lead-phone"
                 type="tel"
@@ -389,12 +397,12 @@ function LeadModal({ card, onClose }: { card: CardData; onClose: () => void }) {
               />
             </div>
             <div>
-              <Label htmlFor="lead-message">Nachricht</Label>
+              <Label htmlFor="lead-message">{t("message")}</Label>
               <textarea
                 id="lead-message"
                 value={form.message}
                 onChange={(e) => set("message", e.target.value)}
-                placeholder="Optionale Nachricht..."
+                placeholder={t("messagePlaceholder")}
                 rows={3}
                 className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
               />
@@ -409,8 +417,8 @@ function LeadModal({ card, onClose }: { card: CardData; onClose: () => void }) {
               style={{ backgroundColor: card.primaryColor }}
             >
               {loading
-                ? <><Loader2 className="h-4 w-4 animate-spin" /> Wird gesendet…</>
-                : "Kontakt senden"}
+                ? <><Loader2 className="h-4 w-4 animate-spin" /> {t("sendingContact")}</>
+                : t("sendContact")}
             </Button>
           </form>
         )}

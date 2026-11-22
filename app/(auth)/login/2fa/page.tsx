@@ -1,7 +1,10 @@
 "use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/pages/two-factor-login.json";
+import it from "@/messages/it/pages/two-factor-login.json";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +17,8 @@ import { twoFactor } from "@/lib/auth-client";
 export const dynamic = "force-dynamic";
 
 export default function TwoFactorChallengePage() {
-  const router = useRouter();
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   const [mode, setMode] = useState<"totp" | "backup">("totp");
   const [code, setCode] = useState("");
   const [trustDevice, setTrustDevice] = useState(false);
@@ -35,32 +39,32 @@ export default function TwoFactorChallengePage() {
     if (res.error) {
       setError(
         mode === "totp"
-          ? "Code ist falsch oder abgelaufen."
-          : "Backup-Code ist ungültig oder bereits verwendet."
+          ? t("invalidCode")
+          : t("invalidBackupCode")
       );
       setLoading(false);
       return;
     }
 
-    router.push("/dashboard");
-    router.refresh();
+    const invite = new URLSearchParams(window.location.search).get("invite");
+    window.location.assign(invite ? `/invite?${new URLSearchParams({ invite })}` : "/dashboard");
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Zwei-Faktor-Authentifizierung</CardTitle>
+        <CardTitle>{t("heading")}</CardTitle>
         <CardDescription>
           {mode === "totp"
-            ? "Gib den 6-stelligen Code aus deiner Authenticator-App ein."
-            : "Gib einen deiner gespeicherten Backup-Codes ein."}
+            ? t("totpInstructions")
+            : t("backupInstructions")}
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="code">
-              {mode === "totp" ? "6-stelliger Code" : "Backup-Code"}
+              {mode === "totp" ? t("totpCode") : t("backupCode")}
             </Label>
             <Input
               id="code"
@@ -84,14 +88,14 @@ export default function TwoFactorChallengePage() {
               onChange={(e) => setTrustDevice(e.target.checked)}
               className="h-4 w-4 rounded border-input"
             />
-            Diesem Gerät 30 Tage vertrauen
+            {t("trustDevice")}
           </label>
 
           {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
         </CardContent>
         <CardFooter className="flex flex-col gap-3">
           <Button type="submit" className="w-full" disabled={loading || code.length === 0}>
-            {loading ? "Prüfen…" : "Bestätigen"}
+            {loading ? t("verifying") : t("verify")}
           </Button>
           <button
             type="button"
@@ -103,11 +107,11 @@ export default function TwoFactorChallengePage() {
             }}
           >
             {mode === "totp"
-              ? "Stattdessen Backup-Code verwenden"
-              : "Zurück zur Authenticator-App"}
+              ? t("switchToBackup")
+              : t("switchToTotp")}
           </button>
           <p className="text-xs text-muted-foreground text-center">
-            <Link href="/login" className="hover:underline">Zurück zum Login</Link>
+            <Link href="/login" className="hover:underline">{t("backToLogin")}</Link>
           </p>
         </CardFooter>
       </form>

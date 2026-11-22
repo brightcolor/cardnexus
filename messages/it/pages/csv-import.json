@@ -1,0 +1,21 @@
+{
+  "fileRequired": "Carica un file CSV.",
+  "unknownError": "Si è verificato un errore.",
+  "format": "Formato CSV",
+  "required": "Campi obbligatori:",
+  "or": "(oppure",
+  "optional": ". Campi facoltativi:",
+  "description": "L’importazione aggiorna i membri associati allo stesso indirizzo email nell’organizzazione. Per aggiungere un nuovo membro, invia un invito.",
+  "template": "Scarica modello",
+  "drop": "Trascina qui il file CSV o fai clic per selezionarlo",
+  "importing": "Importazione in corso…",
+  "start": "Avvia importazione",
+  "email": "Email",
+  "status": "Stato",
+  "note": "Dettagli",
+  "again": "Avvia un’altra importazione",
+  "importError": "Importazione non riuscita",
+  "created": "Creati",
+  "updated": "Aggiornati",
+  "skipped": "Ignorati"
+}

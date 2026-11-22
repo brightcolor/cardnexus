@@ -1,0 +1,16 @@
+{
+  "title": "Gestione biglietti da visita",
+  "allCards": "Tutti i biglietti da visita",
+  "onPlatform": "biglietti da visita sulla piattaforma",
+  "owner": "Titolare",
+  "slug": "Indirizzo",
+  "template": "Modello",
+  "views": "Visite",
+  "lastModified": "Ultima modifica",
+  "status": "Stato",
+  "public": "Pubblico",
+  "private": "Privato",
+  "view": "Visualizza biglietto",
+  "edit": "Modifica",
+  "empty": "Non è ancora stato creato alcun biglietto da visita."
+}

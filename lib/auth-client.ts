@@ -17,7 +17,8 @@ export const authClient = createAuthClient({
       // this redirect — we route them to the TOTP challenge page.
       onTwoFactorRedirect() {
         if (typeof window !== "undefined") {
-          window.location.href = "/login/2fa";
+          const invite = new URLSearchParams(window.location.search).get("invite");
+          window.location.href = invite ? `/login/2fa?${new URLSearchParams({ invite })}` : "/login/2fa";
         }
       },
     }),

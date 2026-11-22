@@ -1,0 +1,7 @@
+{
+  "unauthorized": "Unauthorized",
+  "missingFile": "Keine Datei",
+  "invalidType": "Nur JPEG, PNG, WebP und GIF erlaubt",
+  "tooLarge": "Datei zu groß (max. 5 MB)",
+  "limit": "Upload-Limit erreicht (max. {max} Dateien). Lösche nicht mehr benötigte Bilder."
+}

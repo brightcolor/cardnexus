@@ -1,9 +1,17 @@
+"use client";
+
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/components/retro-card.json";
+import it from "@/messages/it/components/retro-card.json";
 import { Phone, Mail, Globe, MapPin } from "lucide-react";
 import type { CardData } from "@/types";
 import { fontClass, shadowClass, avatarBorderStyle } from "../CardPreview";
 import { SocialLinks } from "./SocialLinks";
 
 export function RetroTemplate({ card }: { card: Partial<CardData> }) {
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   const color   = card.primaryColor ?? "#92400e";
   const accent  = card.accentColor  ?? color;
   const font    = fontClass(card.fontFamily);
@@ -93,19 +101,19 @@ export function RetroTemplate({ card }: { card: Partial<CardData> }) {
         {/* Contact — two-column grid style */}
         <div className="space-y-2.5">
           {card.phone && (
-            <RetroRow icon={Phone} label="Tel" value={card.phone} href={`tel:${card.phone}`} color={color} />
+            <RetroRow icon={Phone} label={t("phone")} value={card.phone} href={`tel:${card.phone}`} color={color} />
           )}
           {card.mobile && (
-            <RetroRow icon={Phone} label="Mob" value={card.mobile} href={`tel:${card.mobile}`} color={color} />
+            <RetroRow icon={Phone} label={t("mobile")} value={card.mobile} href={`tel:${card.mobile}`} color={color} />
           )}
           {card.email && (
-            <RetroRow icon={Mail} label="Mail" value={card.email} href={`mailto:${card.email}`} color={color} />
+            <RetroRow icon={Mail} label={t("email")} value={card.email} href={`mailto:${card.email}`} color={color} />
           )}
           {card.website && (
             <RetroRow icon={Globe} label="Web" value={card.website.replace(/^https?:\/\//, "")} href={card.website} color={color} external />
           )}
           {card.address && (
-            <RetroRow icon={MapPin} label="Adr" value={card.address} color={color} />
+            <RetroRow icon={MapPin} label={t("address")} value={card.address} color={color} />
           )}
         </div>
 
@@ -125,7 +133,7 @@ export function RetroTemplate({ card }: { card: Partial<CardData> }) {
 
         {card.showQrOnCard && card.slug && (
           <div className="mt-4 flex justify-center">
-            <img src={`/api/qr/${card.slug}`} alt="QR Code" className="h-14 w-14 opacity-50" />
+            <img src={`/api/qr/${card.slug}`} alt={t("qrAlt")} className="h-14 w-14 opacity-50" />
           </div>
         )}
       </div>

@@ -1,0 +1,7 @@
+{
+  "unauthorized": "Unauthorized",
+  "forbidden": "Forbidden",
+  "leaderRestriction": "Team-Leader können nur Mitglieder einladen",
+  "alreadyInvited": "Einladung bereits gesendet",
+  "notFound": "Not found"
+}

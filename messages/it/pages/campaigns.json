@@ -1,0 +1,15 @@
+{
+  "cardRequired": "Crea un biglietto da visita per iniziare a usare le campagne.",
+  "newCampaign": "Crea una campagna",
+  "name": "Nome",
+  "example": "Es. Fiera Milano 2026",
+  "expiry": "Scadenza (facoltativa)",
+  "create": "Crea campagna",
+  "empty": "Non ci sono ancora campagne. Crea il primo link qui sopra.",
+  "expired": "Scaduta",
+  "clicks": "clic",
+  "until": "fino al",
+  "copyLink": "Copia link",
+  "testLink": "Prova link",
+  "delete": "Elimina"
+}

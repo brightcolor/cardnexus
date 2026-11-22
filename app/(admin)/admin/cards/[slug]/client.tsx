@@ -1,5 +1,9 @@
 "use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/components/admin-card-preview.json";
+import it from "@/messages/it/components/admin-card-preview.json";
 import { CardEditor } from "@/components/card/CardEditor";
 import { QRCodeDisplay } from "@/components/card/QRCodeDisplay";
 import type { CardData, DesignPolicy } from "@/types";
@@ -19,6 +23,8 @@ interface Props {
 }
 
 export function AdminCardEditClient({ card }: Props) {
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   const saveEndpoint = `/api/admin/cards/${card.slug}`;
 
   return (
@@ -31,7 +37,7 @@ export function AdminCardEditClient({ card }: Props) {
       />
 
       <div className="border-t border-border pt-8">
-        <h2 className="text-lg font-semibold mb-4">QR-Code</h2>
+        <h2 className="text-lg font-semibold mb-4">{t("qrCode")}</h2>
         <QRCodeDisplay slug={card.slug} color={card.primaryColor} />
       </div>
     </div>

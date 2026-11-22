@@ -1,0 +1,14 @@
+{
+  "newCard": "Nuova scheda",
+  "createFailed": "Creazione della scheda non riuscita",
+  "cloneFailed": "Duplicazione della scheda non riuscita",
+  "lastCard": "Devi mantenere almeno una scheda.",
+  "confirmDelete": "Vuoi eliminare definitivamente la scheda?",
+  "choose": "Scegli una scheda",
+  "rename": "Rinomina",
+  "makeDefault": "Imposta come predefinita",
+  "delete": "Elimina",
+  "creating": "Creazione in corso…",
+  "cloning": "Duplicazione in corso…",
+  "clone": "Duplica"
+}

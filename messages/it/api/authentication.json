@@ -1,0 +1,13 @@
+{
+  "credentials": "Email o password errata.",
+  "invalidEmail": "Inserisci un indirizzo email valido.",
+  "emailInUse": "Questo indirizzo email è già in uso.",
+  "shortPassword": "La password è troppo corta.",
+  "longPassword": "La password è troppo lunga.",
+  "invalidPassword": "La password non è valida.",
+  "invalidToken": "Il link o la sessione è scaduto.",
+  "invalidCode": "Il codice non è valido o è scaduto.",
+  "rateLimit": "Troppe richieste. Riprova più tardi.",
+  "generic": "Non è stato possibile completare l’operazione.",
+  "proxyRateLimit": "Troppi tentativi di accesso. Riprova tra un minuto."
+}

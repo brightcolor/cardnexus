@@ -1,9 +1,17 @@
+"use client";
+
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/components/bold-card.json";
+import it from "@/messages/it/components/bold-card.json";
 import { Phone, Mail, Globe, MapPin } from "lucide-react";
 import type { CardData } from "@/types";
 import { fontClass, radiusClass, shadowClass, avatarBorderStyle } from "../CardPreview";
 import { SocialLinks } from "./SocialLinks";
 
 export function BoldTemplate({ card }: { card: Partial<CardData> }) {
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   const color   = card.primaryColor ?? "#0F172A";
   const accent  = card.accentColor  ?? color;
   const font    = fontClass(card.fontFamily);
@@ -53,7 +61,7 @@ export function BoldTemplate({ card }: { card: Partial<CardData> }) {
 
         {/* QR at bottom */}
         {card.showQrOnCard && card.slug
-          ? <img src={`/api/qr/${card.slug}`} alt="QR" className="h-12 w-12 invert opacity-60" />
+          ? <img src={`/api/qr/${card.slug}`} alt={t("qrAlt")} className="h-12 w-12 invert opacity-60" />
           : <div />}
       </div>
 
@@ -73,7 +81,7 @@ export function BoldTemplate({ card }: { card: Partial<CardData> }) {
             <p className="text-xs text-gray-300 mt-0.5">{card.department}</p>
           )}
           {!card.title && !card.company && (
-            <p className="text-sm font-semibold text-gray-300">Berufsbezeichnung</p>
+            <p className="text-sm font-semibold text-gray-300">{t("jobTitle")}</p>
           )}
         </div>
 

@@ -1,0 +1,13 @@
+{
+  "invite": "Einladen",
+  "heading": "Benutzer einladen",
+  "email": "E-Mail-Adresse",
+  "role": "Rolle",
+  "leader": "Team Leader",
+  "member": "Mitglied",
+  "sending": "Wird eingeladen…",
+  "create": "Einladung erstellen",
+  "created": "Einladung erstellt!",
+  "sendAnother": "Weitere einladen",
+  "shareHint": "Link an {email} senden (gültig 7 Tage)"
+}

@@ -1,5 +1,7 @@
+import { apiMessage } from "@/lib/i18n/api";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { canReadCard, publishedCardScope, unexpiredCardScope } from "@/lib/card-publication";
 import { generateQRCodeSVG } from "@/lib/qr";
 
 export async function GET(
@@ -9,12 +11,12 @@ export async function GET(
   const { slug } = await params;
 
   const card = await db.card.findUnique({
-    where: { slug },
-    select: { isPublic: true, primaryColor: true },
+    where: { slug, ...publishedCardScope, ...unexpiredCardScope() },
+    select: { slug: true, passwordHash: true, primaryColor: true },
   });
 
-  if (!card || !card.isPublic) {
-    return NextResponse.json({ error: "Nicht gefunden" }, { status: 404 });
+  if (!card || !await canReadCard(card)) {
+    return NextResponse.json({ error: await apiMessage("missing") }, { status: 404 });
   }
 
   const url = new URL(request.url);
@@ -34,7 +36,7 @@ export async function GET(
   return new NextResponse(svg, {
     headers: {
       "Content-Type": "image/svg+xml",
-      "Cache-Control": "public, max-age=3600",
+      "Cache-Control": "private, no-store",
     },
   });
 }

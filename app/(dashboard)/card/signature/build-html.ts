@@ -1,3 +1,6 @@
+import type { Locale } from "@/lib/i18n/locales";
+import de from "@/messages/de/components/signature-export.json";
+import it from "@/messages/it/components/signature-export.json";
 import type { CardData } from "@/types";
 
 export type SigStyle = "standard" | "compact" | "rich" | "modern" | "minimal" | "dark";
@@ -35,27 +38,29 @@ function footerRow(text: string, cols = 1) {
   return `<tr><td colspan="${cols}" style="padding-top:10px;font-size:10px;color:#999999;border-top:1px solid #eeeeee;">${text.replace(/\n/g, "<br>")}</td></tr>`;
 }
 
-export function buildPlainText(card: CardData): string {
+export function buildPlainText(card: CardData, locale: Locale = "de"): string {
+  const labels = locale === "it" ? it : de;
   const name = `${card.firstName ?? ""} ${card.lastName ?? ""}`.trim();
   const header = [name, [card.title, card.company].filter(Boolean).join(" | ")].filter(Boolean);
   const contact = [
-    card.phone   && `Tel:    ${card.phone}`,
-    card.mobile  && `Mobil:  ${card.mobile}`,
-    card.email   && `E-Mail: ${card.email}`,
-    card.website && `Web:    ${card.website}`,
-    card.address && `Adr:    ${card.address}`,
+    card.phone   && `${labels.phone.padEnd(8)}${card.phone}`,
+    card.mobile  && `${labels.mobile.padEnd(8)}${card.mobile}`,
+    card.email   && `${labels.email.padEnd(8)}${card.email}`,
+    card.website && `${labels.website.padEnd(8)}${card.website}`,
+    card.address && `${labels.address.padEnd(8)}${card.address}`,
   ].filter(Boolean) as string[];
   return [...header, "", ...contact].join("\n");
 }
 
-export function buildHtml(card: CardData, style: SigStyle, baseUrl: string, opts: SigOptions): string {
+export function buildHtml(card: CardData, style: SigStyle, baseUrl: string, opts: SigOptions, locale: Locale = "de"): string {
+  const labels = locale === "it" ? it : de;
   const { color, showAvatar, showSocials, showCardLink, footerText } = opts;
   const name    = `${card.firstName ?? ""} ${card.lastName ?? ""}`.trim();
   const avatar  = card.avatarUrl && showAvatar ? abs(card.avatarUrl, baseUrl) : null;
   const cardUrl = `${baseUrl}/c/${card.slug}`;
   const socials = showSocials ? getSocials(card) : [];
   const btn     = showCardLink
-    ? `<a href="${cardUrl}" style="font-family:Arial,sans-serif;font-size:11px;background-color:${color};color:#ffffff;text-decoration:none;padding:5px 12px;border-radius:4px;display:inline-block;">Digitale Visitenkarte</a>`
+    ? `<a href="${cardUrl}" style="font-family:Arial,sans-serif;font-size:11px;background-color:${color};color:#ffffff;text-decoration:none;padding:5px 12px;border-radius:4px;display:inline-block;">${labels.card}</a>`
     : "";
 
   const contact555 = [

@@ -1,3 +1,4 @@
+import { apiMessage } from "@/lib/i18n/api";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyWebhookSignature } from "@/lib/paypal";
@@ -5,7 +6,7 @@ import { verifyWebhookSignature } from "@/lib/paypal";
 export async function POST(req: NextRequest) {
   const webhookId = process.env.PAYPAL_WEBHOOK_ID;
   if (!webhookId) {
-    return NextResponse.json({ error: "Webhook ID not configured" }, { status: 500 });
+    return NextResponse.json({ error: await apiMessage("webhookIdMissing") }, { status: 500 });
   }
 
   const body = await req.text();
@@ -23,14 +24,14 @@ export async function POST(req: NextRequest) {
 
   if (!valid) {
     console.error("[paypal webhook] signature verification failed");
-    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+    return NextResponse.json({ error: await apiMessage("invalidSignature") }, { status: 400 });
   }
 
   let event: { id?: string; event_type: string; resource: Record<string, unknown> };
   try {
     event = JSON.parse(body);
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json({ error: await apiMessage("invalidJson") }, { status: 400 });
   }
 
   // SECURITY: idempotent processing — PayPal retries deliveries until 200.

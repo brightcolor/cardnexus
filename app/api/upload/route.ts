@@ -1,3 +1,7 @@
+import { translator } from "@/lib/i18n/messages";
+import { getLocale } from "@/lib/i18n/server";
+import de from "@/messages/de/api/upload.json";
+import it from "@/messages/it/api/upload.json";
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -22,18 +26,20 @@ const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 const MAX_UPLOADS_PER_USER = 20;
 
 export async function POST(request: NextRequest) {
+  const locale = await getLocale();
+  const t = translator(locale, de, it);
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: t("unauthorized") }, { status: 401 });
 
   const formData = await request.formData();
   const file = formData.get("file") as File | null;
 
-  if (!file) return NextResponse.json({ error: "Keine Datei" }, { status: 400 });
+  if (!file) return NextResponse.json({ error: t("missingFile") }, { status: 400 });
   if (!ALLOWED_TYPES.includes(file.type as AllowedMime)) {
-    return NextResponse.json({ error: "Nur JPEG, PNG, WebP und GIF erlaubt" }, { status: 400 });
+    return NextResponse.json({ error: t("invalidType") }, { status: 400 });
   }
   if (file.size > MAX_SIZE) {
-    return NextResponse.json({ error: "Datei zu groß (max. 5 MB)" }, { status: 400 });
+    return NextResponse.json({ error: t("tooLarge") }, { status: 400 });
   }
 
   const uploadDir = join(process.cwd(), "public", "uploads");
@@ -44,7 +50,7 @@ export async function POST(request: NextRequest) {
     const userCount = existing.filter((f) => f.startsWith(`${session.user.id}-`)).length;
     if (userCount >= MAX_UPLOADS_PER_USER) {
       return NextResponse.json(
-        { error: `Upload-Limit erreicht (max. ${MAX_UPLOADS_PER_USER} Dateien). Lösche nicht mehr benötigte Bilder.` },
+        { error: t("limit", { max: MAX_UPLOADS_PER_USER }) },
         { status: 400 }
       );
     }

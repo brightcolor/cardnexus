@@ -1,0 +1,21 @@
+{
+  "greeting": "Ciao,",
+  "firstCard": "Crea il tuo primo biglietto da visita digitale.",
+  "noCard": "Non hai ancora un biglietto da visita",
+  "noCardHint": "Crea il tuo biglietto da visita digitale in pochi minuti.",
+  "createCard": "Crea biglietto",
+  "yourCards": "I tuoi biglietti da visita",
+  "newCard": "Nuovo biglietto",
+  "defaultCard": "Predefinito",
+  "publicCard": "Pubblico",
+  "viewsLastWeek": "Visite negli ultimi 7 giorni",
+  "viewsTotal": "Visite totali",
+  "viewsLastMonth": "Visite negli ultimi 30 giorni",
+  "editCard": "Modifica il biglietto",
+  "edit": "Modifica",
+  "viewAnalytics": "Consulta le statistiche",
+  "analytics": "Statistiche",
+  "share": "Condividi biglietto",
+  "open": "Apri",
+  "liveViews": "Visite in tempo reale"
+}

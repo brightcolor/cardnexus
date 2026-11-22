@@ -1,0 +1,6 @@
+{
+  "pending": "La scheda è in attesa di approvazione",
+  "pendingHint": "Un amministratore deve approvare l’ultima modifica. Fino ad allora rimane visibile la versione precedente della scheda.",
+  "rejected": "Modifica rifiutata",
+  "rejectedHint": "Modifica la scheda e salvala di nuovo."
+}

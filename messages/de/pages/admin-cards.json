@@ -1,0 +1,16 @@
+{
+  "title": "Karten verwalten",
+  "allCards": "Alle Karten",
+  "onPlatform": "Karten auf der Plattform",
+  "owner": "Inhaber",
+  "slug": "Slug / URL",
+  "template": "Template",
+  "views": "Aufrufe",
+  "lastModified": "Zuletzt geändert",
+  "status": "Status",
+  "public": "Öffentlich",
+  "private": "Privat",
+  "view": "Karte ansehen",
+  "edit": "Bearbeiten",
+  "empty": "Noch keine Karten erstellt."
+}

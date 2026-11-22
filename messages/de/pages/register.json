@@ -1,0 +1,14 @@
+{
+  "failure": "Registrierung fehlgeschlagen.",
+  "heading": "Account erstellen",
+  "invited": "Du wurdest eingeladen. Erstelle deinen Account.",
+  "description": "Starte kostenlos mit deiner digitalen Visitenkarte.",
+  "name": "Name",
+  "nameExample": "Max Mustermann",
+  "email": "E-Mail",
+  "password": "Passwort",
+  "passwordHint": "Mindestens 8 Zeichen",
+  "submitting": "Wird erstellt…",
+  "alreadyRegistered": "Bereits registriert?",
+  "signIn": "Anmelden"
+}

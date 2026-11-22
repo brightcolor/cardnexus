@@ -1,5 +1,9 @@
 "use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/components/billing-actions.json";
+import it from "@/messages/it/components/billing-actions.json";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -21,6 +25,8 @@ export function UpgradeButtons({
   stripeConfigured,
   paypalConfigured,
 }: Props) {
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   const [loading, setLoading] = useState<"stripe" | "paypal" | "portal" | null>(null);
 
   async function startStripe() {
@@ -69,7 +75,7 @@ export function UpgradeButtons({
     return (
       <div className="space-y-2">
         <Button variant="outline" className="w-full" disabled>
-          Aktueller Plan
+          {t("current")}
         </Button>
         {hasStripe && (
           <Button
@@ -81,13 +87,13 @@ export function UpgradeButtons({
             {loading === "portal" ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
-              "Abo verwalten / kündigen (Stripe)"
+              t("manageStripe")
             )}
           </Button>
         )}
         {hasPaypal && (
           <p className="text-xs text-muted-foreground text-center">
-            PayPal-Abo über{" "}
+            {t("managePaypalPrefix")}{" "}
             <a
               href="https://www.paypal.com/myaccount/autopay"
               target="_blank"
@@ -96,7 +102,7 @@ export function UpgradeButtons({
             >
               paypal.com/myaccount/autopay
             </a>{" "}
-            kündigen.
+            {t("managePaypalSuffix")}
           </p>
         )}
       </div>
@@ -107,8 +113,8 @@ export function UpgradeButtons({
   if (!stripeConfigured && !paypalConfigured) {
     return (
       <Button asChild variant="outline" className="w-full">
-        <a href={`mailto:sales@cardnexus.app?subject=Upgrade zu ${planId}`}>
-          Per E-Mail anfragen
+        <a href={`mailto:sales@cardnexus.app?subject=${encodeURIComponent(t("upgradeSubject", { plan: planId }))}`}>
+          {t("contactByEmail")}
         </a>
       </Button>
     );
@@ -126,7 +132,7 @@ export function UpgradeButtons({
           {loading === "stripe" ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            "Kreditkarte / SEPA"
+            t("cardOrSepa")
           )}
         </Button>
       )}

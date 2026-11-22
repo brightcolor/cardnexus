@@ -1,0 +1,7 @@
+{
+  "notFound": "Karte nicht gefunden",
+  "unavailable": "Nicht verfügbar",
+  "rateLimit": "Zu viele Anfragen — bitte später erneut versuchen.",
+  "invalidInput": "Ungültige Eingabe",
+  "serverError": "Serverfehler"
+}

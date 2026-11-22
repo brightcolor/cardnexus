@@ -1,0 +1,15 @@
+{
+  "noCard": "Non hai ancora un biglietto da visita",
+  "cardRequired": "Crea un biglietto da visita per iniziare a raccogliere i recapiti.",
+  "createCard": "Crea biglietto da visita",
+  "search": "Cerca…",
+  "exportCsv": "Esporta CSV",
+  "empty": "Non ci sono ancora contatti",
+  "emptyHint": "Quando un visitatore lascia i suoi recapiti sul tuo biglietto da visita, li troverai qui.",
+  "hideMessage": "Nascondi messaggio",
+  "showMessage": "Mostra messaggio",
+  "delete": "Elimina contatto",
+  "noResults": "Nessun risultato per «{query}»",
+  "single": "contatto",
+  "multiple": "contatti"
+}

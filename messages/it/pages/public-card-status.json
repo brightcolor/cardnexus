@@ -1,0 +1,7 @@
+{
+  "notFound": "Biglietto da visita non trovato",
+  "unavailable": "Biglietto da visita non disponibile",
+  "expired": "Biglietto da visita scaduto",
+  "protected": "Biglietto da visita protetto",
+  "expiredDescription": "Questo biglietto da visita non è più disponibile."
+}

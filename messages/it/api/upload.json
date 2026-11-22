@@ -1,0 +1,7 @@
+{
+  "unauthorized": "Accedi per caricare un’immagine.",
+  "missingFile": "Seleziona un file.",
+  "invalidType": "Carica un’immagine in formato JPEG, PNG, WebP o GIF.",
+  "tooLarge": "L’immagine supera il limite di 5 MB.",
+  "limit": "Hai raggiunto il limite di {max} file. Elimina le immagini che non ti servono più."
+}

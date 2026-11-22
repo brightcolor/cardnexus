@@ -1,5 +1,9 @@
 "use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/components/analytics-technology.json";
+import it from "@/messages/it/components/analytics-technology.json";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell } from "recharts";
 import { Monitor, Cpu } from "lucide-react";
@@ -9,7 +13,9 @@ const BROWSER_COLORS = ["#6366F1", "#8B5CF6", "#EC4899", "#F43F5E", "#F59E0B", "
 const OS_COLORS     = ["#0F172A", "#64748B", "#94A3B8", "#CBD5E1", "#E2E8F0", "#10B981", "#6366F1"];
 
 function PieLegend({ items, colors }: { items: { label: string; count: number }[]; colors: string[] }) {
-  if (items.length === 0) return <p className="text-sm text-muted-foreground">Noch keine Daten</p>;
+  const locale = useLocale();
+  const t = translator(locale, de, it);
+  if (items.length === 0) return <p className="text-sm text-muted-foreground">{t("empty")}</p>;
   const pieData = items.map((i) => ({ name: i.label, value: i.count }));
   return (
     <div className="flex items-center gap-6">
@@ -37,6 +43,8 @@ interface Props {
 }
 
 export function AnalyticsTech({ browserSplit, osSplit }: Props) {
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   if (browserSplit.length === 0 && osSplit.length === 0) return null;
   return (
     <div className="grid md:grid-cols-2 gap-4">
@@ -44,7 +52,7 @@ export function AnalyticsTech({ browserSplit, osSplit }: Props) {
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <Monitor className="h-4 w-4 text-muted-foreground" />
-            Browser
+            {t("browser")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -58,7 +66,7 @@ export function AnalyticsTech({ browserSplit, osSplit }: Props) {
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <Cpu className="h-4 w-4 text-muted-foreground" />
-            Betriebssystem
+            {t("os")}
           </CardTitle>
         </CardHeader>
         <CardContent>

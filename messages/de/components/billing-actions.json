@@ -1,0 +1,9 @@
+{
+  "current": "Aktueller Plan",
+  "manageStripe": "Abo verwalten / kündigen (Stripe)",
+  "managePaypalPrefix": "PayPal-Abo über",
+  "managePaypalSuffix": "kündigen.",
+  "contactByEmail": "Per E-Mail anfragen",
+  "cardOrSepa": "Kreditkarte / SEPA",
+  "upgradeSubject": "Upgrade zu {plan}"
+}

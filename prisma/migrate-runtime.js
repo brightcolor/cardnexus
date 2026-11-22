@@ -35,16 +35,16 @@ async function migrate() {
       }
     } catch (e) {
       console.error(`[migrate] ! ${table}.${column}: ${e.message}`);
+      throw e;
     }
   }
 
   async function createIndex(name, table, column) {
-    try {
-      await db.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "${name}" ON "${table}"("${column}")`);
-    } catch (e) { /* already exists */ }
+    await db.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "${name}" ON "${table}"("${column}")`);
   }
 
   // ── user table ───────────────────────────────────────────────────────────
+  await addColumn("user", "locale", "TEXT");
   await addColumn("user", "leadNotification",     'TEXT NOT NULL DEFAULT "off"');
   await addColumn("user", "plan",                 'TEXT NOT NULL DEFAULT "free"');
   await addColumn("user", "planExpiresAt",        "DATETIME");
@@ -75,6 +75,7 @@ async function migrate() {
     }
   } catch (e) {
     console.error(`[migrate] ! OrganizationSettings: ${e.message}`);
+    throw e;
   }
 
   // ── PlatformSettings new columns ────────────────────────────────────────
@@ -97,9 +98,7 @@ async function migrate() {
   await addColumn("Card", "expiresAt",            "DATETIME");
   await addColumn("Card", "passwordHash",         "TEXT");
   // Drop the unique constraint on userId to allow multiple cards per user
-  try {
-    await db.$executeRawUnsafe(`DROP INDEX IF EXISTS "Card_userId_key"`);
-  } catch (e) { /* already dropped */ }
+  await db.$executeRawUnsafe(`DROP INDEX IF EXISTS "Card_userId_key"`);
   await createIndex("Card_userId_idx", "Card", "userId");
 
   // ── Lead table ───────────────────────────────────────────────────────────
@@ -127,6 +126,7 @@ async function migrate() {
     }
   } catch (e) {
     console.error(`[migrate] ! Lead table: ${e.message}`);
+    throw e;
   }
 
   // ── Campaign table ───────────────────────────────────────────────────────
@@ -154,6 +154,7 @@ async function migrate() {
     }
   } catch (e) {
     console.error(`[migrate] ! Campaign table: ${e.message}`);
+    throw e;
   }
 
   // ── Notification table ───────────────────────────────────────────────────
@@ -182,6 +183,7 @@ async function migrate() {
     }
   } catch (e) {
     console.error(`[migrate] ! Notification table: ${e.message}`);
+    throw e;
   }
 
   // ── Webhook table ────────────────────────────────────────────────────────
@@ -208,6 +210,7 @@ async function migrate() {
     } else { skip++; }
   } catch (e) {
     console.error(`[migrate] ! Webhook table: ${e.message}`);
+    throw e;
   }
 
   // ── ProcessedWebhookEvent (Stripe/PayPal idempotency) ───────────────────
@@ -229,6 +232,7 @@ async function migrate() {
     } else { skip++; }
   } catch (e) {
     console.error(`[migrate] ! ProcessedWebhookEvent: ${e.message}`);
+    throw e;
   }
 
   // ── ApiKey table ─────────────────────────────────────────────────────────
@@ -254,6 +258,7 @@ async function migrate() {
     } else { skip++; }
   } catch (e) {
     console.error(`[migrate] ! ApiKey table: ${e.message}`);
+    throw e;
   }
 
   // ── Card vCard 4.0 fields (v2.0.0) ──────────────────────────────────────
@@ -288,6 +293,7 @@ async function migrate() {
     } else { skip++; }
   } catch (e) {
     console.error(`[migrate] ! CardSlugAlias table: ${e.message}`);
+    throw e;
   }
 
   // ── CardAnalytic extended metrics ────────────────────────────────────────
@@ -309,6 +315,8 @@ async function migrate() {
           "secret"      TEXT    NOT NULL,
           "backupCodes" TEXT    NOT NULL,
           "verified"    INTEGER NOT NULL DEFAULT 1,
+          "failedVerificationCount" INTEGER NOT NULL DEFAULT 0,
+          "lockedUntil" DATETIME,
           CONSTRAINT "twoFactor_userId_fkey" FOREIGN KEY ("userId")
             REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE
         )
@@ -320,105 +328,16 @@ async function migrate() {
     } else { skip++; }
   } catch (e) {
     console.error(`[migrate] ! twoFactor table: ${e.message}`);
+    throw e;
   }
-
-  // ── Demo user seed ──────────────────────────────────────────────────────────
-  await seedDemoUser(db);
+  await addColumn("twoFactor", "failedVerificationCount", "INTEGER NOT NULL DEFAULT 0");
+  await addColumn("twoFactor", "lockedUntil", "DATETIME");
 
   await db.$disconnect();
   console.log(`[migrate] Done — ${ok} applied, ${skip} already up-to-date`);
 }
 
-/**
- * Creates the public demo user + card if they don't exist yet.
- * Fully idempotent — safe to run on every container start.
- */
-async function seedDemoUser(db) {
-  try {
-    const DEMO_EMAIL = "demo@cardnexus.app";
-    const existing = await db.user.findUnique({ where: { email: DEMO_EMAIL } });
-    if (existing) {
-      console.log("[seed] demo user already exists — skipped");
-      return;
-    }
-
-    // Dynamic imports needed: nanoid v5 and better-auth/utils are ESM-only
-    const { hashPassword } = await import("better-auth/utils/password");
-    const { nanoid } = await import("nanoid");
-
-    const now = new Date();
-    const demoUserId    = nanoid();
-    const demoAccountId = nanoid();
-    const demoHashed    = await hashPassword("demo1234");
-
-    await db.user.create({
-      data: {
-        id: demoUserId,
-        name: "Alex Demo",
-        email: DEMO_EMAIL,
-        emailVerified: true,
-        role: "member",
-        createdAt: now,
-        updatedAt: now,
-      },
-    });
-
-    await db.account.create({
-      data: {
-        id: demoAccountId,
-        userId: demoUserId,
-        accountId: DEMO_EMAIL,
-        providerId: "credential",
-        password: demoHashed,
-        createdAt: now,
-        updatedAt: now,
-      },
-    });
-
-    await db.card.create({
-      data: {
-        userId: demoUserId,
-        slug: "demo",
-        isPublic: true,
-        firstName: "Alex",
-        lastName: "Demo",
-        title: "Head of Innovation",
-        company: "CardNexus GmbH",
-        department: "Product & Design",
-        bio: "Digitale Visitenkarten für die nächste Generation – teile deine Kontaktdaten mit einem Tap, Scan oder Link. Keine App nötig.",
-        phone: "+49 30 1234567",
-        mobile: "+49 170 9876543",
-        email: DEMO_EMAIL,
-        website: "https://cardnexus.app",
-        address: "Unter den Linden 1, 10117 Berlin",
-        linkedin: "https://linkedin.com/in/alexdemo",
-        twitter: "https://twitter.com/alexdemo",
-        github: "https://github.com/alexdemo",
-        instagram: "https://instagram.com/alexdemo",
-        customLinks: JSON.stringify([
-          { label: "📅 Meeting buchen", url: "https://cal.com/demo" },
-          { label: "💼 Portfolio",      url: "https://example.com/portfolio" },
-          { label: "🎙️ Podcast",        url: "https://example.com/podcast" },
-        ]),
-        templateId: "modern",
-        primaryColor: "#0F172A",
-        accentColor: "#14B8A6",
-        fontFamily: "inter",
-        layoutStyle: "centered",
-        roundedStyle: "pill",
-        showQrOnCard: true,
-        totalViews: 1247,
-        createdAt: now,
-        updatedAt: now,
-      },
-    });
-
-    console.log("[seed] + demo user created (demo@cardnexus.app / demo1234)");
-  } catch (e) {
-    console.error("[seed] ! demo user:", e.message);
-  }
-}
-
 migrate().catch((e) => {
   console.error("[migrate] Fatal:", e.message);
+  process.exitCode = 1;
 });

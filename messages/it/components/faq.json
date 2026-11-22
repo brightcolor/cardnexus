@@ -1,0 +1,18 @@
+{
+  "freeQuestion": "CardNexus è davvero gratuito?",
+  "freeAnswer": "Sì. Il piano Free resta gratuito e include un biglietto da visita digitale con codice QR, download vCard e raccolta di contatti. Non serve una carta di credito.",
+  "appQuestion": "Serve un’app per condividere il biglietto da visita?",
+  "appAnswer": "Il tuo biglietto si apre in qualsiasi browser. Se usi un tag NFC, ti serve un’app solo per configurarlo la prima volta.",
+  "nfcQuestion": "Come funziona l’NFC?",
+  "nfcAnswer": "Scrivi l’indirizzo del biglietto su un tag NFC (circa 0,50–2 €). Chi avvicina lo smartphone al tag apre subito il tuo biglietto digitale. Funziona da iPhone 7 e da Android 4.4.",
+  "teamQuestion": "Posso usare CardNexus per il mio team?",
+  "teamAnswer": "Sì. Con il piano Business puoi gestire un numero illimitato di membri, assegnare ruoli, importare dati da CSV e applicare a tutti i biglietti lo stesso stile aziendale.",
+  "expiryQuestion": "Cosa succede quando scade il mio piano?",
+  "expiryAnswer": "L’account passa al piano Free e il biglietto resta attivo. Per continuare a usare le funzioni Pro o Business, come il white label e le campagne, devi rinnovare il piano.",
+  "cancelQuestion": "Come posso disdire?",
+  "cancelAnswer": "Scrivici un’email. Non c’è una durata minima e puoi disdire ogni mese.",
+  "safetyQuestion": "I miei dati sono al sicuro?",
+  "safetyAnswer": "Sì. I server e il database si trovano in Germania. Non usiamo cookie di tracciamento di terze parti e rispettiamo il GDPR.",
+  "domainQuestion": "Posso usare il mio dominio?",
+  "domainAnswer": "Sì, dal piano Pro. Puoi pubblicare il biglietto sul tuo dominio, per esempio biglietto.miaazienda.it."
+}

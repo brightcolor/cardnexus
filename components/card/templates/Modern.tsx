@@ -1,9 +1,17 @@
+"use client";
+
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/components/modern-card.json";
+import it from "@/messages/it/components/modern-card.json";
 import { Phone, Mail, Globe, MapPin } from "lucide-react";
 import type { CardData } from "@/types";
 import { fontClass, radiusClass, shadowClass, avatarBorderStyle } from "../CardPreview";
 import { SocialLinks } from "./SocialLinks";
 
 export function ModernTemplate({ card }: { card: Partial<CardData> }) {
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   const color   = card.primaryColor ?? "#0F172A";
   const accent  = card.accentColor  ?? color;
   const font    = fontClass(card.fontFamily);
@@ -109,8 +117,8 @@ export function ModernTemplate({ card }: { card: Partial<CardData> }) {
       {/* QR */}
       {card.showQrOnCard && card.slug && (
         <div className="px-6 pb-4 flex items-center gap-3">
-          <img src={`/api/qr/${card.slug}`} alt="QR Code" className="h-12 w-12" />
-          <p className="text-xs text-gray-400">Scan für digitale Karte</p>
+          <img src={`/api/qr/${card.slug}`} alt={t("qrAlt")} className="h-12 w-12" />
+          <p className="text-xs text-gray-400">{t("scan")}</p>
         </div>
       )}
     </div>

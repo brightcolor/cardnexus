@@ -1,3 +1,4 @@
+import { apiMessage } from "@/lib/i18n/api";
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -5,13 +6,11 @@ import { db } from "@/lib/db";
 
 /**
  * GET /api/account/export
- * Returns ALL personal data the platform holds about the current user
- * as a single JSON download. DSGVO Art. 15 (right of access) and
- * Art. 20 (right to data portability).
+ * Downloads the account's exportable data as JSON.
  */
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const userId = session.user.id;
 
@@ -28,7 +27,7 @@ export async function GET() {
           // intentionally NOT exporting secret/password fields
         },
       }),
-      db.card.findMany({ where: { userId } }),
+      db.card.findMany({ where: { userId }, omit: { passwordHash: true } }),
       db.lead.findMany({ where: { card: { userId } } }),
       db.cardAnalytic.findMany({ where: { userId } }),
       db.webhook.findMany({
@@ -40,7 +39,13 @@ export async function GET() {
         select: { id: true, name: true, prefix: true, lastUsedAt: true, createdAt: true },
       }),
       db.notification.findMany({ where: { userId } }),
-      db.invitation.findMany({ where: { senderId: userId } }),
+      db.invitation.findMany({
+        where: { senderId: userId },
+        select: {
+          id: true, organizationId: true, email: true, role: true,
+          expiresAt: true, acceptedAt: true, createdAt: true,
+        },
+      }),
     ]);
 
   const payload = {
@@ -62,6 +67,7 @@ export async function GET() {
     headers: {
       "Content-Type": "application/json; charset=utf-8",
       "Content-Disposition": `attachment; filename="${filename}"`,
+      "Cache-Control": "private, no-store",
     },
   });
 }

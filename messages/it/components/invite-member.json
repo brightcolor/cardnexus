@@ -1,0 +1,13 @@
+{
+  "invite": "Invita",
+  "heading": "Invita un membro",
+  "email": "Indirizzo email",
+  "role": "Ruolo",
+  "leader": "Responsabile del team",
+  "member": "Membro",
+  "sending": "Invio in corso…",
+  "create": "Crea invito",
+  "created": "Invito creato",
+  "sendAnother": "Invita un’altra persona",
+  "shareHint": "Invia il link a {email}. È valido per 7 giorni."
+}

@@ -1,13 +1,15 @@
 "use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/components/analytics-geography.json";
+import it from "@/messages/it/components/analytics-geography.json";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Globe, MapPin, Link as LinkIcon, Languages } from "lucide-react";
 import type { AnalyticsSummary } from "@/types";
 
-const COUNTRY_NAMES = new Intl.DisplayNames(["de"], { type: "region" });
-
-function safeCountryName(code: string) {
-  try { return COUNTRY_NAMES.of(code) ?? code; } catch { return code; }
+function safeCountryName(names: Intl.DisplayNames, code: string) {
+  try { return names.of(code) ?? code; } catch { return code; }
 }
 
 const BAR_COLORS = ["#6366F1", "#8B5CF6", "#EC4899", "#F43F5E", "#F59E0B", "#10B981", "#0EA5E9", "#14B8A6"];
@@ -17,8 +19,10 @@ function BarList({ items, labelKey, countKey }: {
   labelKey: string;
   countKey: string;
 }) {
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   const max = (items[0]?.[countKey] as number) ?? 1;
-  if (items.length === 0) return <p className="text-sm text-muted-foreground">Noch keine Daten</p>;
+  if (items.length === 0) return <p className="text-sm text-muted-foreground">{t("empty")}</p>;
   return (
     <div className="space-y-2.5">
       {items.map((item, i) => (
@@ -45,11 +49,14 @@ interface Props {
 }
 
 export function AnalyticsGeo({ topCountries, topCities, topReferrers, topLanguages }: Props) {
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   const hasAny = topCountries.length + topCities.length + topReferrers.length + topLanguages.length > 0;
   if (!hasAny) return null;
 
+  const countryNames = new Intl.DisplayNames(locale, { type: "region" });
   const countriesFormatted = topCountries.map((r) => ({
-    country: safeCountryName(r.country),
+    country: safeCountryName(countryNames, r.country),
     count: r.count,
   }));
 
@@ -68,7 +75,7 @@ export function AnalyticsGeo({ topCountries, topCities, topReferrers, topLanguag
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Globe className="h-4 w-4 text-muted-foreground" />
-                  Länder
+                  {t("countries")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -81,7 +88,7 @@ export function AnalyticsGeo({ topCountries, topCities, topReferrers, topLanguag
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-muted-foreground" />
-                  Städte
+                  {t("cities")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -100,7 +107,7 @@ export function AnalyticsGeo({ topCountries, topCities, topReferrers, topLanguag
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <LinkIcon className="h-4 w-4 text-muted-foreground" />
-                  Referrer
+                  {t("referrers")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -113,7 +120,7 @@ export function AnalyticsGeo({ topCountries, topCities, topReferrers, topLanguag
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Languages className="h-4 w-4 text-muted-foreground" />
-                  Sprachen
+                  {t("languages")}
                 </CardTitle>
               </CardHeader>
               <CardContent>

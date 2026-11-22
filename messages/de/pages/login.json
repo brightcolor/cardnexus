@@ -1,0 +1,12 @@
+{
+  "invalidCredentials": "E-Mail oder Passwort falsch.",
+  "heading": "Willkommen zurück",
+  "description": "Melde dich mit deinem Account an.",
+  "email": "E-Mail",
+  "password": "Passwort",
+  "submitting": "Anmelden…",
+  "submit": "Anmelden",
+  "forgotPassword": "Passwort vergessen?",
+  "noAccount": "Noch kein Account?",
+  "register": "Registrieren"
+}

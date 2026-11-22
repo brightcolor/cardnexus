@@ -1,0 +1,21 @@
+{
+  "greeting": "Hallo,",
+  "firstCard": "Erstelle jetzt deine erste digitale Visitenkarte.",
+  "noCard": "Keine Karte vorhanden",
+  "noCardHint": "Erstelle jetzt deine digitale Visitenkarte in wenigen Minuten.",
+  "createCard": "Karte erstellen",
+  "yourCards": "Deine Karten",
+  "newCard": "Neue Karte",
+  "defaultCard": "Standard",
+  "publicCard": "Öffentlich",
+  "viewsLastWeek": "Aufrufe letzte 7 Tage",
+  "viewsTotal": "Aufrufe gesamt",
+  "viewsLastMonth": "Aufrufe letzte 30 Tage",
+  "editCard": "Karte bearbeiten",
+  "edit": "Bearbeiten",
+  "viewAnalytics": "Analytics ansehen",
+  "analytics": "Analytics",
+  "share": "Karte teilen",
+  "open": "Öffnen",
+  "liveViews": "Live-Aufrufe"
+}

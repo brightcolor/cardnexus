@@ -1,5 +1,7 @@
+import { apiMessage } from "@/lib/i18n/api";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { canReadCard, publishedCardScope, unexpiredCardScope } from "@/lib/card-publication";
 import { generateVCard, vCardFileName } from "@/lib/vcard";
 import type { CardData } from "@/types";
 
@@ -10,12 +12,11 @@ export async function GET(
   const { slug } = await params;
 
   const card = await db.card.findUnique({
-    where: { slug },
-    include: { user: { select: { name: true, email: true } } },
+    where: { slug, ...publishedCardScope, ...unexpiredCardScope() },
   });
 
-  if (!card || !card.isPublic) {
-    return NextResponse.json({ error: "Nicht gefunden" }, { status: 404 });
+  if (!card || !await canReadCard(card)) {
+    return NextResponse.json({ error: await apiMessage("missing") }, { status: 404 });
   }
 
   // Track download
@@ -33,6 +34,7 @@ export async function GET(
 
   return new NextResponse(vcf, {
     headers: {
+      "Cache-Control": "private, no-store",
       "Content-Type": "text/vcard; charset=utf-8",
       "Content-Disposition": `attachment; filename="${filename}"`,
     },

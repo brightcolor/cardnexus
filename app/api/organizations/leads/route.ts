@@ -1,3 +1,4 @@
+import { apiMessage } from "@/lib/i18n/api";
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -7,13 +8,13 @@ import { buildCsv } from "@/lib/csv";
 
 export async function GET(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const role = (session.user as { role?: string }).role ?? "member";
   const orgId = (session.user as { organizationId?: string }).organizationId;
 
   if (!canManageOrganization(role) || !orgId) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return NextResponse.json({ error: await apiMessage("forbidden") }, { status: 403 });
   }
 
   const url = new URL(request.url);

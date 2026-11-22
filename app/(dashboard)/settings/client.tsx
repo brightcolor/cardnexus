@@ -1,5 +1,9 @@
 "use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/pages/account-settings.json";
+import it from "@/messages/it/pages/account-settings.json";
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,6 +45,8 @@ function parseJson<T>(val: string | null | undefined, fallback: T): T {
 }
 
 export function SettingsClientPage({ user, org }: Props) {
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   const [orgName, setOrgName]   = useState(org?.name ?? "");
   const [orgColor, setOrgColor] = useState(org?.primaryColor ?? "#0F172A");
 
@@ -158,15 +164,15 @@ export function SettingsClientPage({ user, org }: Props) {
   return (
     <div className="space-y-8 max-w-3xl">
       <div>
-        <h1 className="text-2xl font-bold">Einstellungen</h1>
-        <p className="text-muted-foreground mt-1">Account und Organisations-Einstellungen</p>
+        <h1 className="text-2xl font-bold">{t("heading")}</h1>
+        <p className="text-muted-foreground mt-1">{t("description")}</p>
       </div>
 
       {/* Account */}
       <Card>
         <CardHeader>
-          <CardTitle>Account</CardTitle>
-          <CardDescription>Deine persönlichen Informationen</CardDescription>
+          <CardTitle>{t("account")}</CardTitle>
+          <CardDescription>{t("accountDescription")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-3">
@@ -174,11 +180,11 @@ export function SettingsClientPage({ user, org }: Props) {
               <p className="font-medium">{user.name}</p>
               <p className="text-sm text-muted-foreground">{user.email}</p>
             </div>
-            <Badge className="ml-auto" variant="secondary">{getRoleLabel(user.role)}</Badge>
+            <Badge className="ml-auto" variant="secondary">{getRoleLabel(user.role, locale)}</Badge>
           </div>
           <div className="border-t border-border pt-4 mt-4 space-y-4">
             <div className="space-y-2">
-              <p className="text-sm font-medium">Name ändern</p>
+              <p className="text-sm font-medium">{t("changeName")}</p>
               <div className="flex gap-2">
                 <Input
                   value={newName}
@@ -188,12 +194,12 @@ export function SettingsClientPage({ user, org }: Props) {
                   onKeyDown={(e) => e.key === "Enter" && saveName()}
                 />
                 <Button size="sm" onClick={saveName} disabled={nameSaving || !newName.trim()}>
-                  {nameSaving ? "…" : nameSaved ? "✓" : "Speichern"}
+                  {nameSaving ? "…" : nameSaved ? "✓" : t("saveField")}
                 </Button>
               </div>
             </div>
             <div className="space-y-2">
-              <p className="text-sm font-medium">E-Mail-Adresse ändern</p>
+              <p className="text-sm font-medium">{t("changeEmail")}</p>
               <div className="flex gap-2">
                 <Input
                   type="email"
@@ -204,7 +210,7 @@ export function SettingsClientPage({ user, org }: Props) {
                   onKeyDown={(e) => e.key === "Enter" && saveEmail()}
                 />
                 <Button size="sm" onClick={saveEmail} disabled={emailSaving || !newEmail}>
-                  {emailSaving ? "…" : emailSaved ? "✓" : "Speichern"}
+                  {emailSaving ? "…" : emailSaved ? "✓" : t("saveField")}
                 </Button>
               </div>
               {emailError && <p className="text-xs text-destructive">{emailError}</p>}
@@ -224,18 +230,18 @@ export function SettingsClientPage({ user, org }: Props) {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Bell className="h-5 w-5 text-muted-foreground" />
-            <CardTitle className="text-base">Lead-Benachrichtigungen</CardTitle>
-            {notifSaved && <Badge variant="outline" className="ml-auto text-green-600 border-green-300">Gespeichert</Badge>}
-            {notifSaving && <Badge variant="outline" className="ml-auto">Wird gespeichert…</Badge>}
+            <CardTitle className="text-base">{t("leadNotifications")}</CardTitle>
+            {notifSaved && <Badge variant="outline" className="ml-auto text-green-600 border-green-300">{t("saved")}</Badge>}
+            {notifSaving && <Badge variant="outline" className="ml-auto">{t("saving")}</Badge>}
           </div>
-          <CardDescription>Wie möchtest du benachrichtigt werden, wenn jemand auf deiner Karte Kontakt hinterlässt?</CardDescription>
+          <CardDescription>{t("notificationDescription")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-2">
             {([
-              { value: "off",     label: "Keine Benachrichtigungen",    desc: "Leads werden nur im Dashboard gespeichert." },
-              { value: "instant", label: "Sofort",                      desc: "Du bekommst bei jedem neuen Lead eine E-Mail." },
-              { value: "daily",   label: "Tägliche Zusammenfassung",    desc: "Einmal täglich – nur wenn neue Leads vorliegen." },
+              { value: "off",     label: t("noNotifications"),    desc: t("noNotificationsDescription") },
+              { value: "instant", label: t("instantNotifications"),                      desc: t("instantNotificationsDescription") },
+              { value: "daily",   label: t("dailyNotifications"),    desc: t("dailyNotificationsDescription") },
             ] as const).map(({ value, label, desc }) => (
               <button
                 key={value}
@@ -311,7 +317,7 @@ export function SettingsClientPage({ user, org }: Props) {
           />
           <Button onClick={saveOrgSettings} disabled={saving}>
             <Save className="h-4 w-4" />
-            {saved ? "Gespeichert!" : saving ? "Wird gespeichert…" : "Einstellungen speichern"}
+            {saved ? t("settingsSaved") : saving ? t("saving") : t("saveSettings")}
           </Button>
         </>
       )}
@@ -322,9 +328,9 @@ export function SettingsClientPage({ user, org }: Props) {
           <div className="flex items-center gap-2">
             <Wallet className="h-5 w-5 text-muted-foreground" />
             <CardTitle className="text-base">Apple & Google Wallet</CardTitle>
-            <Badge variant="outline" className="ml-auto">Demnächst</Badge>
+            <Badge variant="outline" className="ml-auto">{t("comingSoon")}</Badge>
           </div>
-          <CardDescription>Karten direkt in Apple Wallet oder Google Wallet speichern. Diese Funktion wird bald verfügbar sein.</CardDescription>
+          <CardDescription>{t("walletDescription")}</CardDescription>
         </CardHeader>
       </Card>
     </div>

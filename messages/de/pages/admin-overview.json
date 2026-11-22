@@ -1,0 +1,16 @@
+{
+  "users": "Benutzer gesamt",
+  "newUsers": "Neu diesen Monat",
+  "cards": "Digitale Karten",
+  "events": "Events (30d)",
+  "heading": "Plattform-Übersicht",
+  "description": "Globale Statistiken für alle Organisationen",
+  "planDistribution": "Plan-Verteilung",
+  "revenueEstimate": "Umsatz-Schätzung",
+  "mrr": "MRR (geschätzt)",
+  "basedOn": "Basierend auf",
+  "organizations": "Organisationen",
+  "paying": "Bezahlend",
+  "local": "lokal",
+  "changelog": "Changelog"
+}

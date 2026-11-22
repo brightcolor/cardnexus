@@ -1,0 +1,12 @@
+{
+  "title": "Nuovo contatto per {card}",
+  "subject": "Nuovo contatto: {lead} ({card})",
+  "heading": "Un nuovo contatto dal tuo biglietto da visita",
+  "body": "{lead} ha lasciato i suoi recapiti sul biglietto da visita {card}.",
+  "email": "Email",
+  "phone": "Telefono",
+  "message": "Messaggio",
+  "name": "Nome",
+  "viewLeads": "Vedi i contatti",
+  "reason": "Ricevi questo messaggio perché hai attivato le notifiche immediate per i nuovi contatti. Puoi cambiare la preferenza nelle impostazioni."
+}

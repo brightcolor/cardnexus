@@ -1,5 +1,11 @@
 "use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import optionsDe from "@/messages/de/components/card-design-options.json";
+import optionsIt from "@/messages/it/components/card-design-options.json";
+import de from "@/messages/de/components/card-design.json";
+import it from "@/messages/it/components/card-design.json";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,14 +31,19 @@ interface Props {
 }
 
 function LockedBadge() {
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   return (
     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-      <Lock className="h-3 w-3" /> Vom Admin gesperrt
+      <Lock className="h-3 w-3" /> {t("locked")}
     </span>
   );
 }
 
 export function DesignTab({ card, update, policy, allTemplates, allowedDomains, canCustomDomain }: Props) {
+  const locale = useLocale();
+  const t = translator(locale, de, it);
+  const option = translator(locale, optionsDe, optionsIt);
   const hasBrandColors = policy.brandColors.length > 0;
 
   return (
@@ -40,7 +51,7 @@ export function DesignTab({ card, update, policy, allTemplates, allowedDomains, 
       {/* Template */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-base">Template</Label>
+          <Label className="text-base">{t("template")}</Label>
           {!policy.allowTemplateChange && <LockedBadge />}
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -61,7 +72,7 @@ export function DesignTab({ card, update, policy, allTemplates, allowedDomains, 
                 )}
                 <div className="h-8 w-8 rounded-lg mb-2" style={{ backgroundColor: t.preview }} />
                 <p className="text-sm font-medium">{t.name}</p>
-                <p className="text-xs text-muted-foreground">{t.description}</p>
+                <p className="text-xs text-muted-foreground">{option(("template" + t.id[0].toUpperCase() + t.id.slice(1)) as keyof typeof optionsDe)}</p>
               </button>
             );
           })}
@@ -71,14 +82,14 @@ export function DesignTab({ card, update, policy, allTemplates, allowedDomains, 
       {/* Primary color */}
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label className="text-base">Primärfarbe</Label>
+          <Label className="text-base">{t("primaryColor")}</Label>
           {!policy.allowColorChange && <LockedBadge />}
         </div>
         {policy.allowColorChange ? (
           <>
             {hasBrandColors && (
               <div className="space-y-1.5">
-                <p className="text-xs text-muted-foreground">Markenfarben der Organisation</p>
+                <p className="text-xs text-muted-foreground">{t("brandColors")}</p>
                 <div className="flex flex-wrap gap-2">
                   {policy.brandColors.map((c) => (
                     <button key={c} type="button" title={c} onClick={() => update("primaryColor", c)}
@@ -109,24 +120,24 @@ export function DesignTab({ card, update, policy, allTemplates, allowedDomains, 
 
       {/* Accent color */}
       <section className="space-y-2">
-        <Label className="text-base">Akzentfarbe <span className="text-xs font-normal text-muted-foreground">(optional)</span></Label>
-        <p className="text-xs text-muted-foreground">Zweite Farbe für Icons, Links und Buttons</p>
+        <Label className="text-base">{t("accentColor")} <span className="text-xs font-normal text-muted-foreground">{t("optional")}</span></Label>
+        <p className="text-xs text-muted-foreground">{t("accentHint")}</p>
         <div className="flex items-center gap-3">
           <input type="color" value={card.accentColor ?? card.primaryColor ?? "#0F172A"}
             onChange={(e) => update("accentColor", e.target.value)}
             className="h-10 w-16 rounded-md border border-input cursor-pointer" />
           <Input value={card.accentColor ?? ""} onChange={(e) => update("accentColor", e.target.value || null)}
-            className="font-mono w-32" placeholder="wie Primär" maxLength={7} />
+            className="font-mono w-32" placeholder={t("usePrimary")} maxLength={7} />
           {card.accentColor && (
             <Button type="button" variant="ghost" size="sm" onClick={() => update("accentColor", null)}
-              className="text-muted-foreground">Zurücksetzen</Button>
+              className="text-muted-foreground">{t("reset")}</Button>
           )}
         </div>
       </section>
 
       {/* Background */}
       <section className="space-y-3">
-        <Label className="text-base">Hintergrund</Label>
+        <Label className="text-base">{t("background")}</Label>
         <div className="grid grid-cols-3 gap-2">
           {BG_OPTIONS.map((b) => (
             <button key={b.value} type="button"
@@ -134,8 +145,8 @@ export function DesignTab({ card, update, policy, allTemplates, allowedDomains, 
               className={`rounded-lg border-2 p-3 text-left transition-all ${
                 (card.cardBackground ?? "white") === b.value ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground"
               }`}>
-              <p className="text-sm font-medium">{b.label}</p>
-              <p className="text-xs text-muted-foreground">{b.description}</p>
+              <p className="text-sm font-medium">{option(b.label)}</p>
+              <p className="text-xs text-muted-foreground">{option(b.description)}</p>
             </button>
           ))}
         </div>
@@ -143,7 +154,7 @@ export function DesignTab({ card, update, policy, allTemplates, allowedDomains, 
 
       {/* Shadow */}
       <section className="space-y-3">
-        <Label className="text-base">Kartenschatten</Label>
+        <Label className="text-base">{t("shadow")}</Label>
         <div className="flex gap-2 flex-wrap">
           {SHADOW_OPTIONS.map((s) => (
             <button key={s.value} type="button"
@@ -151,7 +162,7 @@ export function DesignTab({ card, update, policy, allTemplates, allowedDomains, 
               className={`rounded-lg border-2 px-3 py-2 text-sm font-medium transition-all ${
                 (card.shadowStyle ?? "md") === s.value ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground"
               }`}>
-              {s.label}
+              {option(s.label)}
             </button>
           ))}
         </div>
@@ -160,7 +171,7 @@ export function DesignTab({ card, update, policy, allTemplates, allowedDomains, 
       {/* Font */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-base">Schriftart</Label>
+          <Label className="text-base">{t("font")}</Label>
           {!policy.allowFontChange && <LockedBadge />}
         </div>
         <div className="grid grid-cols-2 gap-2">
@@ -183,7 +194,7 @@ export function DesignTab({ card, update, policy, allTemplates, allowedDomains, 
       {/* Layout */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-base">Layout</Label>
+          <Label className="text-base">{t("layout")}</Label>
           {!policy.allowLayoutChange && <LockedBadge />}
         </div>
         <div className="space-y-2">
@@ -195,8 +206,8 @@ export function DesignTab({ card, update, policy, allTemplates, allowedDomains, 
                 className={`w-full rounded-lg border-2 p-3 text-left transition-all ${
                   (card.layoutStyle ?? "standard") === l.value ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground"
                 } ${locked ? "opacity-50 cursor-not-allowed" : ""}`}>
-                <p className="text-sm font-medium">{l.label}</p>
-                <p className="text-xs text-muted-foreground">{l.description}</p>
+                <p className="text-sm font-medium">{option(l.label)}</p>
+                <p className="text-xs text-muted-foreground">{option(l.description)}</p>
               </button>
             );
           })}
@@ -205,7 +216,7 @@ export function DesignTab({ card, update, policy, allTemplates, allowedDomains, 
 
       {/* Rounded */}
       <section className="space-y-3">
-        <Label className="text-base">Eckenradius</Label>
+        <Label className="text-base">{t("radius")}</Label>
         <div className="flex gap-2">
           {ROUNDED_OPTIONS.map((r) => (
             <button key={r.value} type="button"
@@ -213,7 +224,7 @@ export function DesignTab({ card, update, policy, allTemplates, allowedDomains, 
               className={`flex-1 rounded-lg border-2 py-2 text-sm font-medium transition-all ${
                 (card.roundedStyle ?? "default") === r.value ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground"
               }`}>
-              {r.label}
+              {option(r.label)}
             </button>
           ))}
         </div>
@@ -221,7 +232,7 @@ export function DesignTab({ card, update, policy, allTemplates, allowedDomains, 
 
       {/* Avatar border */}
       <section className="space-y-3">
-        <Label className="text-base">Avatar-Rahmen</Label>
+        <Label className="text-base">{t("avatarBorder")}</Label>
         <div className="flex gap-2">
           {AVATAR_BORDER_OPTIONS.map((a) => (
             <button key={a.value} type="button"
@@ -229,7 +240,7 @@ export function DesignTab({ card, update, policy, allTemplates, allowedDomains, 
               className={`flex-1 rounded-lg border-2 py-2 text-sm font-medium transition-all ${
                 (card.avatarBorder ?? "none") === a.value ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground"
               }`}>
-              {a.label}
+              {option(a.label)}
             </button>
           ))}
         </div>
@@ -237,7 +248,7 @@ export function DesignTab({ card, update, policy, allTemplates, allowedDomains, 
 
       {/* Social style */}
       <section className="space-y-3">
-        <Label className="text-base">Social-Stil</Label>
+        <Label className="text-base">{t("socialStyle")}</Label>
         <div className="space-y-2">
           {SOCIAL_STYLE_OPTIONS.map((s) => (
             <button key={s.value} type="button"
@@ -245,8 +256,8 @@ export function DesignTab({ card, update, policy, allTemplates, allowedDomains, 
               className={`w-full rounded-lg border-2 p-3 text-left transition-all ${
                 (card.socialStyle ?? "icons") === s.value ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground"
               }`}>
-              <p className="text-sm font-medium">{s.label}</p>
-              <p className="text-xs text-muted-foreground">{s.description}</p>
+              <p className="text-sm font-medium">{option(s.label)}</p>
+              <p className="text-xs text-muted-foreground">{option(s.description)}</p>
             </button>
           ))}
         </div>
@@ -256,27 +267,27 @@ export function DesignTab({ card, update, policy, allTemplates, allowedDomains, 
       <section className="space-y-3 rounded-xl border border-border p-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium">Firmenlogo</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Erscheint klein auf der Karte (oben rechts)</p>
+            <p className="text-sm font-medium">{t("logo")}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{t("logoHint")}</p>
           </div>
           {!policy.canEditLogo && <LockedBadge />}
         </div>
         {policy.canEditLogo ? (
           <ImageUpload value={card.logoUrl} onChange={(url) => update("logoUrl", url)}
-            label="Logo hochladen" shape="wide" className="h-20" />
+            label={t("logoUpload")} shape="wide" className="h-20" />
         ) : (
           card.logoUrl
             ? <img src={card.logoUrl} alt="Logo" className="h-10 w-auto max-w-[120px] object-contain opacity-60" />
-            : <p className="text-xs text-muted-foreground">Kein Logo gesetzt</p>
+            : <p className="text-xs text-muted-foreground">{t("logoMissing")}</p>
         )}
       </section>
 
       {/* Toggles */}
       {[
-        { key: "showQrOnCard" as const,        label: "QR-Code auf Karte zeigen",         desc: "Kleiner QR-Code direkt auf der Visitenkarte" },
-        { key: "isPublic" as const,            label: "Karte öffentlich",                 desc: "Karte für alle sichtbar" },
-        { key: "showInTeamDirectory" as const, label: "Im Team-Verzeichnis anzeigen",     desc: "Profil im öffentlichen Verzeichnis deiner Organisation sichtbar" },
-        { key: "hideShareButton" as const,     label: "Teilen-Button ausblenden",         desc: "Kein Teilen-Button auf der öffentlichen Kartenansicht" },
+        { key: "showQrOnCard" as const,        label: t("showQr"),         desc: t("showQrHint") },
+        { key: "isPublic" as const,            label: t("public"),                 desc: t("publicHint") },
+        { key: "showInTeamDirectory" as const, label: t("showInDirectory"),     desc: t("showInDirectoryHint") },
+        { key: "hideShareButton" as const,     label: t("hideShare"),         desc: t("hideShareHint") },
       ].map(({ key, label, desc }) => (
         <div key={key} className="flex items-center justify-between rounded-lg border border-border p-4">
           <div>

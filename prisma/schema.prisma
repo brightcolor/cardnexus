@@ -10,6 +10,7 @@ datasource db {
 // ─── better-auth required tables ─────────────────────────────────────────────
 
 model user {
+  locale String?
   id            String    @id
   name          String
   email         String    @unique
@@ -67,6 +68,8 @@ model twoFactor {
   secret      String
   backupCodes String
   verified    Boolean @default(true)
+  failedVerificationCount Int @default(0)
+  lockedUntil DateTime?
 
   @@index([secret])
   @@index([userId])

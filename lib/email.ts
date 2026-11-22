@@ -1,4 +1,26 @@
+import orgRestoredDe from "@/messages/de/emails/organization-restored.json";
+import orgRestoredIt from "@/messages/it/emails/organization-restored.json";
+import orgFrozenDe from "@/messages/de/emails/organization-frozen.json";
+import orgFrozenIt from "@/messages/it/emails/organization-frozen.json";
 import nodemailer from "nodemailer";
+import { db } from "./db";
+import { defaultLocale, parseLocale, type Locale } from "./i18n/locales";
+import { translator } from "./i18n/messages";
+import layoutDe from "@/messages/de/emails/layout.json";
+import layoutIt from "@/messages/it/emails/layout.json";
+import invitationDe from "@/messages/de/emails/invitation.json";
+import invitationIt from "@/messages/it/emails/invitation.json";
+import passwordResetDe from "@/messages/de/emails/password-reset.json";
+import passwordResetIt from "@/messages/it/emails/password-reset.json";
+import welcomeDe from "@/messages/de/emails/welcome.json";
+import welcomeIt from "@/messages/it/emails/welcome.json";
+import leadNotificationDe from "@/messages/de/emails/lead-notification.json";
+import leadNotificationIt from "@/messages/it/emails/lead-notification.json";
+import emailChangeNotificationDe from "@/messages/de/emails/email-change.json";
+import emailChangeNotificationIt from "@/messages/it/emails/email-change.json";
+import verificationDe from "@/messages/de/emails/email-verification.json";
+import verificationIt from "@/messages/it/emails/email-verification.json";
+
 
 // ── Transport ──────────────────────────────────────────────────────────────
 function createTransport() {
@@ -32,10 +54,23 @@ function esc(value: unknown): string {
     .replace(/'/g, "&#39;");
 }
 
+async function recipientLocale(email: string, userId?: string): Promise<Locale> {
+  const user = await db.user.findUnique({
+    where: userId ? { id: userId } : { email },
+    select: { locale: true },
+  });
+  return parseLocale(user?.locale) ?? defaultLocale();
+}
+
+function strong(value: string) {
+  return "<strong>" + esc(value) + "</strong>";
+}
+
 // ── Base layout ────────────────────────────────────────────────────────────
-function layout(title: string, body: string) {
+function layout(locale: Locale, title: string, body: string) {
+  const t = translator(locale, layoutDe, layoutIt);
   return `<!DOCTYPE html>
-<html lang="de">
+<html lang="${locale}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -67,8 +102,8 @@ function layout(title: string, body: string) {
           <!-- Footer -->
           <tr>
             <td align="center" style="padding:24px 0 0;color:#9ca3af;font-size:12px;line-height:1.6;">
-              &copy; ${new Date().getFullYear()} ${APP_NAME}. Alle Rechte vorbehalten.<br />
-              Diese E-Mail wurde automatisch generiert. Bitte nicht antworten.
+              &copy; ${new Date().getFullYear()} ${APP_NAME}. ${t("copyright")}<br />
+              ${t("automatic")}
             </td>
           </tr>
 
@@ -111,6 +146,16 @@ async function send(to: string, subject: string, html: string) {
 }
 
 // ── Invitation email ───────────────────────────────────────────────────────
+export async function sendEmailVerification({ to, url }: { to: string; url: string }) {
+  const transport = createTransport();
+  if (!transport) throw new Error("SMTP unavailable");
+  const locale = await recipientLocale(to);
+  const t = translator(locale, verificationDe, verificationIt);
+  const subject = t("subject");
+  const html = layout(locale, esc(subject), h1(esc(subject)) + p(esc(t("body"))) + btn(esc(t("confirm")), esc(url)));
+  await transport.sendMail({ from: FROM, to, subject, html });
+}
+
 export async function sendInvitationEmail({
   to, senderName, orgName, role, inviteUrl,
 }: {
@@ -120,26 +165,29 @@ export async function sendInvitationEmail({
   role: string;
   inviteUrl: string;
 }) {
+  const locale = await recipientLocale(to);
+  const t = translator(locale, invitationDe, invitationIt);
   const roleLabel: Record<string, string> = {
-    company_admin: "Administrator",
-    team_leader:   "Team Leader",
-    member:        "Mitglied",
+    company_admin: t("admin"),
+    team_leader:   t("leader"),
+    member:        t("member"),
   };
 
   const html = layout(
-    esc(`Einladung zu ${orgName}`),
+    locale,
+    esc(t("title", { orgName })),
     `
-    ${h1(`Du wurdest eingeladen`)}
-    ${p(`<strong>${esc(senderName)}</strong> hat dich eingeladen, ${esc(APP_NAME)} als <strong>${esc(roleLabel[role] ?? role)}</strong> der Organisation <strong>${esc(orgName)}</strong> beizutreten.`)}
-    ${p("Erstelle deinen kostenlosen Account und gestalte sofort deine digitale Visitenkarte.")}
+    ${h1(t("heading"))}
+    ${p(t("body", { sender: strong(senderName), app: esc(APP_NAME), role: strong(roleLabel[role] ?? role), organization: strong(orgName) }))}
+    ${p(t("description"))}
     <div style="text-align:center;">
-      ${btn("Einladung annehmen", esc(inviteUrl))}
+      ${btn(t("accept"), esc(inviteUrl))}
     </div>
-    ${muted(`Dieser Link ist 7 Tage gültig. Falls du diese E-Mail nicht erwartet hast, kannst du sie ignorieren.<br/>Link: ${esc(inviteUrl)}`)}
+    ${muted(t("expiry", { url: esc(inviteUrl) }))}
     `
   );
 
-  await send(to, `${senderName} lädt dich zu ${orgName} ein`, html);
+  await send(to, t("subject", { senderName, orgName }), html);
 }
 
 // ── Welcome email ──────────────────────────────────────────────────────────
@@ -150,30 +198,33 @@ export async function sendWelcomeEmail({
   name: string;
   dashboardUrl: string;
 }) {
+  const locale = await recipientLocale(to);
+  const t = translator(locale, welcomeDe, welcomeIt);
   const html = layout(
-    esc(`Willkommen bei ${APP_NAME}`),
+    locale,
+    esc(t("title", { app: APP_NAME })),
     `
-    ${h1(`Hallo ${esc(name.split(" ")[0])} 👋`)}
-    ${p(`Schön, dass du dabei bist! Dein ${esc(APP_NAME)}-Account ist bereit.`)}
-    ${p("Erstelle jetzt deine digitale Visitenkarte, füge deine Kontaktdaten ein und teile sie per Link, QR-Code oder NFC-Chip.")}
+    ${h1(t("greeting", { name: esc(name.split(" ")[0]) }))}
+    ${p(t("intro", { app: esc(APP_NAME) }))}
+    ${p(t("description"))}
     <div style="text-align:center;">
-      ${btn("Zum Dashboard", esc(dashboardUrl))}
+      ${btn(t("dashboard"), esc(dashboardUrl))}
     </div>
     <table width="100%" cellpadding="0" cellspacing="0" style="margin:28px 0;border-top:1px solid #f3f4f6;padding-top:20px;">
       <tr>
         <td style="font-size:13px;color:#6b7280;line-height:1.8;">
-          <strong style="color:#0f172a;">Was du als Nächstes tun kannst:</strong><br/>
-          &#10003; Karte gestalten &rarr; Template und Farbe wählen<br/>
-          &#10003; QR-Code herunterladen oder NFC-Tag einrichten<br/>
-          &#10003; Analytics aktivieren und Aufrufe tracken
+          <strong style="color:#0f172a;">${t("nextSteps")}</strong><br/>
+          &#10003; ${t("customize")}<br/>
+          &#10003; ${t("share")}<br/>
+          &#10003; ${t("analytics")}
         </td>
       </tr>
     </table>
-    ${muted("Du erhältst diese E-Mail, weil du dich soeben registriert hast.")}
+    ${muted(t("reason"))}
     `
   );
 
-  await send(to, `Willkommen bei ${APP_NAME}!`, html);
+  await send(to, t("subject", { app: APP_NAME }), html);
 }
 
 // ── Lead notification email ────────────────────────────────────────────────
@@ -189,29 +240,32 @@ export async function sendLeadNotificationEmail({
   cardName: string;
   dashboardUrl: string;
 }) {
+  const locale = await recipientLocale(to);
+  const t = translator(locale, leadNotificationDe, leadNotificationIt);
   const rows = [
-    leadEmail ? `<tr><td style="color:#6b7280;padding:4px 0;width:80px;">E-Mail</td><td style="padding:4px 0;"><a href="mailto:${esc(leadEmail)}" style="color:#0f172a;">${esc(leadEmail)}</a></td></tr>` : "",
-    leadPhone ? `<tr><td style="color:#6b7280;padding:4px 0;">Telefon</td><td style="padding:4px 0;">${esc(leadPhone)}</td></tr>` : "",
-    leadMessage ? `<tr><td style="color:#6b7280;padding:4px 0;vertical-align:top;">Nachricht</td><td style="padding:4px 0;">${esc(leadMessage)}</td></tr>` : "",
+    leadEmail ? `<tr><td style="color:#6b7280;padding:4px 0;width:80px;">${t("email")}</td><td style="padding:4px 0;"><a href="mailto:${esc(leadEmail)}" style="color:#0f172a;">${esc(leadEmail)}</a></td></tr>` : "",
+    leadPhone ? `<tr><td style="color:#6b7280;padding:4px 0;">${t("phone")}</td><td style="padding:4px 0;">${esc(leadPhone)}</td></tr>` : "",
+    leadMessage ? `<tr><td style="color:#6b7280;padding:4px 0;vertical-align:top;">${t("message")}</td><td style="padding:4px 0;">${esc(leadMessage)}</td></tr>` : "",
   ].filter(Boolean).join("");
 
   const html = layout(
-    `Neuer Lead – ${cardName}`,
+    locale,
+    esc(t("title", { card: cardName })),
     `
-    ${h1("Neuer Kontakt auf deiner Karte")}
-    ${p(`<strong>${esc(leadName)}</strong> hat auf deiner Karte <strong>${esc(cardName)}</strong> Kontakt hinterlassen.`)}
+    ${h1(t("heading"))}
+    ${p(t("body", { lead: strong(leadName), card: strong(cardName) }))}
     <table style="margin:16px 0;font-size:14px;line-height:1.6;width:100%;">
-      <tr><td style="color:#6b7280;padding:4px 0;width:80px;">Name</td><td style="padding:4px 0;font-weight:600;">${esc(leadName)}</td></tr>
+      <tr><td style="color:#6b7280;padding:4px 0;width:80px;">${t("name")}</td><td style="padding:4px 0;font-weight:600;">${esc(leadName)}</td></tr>
       ${rows}
     </table>
     <div style="text-align:center;">
-      ${btn("Leads ansehen", esc(dashboardUrl))}
+      ${btn(t("viewLeads"), esc(dashboardUrl))}
     </div>
-    ${muted("Du erhältst diese E-Mail, weil du sofortige Lead-Benachrichtigungen aktiviert hast. Du kannst dies in deinen Einstellungen ändern.")}
+    ${muted(t("reason"))}
     `
   );
 
-  await send(to, `Neuer Lead: ${leadName} (${cardName})`, html);
+  await send(to, t("subject", { lead: leadName, card: cardName }), html);
 }
 
 // ── Org frozen email ──────────────────────────────────────────────────────
@@ -223,33 +277,36 @@ export async function sendOrgFrozenEmail({
   orgName: string;
   upgradeUrl: string;
 }) {
+  const locale = await recipientLocale(to);
+  const t = translator(locale, orgFrozenDe, orgFrozenIt);
   const html = layout(
-    esc(`Organisation eingefroren – ${orgName}`),
+    locale,
+    esc(t("title", { org: orgName })),
     `
-    ${h1("Deine Organisation wurde eingefroren")}
-    ${p(`Hallo ${esc(adminName.split(" ")[0])}, dein <strong>Business-Plan</strong> für die Organisation <strong>${esc(orgName)}</strong> ist ausgelaufen oder wurde gekündigt.`)}
-    ${p("Deine Organisation und alle Mitglieder-Daten bleiben erhalten. Die Mitglieder können ${APP_NAME} weiterhin mit ihren eigenen Free-Accounts nutzen – jedoch ohne Organisations-Features.")}
+    ${h1(t("heading"))}
+    ${p(t("intro", { name: esc(adminName.split(" ")[0]), org: strong(orgName) }))}
+    ${p(t("description", { app: esc(APP_NAME) }))}
     <table style="margin:16px 0;border-radius:8px;background:#fef3c7;padding:16px;width:100%;border-left:4px solid #f59e0b;">
       <tr><td style="font-size:14px;color:#92400e;line-height:1.6;">
-        <strong>Was eingefroren ist:</strong><br/>
-        &bull; Mitgliederverwaltung &amp; Einladungen<br/>
-        &bull; Org-Design-Vorgaben für Karten<br/>
-        &bull; Bulk-Import<br/>
-        &bull; Team-Verzeichnis<br/><br/>
-        <strong>Was erhalten bleibt:</strong><br/>
-        &bull; Alle Karten und Kontaktdaten<br/>
-        &bull; Alle Analytics-Daten<br/>
-        &bull; Org-Zuordnung aller Mitglieder
+        <strong>${t("suspendedTitle")}</strong><br/>
+        &bull; ${t("members")}<br/>
+        &bull; ${t("design")}<br/>
+        &bull; ${t("import")}<br/>
+        &bull; ${t("directory")}<br/><br/>
+        <strong>${t("retainedTitle")}</strong><br/>
+        &bull; ${t("cards")}<br/>
+        &bull; ${t("analytics")}<br/>
+        &bull; ${t("membership")}
       </td></tr>
     </table>
-    ${p("Buche erneut den Business-Plan um die Organisation sofort wieder zu aktivieren.")}
+    ${p(t("reactivate"))}
     <div style="text-align:center;">
-      ${btn("Business-Plan buchen", esc(upgradeUrl))}
+      ${btn(t("subscribe"), esc(upgradeUrl))}
     </div>
-    ${muted("Du erhältst diese E-Mail als Administrator der Organisation.")}
+    ${muted(t("reason"))}
     `
   );
-  await send(to, `Organisation eingefroren: ${orgName}`, html);
+  await send(to, t("subject", { org: orgName }), html);
 }
 
 // ── Org restored email ─────────────────────────────────────────────────────
@@ -261,39 +318,46 @@ export async function sendOrgRestoredEmail({
   orgName: string;
   dashboardUrl: string;
 }) {
+  const locale = await recipientLocale(to);
+  const t = translator(locale, orgRestoredDe, orgRestoredIt);
   const html = layout(
-    esc(`Organisation wieder aktiv – ${orgName}`),
+    locale,
+    esc(t("title", { org: orgName })),
     `
-    ${h1("Deine Organisation ist wieder aktiv")}
-    ${p(`Hallo ${esc(adminName.split(" ")[0])}, dein Business-Plan ist wieder aktiv – die Organisation <strong>${esc(orgName)}</strong> und alle Features stehen sofort wieder zur Verfügung.`)}
-    ${p("Alle Mitglieder, Karten und Einstellungen sind unverändert erhalten.")}
+    ${h1(t("heading"))}
+    ${p(t("intro", { name: esc(adminName.split(" ")[0]), org: strong(orgName) }))}
+    ${p(t("description"))}
     <div style="text-align:center;">
-      ${btn("Zum Team-Bereich", esc(dashboardUrl))}
+      ${btn(t("team"), esc(dashboardUrl))}
     </div>
-    ${muted("Du erhältst diese E-Mail als Administrator der Organisation.")}
+    ${muted(t("reason"))}
     `
   );
-  await send(to, `Organisation wieder aktiv: ${orgName}`, html);
+  await send(to, t("subject", { org: orgName }), html);
 }
 
 // ── Email change notification ──────────────────────────────────────────────
 export async function sendEmailChangeNotification({
-  to, newEmail,
+  to, newEmail, userId,
 }: {
   to: string;
   newEmail: string;
+  userId: string;
 }) {
+  const locale = await recipientLocale(to, userId);
+  const t = translator(locale, emailChangeNotificationDe, emailChangeNotificationIt);
   const html = layout(
-    esc(`E-Mail-Adresse geändert – ${APP_NAME}`),
+    locale,
+    esc(t("subject", { app: APP_NAME })),
     `
-    ${h1("E-Mail-Adresse geändert")}
-    ${p(`Die E-Mail-Adresse für deinen ${esc(APP_NAME)}-Account wurde soeben geändert.`)}
-    ${p(`Neue Adresse: <strong>${esc(newEmail)}</strong>`)}
-    ${p("Falls du diese Änderung <strong>nicht</strong> selbst vorgenommen hast, kontaktiere uns sofort und ändere dein Passwort.")}
-    ${muted("Du erhältst diese Sicherheits-E-Mail an deine bisherige Adresse.")}
+    ${h1(t("heading"))}
+    ${p(t("intro", { app: esc(APP_NAME) }))}
+    ${p(t("newAddress", { email: strong(newEmail) }))}
+    ${p(t("security"))}
+    ${muted(t("reason"))}
     `
   );
-  await send(to, `E-Mail-Adresse geändert – ${APP_NAME}`, html);
+  await send(to, t("subject", { app: APP_NAME }), html);
 }
 
 // ── Password reset email ───────────────────────────────────────────────────
@@ -303,16 +367,19 @@ export async function sendPasswordResetEmail({
   to: string;
   url: string;
 }) {
+  const locale = await recipientLocale(to);
+  const t = translator(locale, passwordResetDe, passwordResetIt);
   const html = layout(
-    esc(`Passwort zurücksetzen – ${APP_NAME}`),
+    locale,
+    esc(t("subject", { app: APP_NAME })),
     `
-    ${h1("Passwort zurücksetzen")}
-    ${p(`Du hast einen Passwort-Reset für deinen ${esc(APP_NAME)}-Account angefordert. Klicke auf den Button, um ein neues Passwort zu setzen.`)}
+    ${h1(t("heading"))}
+    ${p(t("body", { app: esc(APP_NAME) }))}
     <div style="text-align:center;">
-      ${btn("Passwort zurücksetzen", esc(url))}
+      ${btn(t("heading"), esc(url))}
     </div>
-    ${muted(`Dieser Link ist 1 Stunde gültig. Falls du diese Anfrage nicht gestellt hast, kannst du diese E-Mail ignorieren.<br/>Link: ${esc(url)}`)}
+    ${muted(t("expiry", { url: esc(url) }))}
     `
   );
-  await send(to, `Passwort zurücksetzen – ${APP_NAME}`, html);
+  await send(to, t("subject", { app: APP_NAME }), html);
 }

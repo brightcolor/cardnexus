@@ -1,0 +1,21 @@
+{
+  "title": "Impressum – CardNexus",
+  "home": "Zurück zur Startseite",
+  "heading": "Impressum",
+  "publisher": "Angaben gemäß § 5 TMG",
+  "publisherName": "[Dein Name / Firmenname]",
+  "publisherAddress": "[Straße und Hausnummer]",
+  "publisherCity": "[PLZ Ort]",
+  "country": "Deutschland",
+  "contact": "Kontakt",
+  "email": "E-Mail:",
+  "responsible": "Verantwortlich für den Inhalt (§ 55 Abs. 2 RStV)",
+  "responsibleName": "[Dein Name]",
+  "responsibleAddress": "[Adresse wie oben]",
+  "liability": "Haftungsausschluss",
+  "liabilityText": "Die Inhalte dieser Webseite wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen. Als Diensteanbieter sind wir gemäß § 7 Abs. 1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich.",
+  "disputes": "Streitschlichtung",
+  "disputeIntro": "Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:",
+  "disputeDetails": ". Unsere E-Mail-Adresse finden Sie oben im Impressum. Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.",
+  "templateReminder": "Bitte ersetze die Platzhalter in eckigen Klammern mit deinen tatsächlichen Angaben."
+}

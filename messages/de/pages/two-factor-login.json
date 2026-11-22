@@ -1,0 +1,15 @@
+{
+  "invalidCode": "Code ist falsch oder abgelaufen.",
+  "invalidBackupCode": "Backup-Code ist ungültig oder bereits verwendet.",
+  "heading": "Zwei-Faktor-Authentifizierung",
+  "totpInstructions": "Gib den 6-stelligen Code aus deiner Authenticator-App ein.",
+  "backupInstructions": "Gib einen deiner gespeicherten Backup-Codes ein.",
+  "totpCode": "6-stelliger Code",
+  "backupCode": "Backup-Code",
+  "trustDevice": "Diesem Gerät 30 Tage vertrauen",
+  "verifying": "Prüfen…",
+  "verify": "Bestätigen",
+  "switchToBackup": "Stattdessen Backup-Code verwenden",
+  "switchToTotp": "Zurück zur Authenticator-App",
+  "backToLogin": "Zurück zum Login"
+}

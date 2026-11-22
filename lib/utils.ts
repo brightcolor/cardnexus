@@ -1,4 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
+import type { Locale } from "@/lib/i18n/locales";
+import de from "@/messages/de/common.json";
+import it from "@/messages/it/common.json";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -15,8 +18,8 @@ export function slugify(text: string): string {
     .replace(/-+$/, "");
 }
 
-export function formatDate(date: Date | string): string {
-  return new Intl.DateTimeFormat("de-DE", {
+export function formatDate(date: Date | string, locale = "de-DE"): string {
+  return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -32,14 +35,9 @@ export function getInitials(name: string): string {
     .slice(0, 2);
 }
 
-export function getRoleLabel(role: string): string {
-  const labels: Record<string, string> = {
-    super_admin: "Super Admin",
-    company_admin: "Admin",
-    team_leader: "Team Leader",
-    member: "Mitglied",
-  };
-  return labels[role] ?? role;
+export function getRoleLabel(role: string, locale: Locale = "de"): string {
+  const labels: Record<string, string> = locale === "it" ? it : de;
+  return Object.hasOwn(labels, role) ? labels[role] : role;
 }
 
 export function canManageUsers(role: string): boolean {

@@ -1,5 +1,9 @@
 "use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/components/member-table.json";
+import it from "@/messages/it/components/member-table.json";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +43,8 @@ const roleBadgeVariant: Record<string, "default" | "secondary" | "outline" | "wa
 };
 
 export function UserTable({ users, currentUserId, currentUserRole, onRoleChange, onDelete }: UserTableProps) {
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   async function handleRoleChange(userId: string, role: string) {
@@ -51,7 +57,7 @@ export function UserTable({ users, currentUserId, currentUserRole, onRoleChange,
   }
 
   async function handleDelete(userId: string) {
-    if (!confirm("Benutzer wirklich löschen?")) return;
+    if (!confirm(t("confirmDelete"))) return;
     setLoadingId(userId);
     try {
       await onDelete(userId);
@@ -63,7 +69,7 @@ export function UserTable({ users, currentUserId, currentUserRole, onRoleChange,
   if (users.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
-        <p className="text-muted-foreground text-sm">Keine Benutzer gefunden</p>
+        <p className="text-muted-foreground text-sm">{t("empty")}</p>
       </div>
     );
   }
@@ -73,10 +79,10 @@ export function UserTable({ users, currentUserId, currentUserRole, onRoleChange,
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border bg-muted/40">
-            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Benutzer</th>
-            <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">Rolle</th>
-            <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden lg:table-cell">Karte</th>
-            <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden lg:table-cell">Seit</th>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground">{t("user")}</th>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">{t("role")}</th>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden lg:table-cell">{t("card")}</th>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden lg:table-cell">{t("joined")}</th>
             <th className="px-4 py-3" />
           </tr>
         </thead>
@@ -93,7 +99,7 @@ export function UserTable({ users, currentUserId, currentUserRole, onRoleChange,
                     <p className="font-medium text-foreground flex items-center gap-1">
                       {user.name}
                       {user.id === currentUserId && (
-                        <span className="text-xs text-muted-foreground">(Ich)</span>
+                        <span className="text-xs text-muted-foreground">{t("me")}</span>
                       )}
                     </p>
                     <p className="text-xs text-muted-foreground">{user.email}</p>
@@ -112,33 +118,33 @@ export function UserTable({ users, currentUserId, currentUserRole, onRoleChange,
                     </SelectTrigger>
                     <SelectContent>
                       {currentUserRole === "super_admin" && (
-                        <SelectItem value="company_admin">Admin</SelectItem>
+                        <SelectItem value="company_admin">{t("admin")}</SelectItem>
                       )}
-                      <SelectItem value="team_leader">Team Leader</SelectItem>
-                      <SelectItem value="member">Mitglied</SelectItem>
+                      <SelectItem value="team_leader">{t("leader")}</SelectItem>
+                      <SelectItem value="member">{t("member")}</SelectItem>
                     </SelectContent>
                   </Select>
                 ) : (
                   <Badge variant={roleBadgeVariant[user.role] ?? "outline"}>
-                    {getRoleLabel(user.role)}
+                    {getRoleLabel(user.role, locale)}
                   </Badge>
                 )}
               </td>
               <td className="px-4 py-3 hidden lg:table-cell">
                 {user.card ? (
                   <div className="flex items-center gap-2">
-                    <Badge variant="success">Aktiv</Badge>
+                    <Badge variant="success">{t("active")}</Badge>
                     <a href={`/c/${user.card.slug}`} target="_blank" rel="noopener noreferrer"
                       className="text-muted-foreground hover:text-foreground">
                       <ExternalLink className="h-3.5 w-3.5" />
                     </a>
                   </div>
                 ) : (
-                  <Badge variant="outline">Keine Karte</Badge>
+                  <Badge variant="outline">{t("noCard")}</Badge>
                 )}
               </td>
               <td className="px-4 py-3 hidden lg:table-cell text-muted-foreground text-xs">
-                {formatDate(user.createdAt)}
+                {formatDate(user.createdAt, locale)}
               </td>
               <td className="px-4 py-3">
                 {user.id !== currentUserId && (currentUserRole === "super_admin" || currentUserRole === "company_admin") && (
@@ -151,7 +157,7 @@ export function UserTable({ users, currentUserId, currentUserRole, onRoleChange,
                     <DropdownMenuContent align="end">
                       {user.card && (
                         <DropdownMenuItem asChild>
-                          <a href={`/c/${user.card.slug}`} target="_blank">Karte ansehen</a>
+                          <a href={`/c/${user.card.slug}`} target="_blank">{t("viewCard")}</a>
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator />
@@ -160,7 +166,7 @@ export function UserTable({ users, currentUserId, currentUserRole, onRoleChange,
                         className="text-destructive focus:text-destructive"
                       >
                         <Trash2 className="h-4 w-4" />
-                        Löschen
+                        {t("delete")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

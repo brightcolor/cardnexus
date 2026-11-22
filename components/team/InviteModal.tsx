@@ -1,5 +1,9 @@
 "use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/components/invite-member.json";
+import it from "@/messages/it/components/invite-member.json";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -13,6 +17,8 @@ interface InviteModalProps {
 }
 
 export function InviteModal({ onInvited }: InviteModalProps) {
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("member");
@@ -60,18 +66,18 @@ export function InviteModal({ onInvited }: InviteModalProps) {
       <DialogTrigger asChild>
         <Button>
           <UserPlus className="h-4 w-4" />
-          Einladen
+          {t("invite")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Benutzer einladen</DialogTitle>
+          <DialogTitle>{t("heading")}</DialogTitle>
         </DialogHeader>
 
         {!inviteUrl ? (
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <Label>E-Mail-Adresse</Label>
+              <Label>{t("email")}</Label>
               <Input
                 type="email"
                 placeholder="max@example.com"
@@ -81,27 +87,27 @@ export function InviteModal({ onInvited }: InviteModalProps) {
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Rolle</Label>
+              <Label>{t("role")}</Label>
               <Select value={role} onValueChange={setRole}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="team_leader">Team Leader</SelectItem>
-                  <SelectItem value="member">Mitglied</SelectItem>
+                  <SelectItem value="team_leader">{t("leader")}</SelectItem>
+                  <SelectItem value="member">{t("member")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
             <Button onClick={handleInvite} disabled={!email || loading} className="w-full">
-              {loading ? "Wird eingeladen…" : "Einladung erstellen"}
+              {loading ? t("sending") : t("create")}
             </Button>
           </div>
         ) : (
           <div className="space-y-4">
             <div className="rounded-lg bg-muted p-4 text-center">
-              <p className="text-sm font-medium text-foreground mb-1">Einladung erstellt!</p>
-              <p className="text-xs text-muted-foreground">Link an {email} senden (gültig 7 Tage)</p>
+              <p className="text-sm font-medium text-foreground mb-1">{t("created")}</p>
+              <p className="text-xs text-muted-foreground">{t("shareHint", { email })}</p>
             </div>
             <div className="flex gap-2">
               <Input value={inviteUrl} readOnly className="font-mono text-xs" />
@@ -110,7 +116,7 @@ export function InviteModal({ onInvited }: InviteModalProps) {
               </Button>
             </div>
             <Button variant="outline" onClick={reset} className="w-full">
-              Weitere einladen
+              {t("sendAnother")}
             </Button>
           </div>
         )}

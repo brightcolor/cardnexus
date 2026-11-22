@@ -1,0 +1,15 @@
+{
+  "workspace": "Workspace",
+  "dashboard": "Dashboard",
+  "myCard": "Meine Karte",
+  "signature": "Signatur",
+  "growth": "Wachstum",
+  "leads": "Leads",
+  "campaigns": "Kampagnen",
+  "analytics": "Analytics",
+  "organization": "Organisation",
+  "settings": "Einstellungen",
+  "mainNavigation": "Hauptnavigation",
+  "signOut": "Abmelden",
+  "upgrade": "Plan upgraden"
+}

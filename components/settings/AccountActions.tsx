@@ -1,5 +1,9 @@
 "use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/components/account-actions.json";
+import it from "@/messages/it/components/account-actions.json";
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +31,8 @@ export function AccountActions() {
 /* ─── Password change ─────────────────────────────────────────────────── */
 
 function PasswordCard() {
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [busy, setBusy] = useState(false);
@@ -42,12 +48,12 @@ function PasswordCard() {
     });
 
     if (res.error) {
-      toast.error("Passwort konnte nicht geändert werden", {
-        description: "Aktuelles Passwort falsch oder neues Passwort zu schwach.",
+      toast.error(t("passwordChangeFailed"), {
+        description: t("passwordInvalid"),
       });
     } else {
-      toast.success("Passwort geändert", {
-        description: "Andere Sessions wurden abgemeldet.",
+      toast.success(t("passwordUpdated"), {
+        description: t("signedOut"),
       });
       setCurrent("");
       setNext("");
@@ -61,9 +67,9 @@ function PasswordCard() {
         <div className="flex items-start gap-3">
           <Lock className="h-5 w-5 text-muted-foreground mt-0.5" />
           <div>
-            <CardTitle className="text-base">Passwort ändern</CardTitle>
+            <CardTitle className="text-base">{t("changePassword")}</CardTitle>
             <CardDescription>
-              Setze ein neues Passwort. Andere aktive Sessions werden abgemeldet.
+              {t("changePasswordHint")}
             </CardDescription>
           </div>
         </div>
@@ -71,7 +77,7 @@ function PasswordCard() {
       <CardContent>
         <form onSubmit={submit} className="space-y-3 max-w-sm">
           <div className="space-y-1.5">
-            <Label htmlFor="current-pw">Aktuelles Passwort</Label>
+            <Label htmlFor="current-pw">{t("currentPassword")}</Label>
             <Input
               id="current-pw"
               type="password"
@@ -82,7 +88,7 @@ function PasswordCard() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="new-pw">Neues Passwort</Label>
+            <Label htmlFor="new-pw">{t("newPassword")}</Label>
             <Input
               id="new-pw"
               type="password"
@@ -95,7 +101,7 @@ function PasswordCard() {
           </div>
           <Button type="submit" size="sm" disabled={busy || !current || next.length < 8}>
             {busy && <Loader2 className="h-4 w-4 animate-spin" />}
-            Passwort ändern
+            {t("changePassword")}
           </Button>
         </form>
       </CardContent>
@@ -106,13 +112,15 @@ function PasswordCard() {
 /* ─── Data export (DSGVO Art. 15/20) ──────────────────────────────────── */
 
 function DataExportCard() {
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   const [busy, setBusy] = useState(false);
 
   async function downloadExport() {
     setBusy(true);
     try {
       const res = await fetch("/api/account/export");
-      if (!res.ok) throw new Error("Export fehlgeschlagen");
+      if (!res.ok) throw new Error(t("exportFailed"));
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -122,9 +130,9 @@ function DataExportCard() {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-      toast.success("Export gestartet");
+      toast.success(t("exportStarted"));
     } catch {
-      toast.error("Export fehlgeschlagen");
+      toast.error(t("exportFailed"));
     } finally {
       setBusy(false);
     }
@@ -136,9 +144,9 @@ function DataExportCard() {
         <div className="flex items-start gap-3">
           <Download className="h-5 w-5 text-muted-foreground mt-0.5" />
           <div>
-            <CardTitle className="text-base">Daten exportieren</CardTitle>
+            <CardTitle className="text-base">{t("exportData")}</CardTitle>
             <CardDescription>
-              Lade alle deine personenbezogenen Daten als JSON herunter (DSGVO Art. 15 &amp; 20).
+              {t("exportHint")}
             </CardDescription>
           </div>
         </div>
@@ -146,7 +154,7 @@ function DataExportCard() {
       <CardContent>
         <Button variant="outline" size="sm" onClick={downloadExport} disabled={busy}>
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-          Daten als JSON herunterladen
+          {t("downloadJson")}
         </Button>
       </CardContent>
     </Card>
@@ -156,16 +164,18 @@ function DataExportCard() {
 /* ─── Delete account (DSGVO Art. 17) ──────────────────────────────────── */
 
 function DeleteAccountCard() {
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
-  const REQUIRED = "LÖSCHEN";
+  const REQUIRED = t("deleteToken");
 
   async function performDelete() {
     setBusy(true);
     const res = await fetch("/api/account", { method: "DELETE" });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      toast.error("Löschen fehlgeschlagen", { description: data.error });
+      toast.error(t("deleteFailed"), { description: data.error });
       setBusy(false);
       return;
     }
@@ -179,10 +189,9 @@ function DeleteAccountCard() {
         <div className="flex items-start gap-3">
           <Trash2 className="h-5 w-5 text-destructive mt-0.5" />
           <div>
-            <CardTitle className="text-base text-destructive">Account löschen</CardTitle>
+            <CardTitle className="text-base text-destructive">{t("deleteAccount")}</CardTitle>
             <CardDescription>
-              Entfernt deinen Account und alle zugehörigen Daten unwiderruflich
-              (Karten, Leads, Webhooks, API-Keys).
+              {t("deleteHint")}
             </CardDescription>
           </div>
         </div>
@@ -192,21 +201,21 @@ function DeleteAccountCard() {
           <AlertDialogTrigger asChild>
             <Button variant="destructive" size="sm">
               <Trash2 className="h-4 w-4" />
-              Account endgültig löschen
+              {t("deletePermanently")}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Account wirklich löschen?</AlertDialogTitle>
+              <AlertDialogTitle>{t("confirmTitle")}</AlertDialogTitle>
               <AlertDialogDescription>
-                Diese Aktion kann <strong>nicht rückgängig</strong> gemacht werden. Alle
+                {t("irreversiblePrefix")} <strong>{t("irreversible")}</strong> gemacht werden. Alle
                 deine Karten, Leads, Analytics, Webhooks und API-Keys werden
                 unwiderruflich gelöscht.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <div className="space-y-1.5">
               <Label htmlFor="confirm">
-                Tippe <code className="px-1 py-0.5 rounded bg-muted text-xs">{REQUIRED}</code> zur Bestätigung
+                {t("typePrefix")} <code className="px-1 py-0.5 rounded bg-muted text-xs">{REQUIRED}</code> {t("typeSuffix")}
               </Label>
               <Input
                 id="confirm"
@@ -217,14 +226,14 @@ function DeleteAccountCard() {
               />
             </div>
             <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setConfirm("")}>Abbrechen</AlertDialogCancel>
+              <AlertDialogCancel onClick={() => setConfirm("")}>{t("cancel")}</AlertDialogCancel>
               <AlertDialogAction
                 disabled={busy || confirm !== REQUIRED}
                 onClick={(e) => { e.preventDefault(); void performDelete(); }}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
                 {busy && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
-                Endgültig löschen
+                {t("confirmDelete")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

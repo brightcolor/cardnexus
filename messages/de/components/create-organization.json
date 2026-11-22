@@ -1,0 +1,16 @@
+{
+  "createError": "Fehler beim Erstellen",
+  "unknownError": "Unbekannter Fehler",
+  "organizationName": "Name der Organisation",
+  "nameExample": "Meine Firma GmbH",
+  "slug": "URL-Kürzel (Slug)",
+  "slugExample": "meine-firma",
+  "slugHint": "Öffentliche URL des Team-Verzeichnisses",
+  "color": "Akzentfarbe",
+  "colorHint": "Primärfarbe für Karten deiner Mitglieder",
+  "creating": "Wird erstellt…",
+  "create": "Organisation erstellen",
+  "nextSteps": "Du wirst automatisch zum Organisations-Admin. Design-Vorgaben kannst du danach unter",
+  "settings": "Einstellungen",
+  "nextStepsEnd": "anpassen."
+}

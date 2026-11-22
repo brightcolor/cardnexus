@@ -1,0 +1,19 @@
+{
+  "title": "NFC-Tag einrichten",
+  "intro": "Mit einem NFC-Tag kannst du deine digitale Karte per Antippen teilen.",
+  "cardUrl": "Deine Karten-URL (auf NFC-Tag schreiben):",
+  "instructions": "So geht es",
+  "buy": "NFC-Tag kaufen",
+  "buyHint": "Kaufe einen beschreibbaren NFC-Tag (NTAG213 oder NTAG215). Empfohlen: NFC-Aufkleber, Visitenkarten-NFC oder NFC-Armband. Preis: ca. 0,50 – 2,00 € pro Tag.",
+  "install": "App installieren",
+  "installHint": "Installiere eine NFC-Schreib-App auf deinem Smartphone:",
+  "write": "URL auf den Tag schreiben",
+  "open": "App offnen und \"Schreiben\" / \"Write\" auswahlen",
+  "record": "Datensatz hinzufugen → URL/URI",
+  "paste": "Deine Karten-URL einfugen (siehe oben)",
+  "tap": "Auf \"Schreiben\" tippen und Tag ans Handy halten",
+  "test": "Testen",
+  "testHint": "Halte ein Smartphone (ohne App) an den Tag — die Karte sollte sich direkt im Browser offnen. iOS ab iPhone 7, Android ab 4.4 unterstuetzt NFC.",
+  "sources": "Empfohlene NFC-Tag Quellen",
+  "androidTools": "NFC Tools oder NFC TagWriter by NXP"
+}

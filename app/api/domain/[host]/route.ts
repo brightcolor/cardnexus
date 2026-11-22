@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { publishedCardScope, unexpiredCardScope } from "@/lib/card-publication";
 
 export async function GET(
   req: NextRequest,
@@ -15,12 +16,12 @@ export async function GET(
   const base     = `${fwdProto}://${fwdHost}`;
 
   const card = await db.card.findFirst({
-    where: { cardDomain: domain, isPublic: true },
+    where: { cardDomain: domain, ...publishedCardScope, ...unexpiredCardScope() },
     select: { slug: true },
   });
 
   if (!card) {
-    return NextResponse.redirect(`${base}/`, { status: 302 });
+    return new NextResponse(null, { status: 404 });
   }
 
   return NextResponse.redirect(`${base}/c/${card.slug}`, { status: 302 });

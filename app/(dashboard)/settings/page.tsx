@@ -1,9 +1,15 @@
+import { getLocale } from "@/lib/i18n/server";
+import { translator } from "@/lib/i18n/messages";
+import de from "@/messages/de/pages/account-settings.json";
+import it from "@/messages/it/pages/account-settings.json";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { SettingsClientPage } from "./client";
 
-export const metadata = { title: "Einstellungen" };
+export async function generateMetadata() {
+  return { title: translator(await getLocale(), de, it)("heading") };
+}
 
 export default async function SettingsPage() {
   const session = await auth.api.getSession({ headers: await headers() });

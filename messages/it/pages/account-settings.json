@@ -1,0 +1,23 @@
+{
+  "heading": "Impostazioni",
+  "description": "Impostazioni dell’account e dell’organizzazione",
+  "account": "Account",
+  "accountDescription": "I tuoi dati personali",
+  "changeName": "Modifica il nome",
+  "changeEmail": "Modifica l’indirizzo email",
+  "saveField": "Salva",
+  "leadNotifications": "Notifiche sui nuovi contatti",
+  "saved": "Salvato",
+  "saving": "Salvataggio in corso…",
+  "notificationDescription": "Come vuoi essere avvisato quando qualcuno lascia i propri recapiti sul tuo biglietto da visita?",
+  "noNotifications": "Nessuna notifica",
+  "noNotificationsDescription": "I contatti restano disponibili nel pannello.",
+  "instantNotifications": "Subito",
+  "instantNotificationsDescription": "Riceverai un’email per ogni nuovo contatto.",
+  "dailyNotifications": "Riepilogo giornaliero",
+  "dailyNotificationsDescription": "Una volta al giorno, se ci sono nuovi contatti.",
+  "settingsSaved": "Impostazioni salvate",
+  "saveSettings": "Salva impostazioni",
+  "comingSoon": "In arrivo",
+  "walletDescription": "Presto potrai salvare i biglietti da visita direttamente in Apple Wallet o Google Wallet."
+}

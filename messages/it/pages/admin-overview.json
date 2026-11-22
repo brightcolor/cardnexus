@@ -1,0 +1,16 @@
+{
+  "users": "Utenti totali",
+  "newUsers": "Nuovi utenti del mese",
+  "cards": "Biglietti da visita digitali",
+  "events": "Eventi (30 giorni)",
+  "heading": "Panoramica della piattaforma",
+  "description": "Statistiche complessive di tutte le organizzazioni",
+  "planDistribution": "Distribuzione dei piani",
+  "revenueEstimate": "Stima dei ricavi",
+  "mrr": "Ricavi ricorrenti mensili stimati",
+  "basedOn": "Calcolati su",
+  "organizations": "Organizzazioni",
+  "paying": "Con piano a pagamento",
+  "local": "locale",
+  "changelog": "Cronologia delle modifiche"
+}

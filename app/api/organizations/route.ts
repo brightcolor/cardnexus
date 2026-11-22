@@ -1,3 +1,4 @@
+import { apiMessage, apiValidation } from "@/lib/i18n/api";
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -5,6 +6,7 @@ import { db } from "@/lib/db";
 import { isSuperAdmin, canManageOrganization, slugify } from "@/lib/utils";
 import { canUseFeature, effectivePlan } from "@/lib/plans";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 
 const createSchema = z.object({
   name: z.string().min(2),
@@ -35,7 +37,7 @@ const updateSchema = createSchema.partial().extend({
 
 export async function GET(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const role = (session.user as { role?: string }).role ?? "member";
   const orgId = (session.user as { organizationId?: string }).organizationId;
@@ -69,85 +71,96 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const session = await auth.api.getSession({
+    headers: await headers(),
+    query: { disableCookieCache: true },
+  });
+  if (!session) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const userId  = session.user.id;
   const role    = (session.user as { role?: string }).role ?? "member";
-  const userOrgId = (session.user as { organizationId?: string }).organizationId;
   const superAdmin = isSuperAdmin(role);
 
   if (!superAdmin) {
     const dbUser = await db.user.findUnique({
       where: { id: userId },
-      select: { plan: true, planExpiresAt: true },
+      select: { plan: true, planExpiresAt: true, organizationId: true },
     });
     const plan = effectivePlan(dbUser?.plan ?? "free", dbUser?.planExpiresAt);
     if (!canUseFeature("teamDirectory", plan)) {
-      return NextResponse.json({ error: "Business-Plan erforderlich" }, { status: 403 });
+      return NextResponse.json({ error: await apiMessage("businessRequired") }, { status: 403 });
     }
-    if (userOrgId) {
-      return NextResponse.json({ error: "Du bist bereits Mitglied einer Organisation" }, { status: 400 });
+    if (dbUser?.organizationId) {
+      return NextResponse.json({ error: await apiMessage("alreadyMember") }, { status: 400 });
     }
   }
 
   const body = await request.json();
   const parsed = createSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+    return NextResponse.json({ error: await apiValidation(parsed.error) }, { status: 400 });
   }
 
   const slug = parsed.data.slug ?? slugify(parsed.data.name);
 
-  const existing = await db.organization.findUnique({ where: { slug }, select: { id: true } });
-  if (existing) {
-    return NextResponse.json({ error: "Dieses URL-Kürzel ist bereits vergeben" }, { status: 409 });
-  }
+  try {
+    const org = await db.$transaction(async (tx) => {
+      const created = await tx.organization.create({
+        data: {
+          name: parsed.data.name,
+          slug,
+          primaryColor: parsed.data.primaryColor ?? "#0F172A",
+          domain: parsed.data.domain,
+          settings: { create: {} },
+        },
+        include: { settings: true },
+      });
 
-  const org = await db.organization.create({
-    data: {
-      name: parsed.data.name,
-      slug,
-      primaryColor: parsed.data.primaryColor ?? "#0F172A",
-      domain: parsed.data.domain,
-      settings: { create: {} },
-    },
-    include: { settings: true },
-  });
-
-  // Assign the creating user as company_admin of the new org
-  if (!superAdmin) {
-    await db.user.update({
-      where: { id: userId },
-      data: { organizationId: org.id, role: "company_admin" },
+      if (!superAdmin) {
+        await tx.user.update({
+          where: { id: userId, organizationId: null },
+          data: { organizationId: created.id, role: "company_admin" },
+        });
+      }
+      return created;
     });
-  }
 
-  return NextResponse.json({ data: org }, { status: 201 });
+    return NextResponse.json({ data: org }, { status: 201 });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2002") {
+        return NextResponse.json({ error: await apiMessage("slugTaken") }, { status: 409 });
+      }
+      if (error.code === "P2025") {
+        return NextResponse.json({ error: await apiMessage("alreadyMember") }, { status: 400 });
+      }
+    }
+    throw error;
+  }
 }
 
 export async function PATCH(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const role = (session.user as { role?: string }).role ?? "member";
   const sessionOrgId = (session.user as { organizationId?: string }).organizationId;
   const superAdmin = isSuperAdmin(role);
 
   if (!superAdmin && !canManageOrganization(role)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return NextResponse.json({ error: await apiMessage("forbidden") }, { status: 403 });
   }
 
   const body = await request.json();
   const parsed = updateSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+    return NextResponse.json({ error: await apiValidation(parsed.error) }, { status: 400 });
   }
 
   // super_admin can target any org by passing `id`; others can only edit their own org
   const targetOrgId = superAdmin ? (parsed.data.id ?? sessionOrgId) : sessionOrgId;
   if (!targetOrgId) {
-    return NextResponse.json({ error: "Organisation nicht gefunden" }, { status: 404 });
+    return NextResponse.json({ error: await apiMessage("organizationNotFound") }, { status: 404 });
   }
 
   const { settings, id: _id, ...orgData } = parsed.data;
@@ -166,13 +179,13 @@ export async function PATCH(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const role = (session.user as { role?: string }).role ?? "member";
-  if (!isSuperAdmin(role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!isSuperAdmin(role)) return NextResponse.json({ error: await apiMessage("forbidden") }, { status: 403 });
 
   const { id } = await request.json();
-  if (!id) return NextResponse.json({ error: "id erforderlich" }, { status: 400 });
+  if (!id) return NextResponse.json({ error: await apiMessage("idRequired") }, { status: 400 });
 
   // Unassign all members before deleting (don't delete the users themselves)
   await db.user.updateMany({

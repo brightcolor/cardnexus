@@ -1,35 +1,48 @@
+import { translator } from "@/lib/i18n/messages";
+import { getLocale } from "@/lib/i18n/server";
+import de from "@/messages/de/pages/print.json";
+import it from "@/messages/it/pages/print.json";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
+import { canReadCard, publicCardFields, publishedCardScope, unexpiredCardScope } from "@/lib/card-publication";
 import type { CardData } from "@/types";
+import { PrintControls } from "./PrintControls";
 import { CardPreview } from "@/components/card/CardPreview";
 
 interface Props { params: Promise<{ slug: string }> }
 
+export async function generateMetadata({ params }: Props) {
+  const { slug } = await params;
+  const card = await db.card.findUnique({ where: { slug, ...publishedCardScope, ...unexpiredCardScope(), passwordHash: null }, select: { firstName: true, lastName: true } });
+  if (!card) return {};
+  const t = translator(await getLocale(), de, it);
+  return { title: [card.firstName, card.lastName, t("subtitle")].filter(Boolean).join(" ") };
+}
+
 export default async function PrintPage({ params }: Props) {
+  const locale = await getLocale();
+  const t = translator(locale, de, it);
   const { slug } = await params;
   const raw = await db.card.findUnique({
-    where: { slug },
-    include: { user: { select: { name: true, email: true, plan: true } } },
+    where: { slug, ...publishedCardScope, ...unexpiredCardScope() },
+    select: { ...publicCardFields, passwordHash: true, user: { select: { plan: true } } },
   });
 
-  if (!raw || !raw.isPublic) notFound();
+  if (!raw || !await canReadCard(raw)) notFound();
 
-  const card = { ...raw, customLinks: JSON.parse(raw.customLinks) } as CardData;
-  const isPro = ["pro", "business"].includes(raw.user?.plan ?? "free");
+  const { passwordHash: _ph, user, ...safe } = raw;
+  const card = { ...safe, customLinks: JSON.parse(raw.customLinks) } as CardData;
+  const isPro = ["pro", "business"].includes(user.plan ?? "free");
 
   return (
-    <html>
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <title>{card.firstName} {card.lastName} – Visitenkarte</title>
-        <style>{`
+    <main className="print-card-page">
+      <style>{`
           @page {
             size: 85mm 54mm;
             margin: 0;
           }
-          * { box-sizing: border-box; margin: 0; padding: 0; }
-          body {
+          .print-card-page, .print-card-page * { box-sizing: border-box; }
+          .print-card-page {
             font-family: Arial, sans-serif;
             background: white;
             display: flex;
@@ -39,16 +52,16 @@ export default async function PrintPage({ params }: Props) {
             min-height: 100vh;
             padding: 16px;
           }
-          .card-wrap {
+          .print-card-page .card-wrap {
             width: 100%;
             max-width: 384px;
           }
-          .no-print { display: flex; gap: 8px; margin-bottom: 16px; }
+          .print-card-page .no-print { display: flex; gap: 8px; margin-bottom: 16px; }
           @media print {
-            .no-print { display: none !important; }
-            body { padding: 0; justify-content: flex-start; }
+            .print-card-page .no-print { display: none !important; }
+            .print-card-page { padding: 0; justify-content: flex-start; }
           }
-          button {
+          .print-card-page button {
             padding: 8px 16px;
             border-radius: 8px;
             border: 1px solid #e5e7eb;
@@ -56,28 +69,21 @@ export default async function PrintPage({ params }: Props) {
             cursor: pointer;
             font-size: 14px;
           }
-          button.primary {
+          .print-card-page button.primary {
             background: #0f172a;
             color: white;
             border-color: #0f172a;
           }
         `}</style>
-        <link rel="stylesheet" href="/_next/static/css/app/layout.css" />
-      </head>
-      <body>
-        <div className="no-print">
-          <button onClick={() => window.print()} className="primary">Drucken / Als PDF speichern</button>
-          <button onClick={() => window.close()}>Schliessen</button>
-        </div>
-        <div className="card-wrap">
+      <PrintControls printLabel={t("print")} closeLabel={t("close")} />
+      <div className="card-wrap">
           <CardPreview card={card} />
         </div>
         {!isPro && (
           <p style={{ marginTop: 12, fontSize: 10, color: '#9ca3af', textAlign: 'center' }}>
-            Erstellt mit CardNexus · cardnexus.app
+            {t("credit")}
           </p>
         )}
-      </body>
-    </html>
+    </main>
   );
 }

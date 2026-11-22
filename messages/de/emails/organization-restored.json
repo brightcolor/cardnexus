@@ -1,0 +1,9 @@
+{
+  "title": "Organisation wieder aktiv – {org}",
+  "subject": "Organisation wieder aktiv: {org}",
+  "heading": "Deine Organisation ist wieder aktiv",
+  "intro": "Hallo {name}, dein Business-Plan ist wieder aktiv – die Organisation {org} und alle Features stehen sofort wieder zur Verfügung.",
+  "description": "Alle Mitglieder, Karten und Einstellungen sind unverändert erhalten.",
+  "team": "Zum Team-Bereich",
+  "reason": "Du erhältst diese E-Mail als Administrator der Organisation."
+}

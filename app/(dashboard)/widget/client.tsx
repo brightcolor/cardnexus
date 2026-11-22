@@ -1,5 +1,9 @@
 "use client";
 
+import { translator } from "@/lib/i18n/messages";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/pages/widget.json";
+import it from "@/messages/it/pages/widget.json";
 import { useState } from "react";
 import { Copy, Check, Code2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +22,8 @@ interface WidgetClientProps {
 }
 
 export function WidgetClient({ cards, canSelectMultiple }: WidgetClientProps) {
+  const locale = useLocale();
+  const t = translator(locale, de, it);
   const [selectedSlug, setSelectedSlug] = useState(cards[0]?.slug ?? "");
   const [width, setWidth] = useState("400");
   const [height, setHeight] = useState("700");
@@ -27,7 +33,7 @@ export function WidgetClient({ cards, canSelectMultiple }: WidgetClientProps) {
   const cardUrl = selectedSlug ? `${baseUrl}/c/${selectedSlug}` : "";
 
   const iframeCode = selectedSlug
-    ? `<iframe\n  src="${cardUrl}"\n  width="${width}"\n  height="${height}"\n  frameborder="0"\n  style="border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.1);"\n  title="Digitale Visitenkarte"\n  loading="lazy"\n></iframe>`
+    ? `<iframe\n  src="${cardUrl}"\n  width="${width}"\n  height="${height}"\n  frameborder="0"\n  style="border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.1);"\n  title="${t("iframeTitle")}"\n  loading="lazy"\n></iframe>`
     : "";
 
   async function copy(text: string, key: "iframe" | "link") {
@@ -41,17 +47,17 @@ export function WidgetClient({ cards, canSelectMultiple }: WidgetClientProps) {
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Code2 className="h-6 w-6" />
-          Karte einbetten
+          {t("heading")}
         </h1>
         <p className="text-muted-foreground mt-1">
-          Bette deine digitale Karte per iFrame direkt auf deiner Website ein.
+          {t("intro")}
         </p>
       </div>
 
       <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
         {/* Card selector */}
         <div>
-          <Label htmlFor="card-select">Karte auswählen</Label>
+          <Label htmlFor="card-select">{t("choose")}</Label>
           {canSelectMultiple && cards.length > 1 ? (
             <select
               id="card-select"
@@ -75,11 +81,11 @@ export function WidgetClient({ cards, canSelectMultiple }: WidgetClientProps) {
           {!canSelectMultiple && (
             <p className="mt-2 text-xs text-muted-foreground flex items-center gap-1.5">
               <Zap className="h-3 w-3 text-amber-500" />
-              Mehrere Karten ab{" "}
+              {t("multiple")}{" "}
               <Link href="/upgrade" className="text-primary underline underline-offset-2">
                 Pro
               </Link>
-              {" "}verfügbar.
+              {" "}{t("available")}
             </p>
           )}
         </div>
@@ -87,11 +93,11 @@ export function WidgetClient({ cards, canSelectMultiple }: WidgetClientProps) {
         {/* Dimensions */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="width">Breite (px)</Label>
+            <Label htmlFor="width">{t("width")}</Label>
             <Input id="width" value={width} onChange={(e) => setWidth(e.target.value)} className="mt-1" />
           </div>
           <div>
-            <Label htmlFor="height">Höhe (px)</Label>
+            <Label htmlFor="height">{t("height")}</Label>
             <Input id="height" value={height} onChange={(e) => setHeight(e.target.value)} className="mt-1" />
           </div>
         </div>
@@ -100,7 +106,7 @@ export function WidgetClient({ cards, canSelectMultiple }: WidgetClientProps) {
       {selectedSlug && (
         <>
           <div className="space-y-2">
-            <p className="text-sm font-medium">Direktlink</p>
+            <p className="text-sm font-medium">{t("link")}</p>
             <div className="flex items-center gap-2">
               <code className="flex-1 text-xs bg-muted rounded-lg px-3 py-2 truncate">{cardUrl}</code>
               <Button size="sm" variant="outline" onClick={() => copy(cardUrl, "link")}>
@@ -110,7 +116,7 @@ export function WidgetClient({ cards, canSelectMultiple }: WidgetClientProps) {
           </div>
 
           <div className="space-y-2">
-            <p className="text-sm font-medium">iFrame-Code</p>
+            <p className="text-sm font-medium">{t("code")}</p>
             <div className="relative">
               <pre className="text-xs bg-muted rounded-xl p-4 overflow-x-auto whitespace-pre leading-relaxed">{iframeCode}</pre>
               <Button
@@ -124,7 +130,7 @@ export function WidgetClient({ cards, canSelectMultiple }: WidgetClientProps) {
           </div>
 
           <div className="space-y-2">
-            <p className="text-sm font-medium">Vorschau</p>
+            <p className="text-sm font-medium">{t("preview")}</p>
             <div className="flex justify-center bg-muted rounded-2xl p-6">
               <iframe
                 src={cardUrl}
@@ -132,7 +138,7 @@ export function WidgetClient({ cards, canSelectMultiple }: WidgetClientProps) {
                 height={Math.min(parseInt(height) || 700, 700)}
                 frameBorder={0}
                 style={{ borderRadius: 16, boxShadow: "0 4px 24px rgba(0,0,0,0.1)" }}
-                title="Vorschau"
+                title={t("preview")}
                 loading="lazy"
               />
             </div>
@@ -142,7 +148,7 @@ export function WidgetClient({ cards, canSelectMultiple }: WidgetClientProps) {
 
       {!selectedSlug && (
         <div className="rounded-xl border border-dashed border-border p-8 text-center text-muted-foreground text-sm">
-          Keine Karte gefunden. Erstelle zuerst eine Karte.
+          {t("empty")}
         </div>
       )}
     </div>

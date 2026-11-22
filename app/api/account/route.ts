@@ -1,3 +1,4 @@
+import { apiMessage } from "@/lib/i18n/api";
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -13,10 +14,10 @@ const patchSchema = z.object({
 
 export async function PATCH(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const body = patchSchema.safeParse(await req.json());
-  if (!body.success) return NextResponse.json({ error: "Ungültige Eingabe" }, { status: 400 });
+  if (!body.success) return NextResponse.json({ error: await apiMessage("invalidForm") }, { status: 400 });
 
   const { name, email, leadNotification } = body.data;
   const updates: Record<string, unknown> = {};
@@ -35,6 +36,7 @@ export async function PATCH(req: NextRequest) {
     const existing = await db.user.findUnique({ where: { email }, select: { id: true } });
     if (!existing || existing.id === session.user.id) {
       updates.email = email;
+      updates.emailVerified = false;
     }
   }
 
@@ -45,7 +47,7 @@ export async function PATCH(req: NextRequest) {
   // Notify the OLD address when email changes — security alert in case the
   // change was not initiated by the account owner.
   if (updates.email && oldEmail) {
-    sendEmailChangeNotification({ to: oldEmail, newEmail: updates.email as string }).catch(() => {});
+    sendEmailChangeNotification({ to: oldEmail, userId: session.user.id, newEmail: updates.email as string }).catch(() => {});
   }
 
   return NextResponse.json({ success: true });
@@ -58,7 +60,7 @@ export async function PATCH(req: NextRequest) {
  */
 export async function DELETE() {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
   const me = await db.user.findUnique({
     where: { id: session.user.id },
@@ -66,7 +68,7 @@ export async function DELETE() {
   });
   if (me?.role === "super_admin") {
     return NextResponse.json(
-      { error: "Super-Admin kann nicht gelöscht werden. Rolle vorher entfernen." },
+      { error: await apiMessage("cannotDeleteSuperAdmin") },
       { status: 400 }
     );
   }

@@ -1,3 +1,7 @@
+import { translator } from "@/lib/i18n/messages";
+import { getLocale } from "@/lib/i18n/server";
+import de from "@/messages/de/components/admin-navigation.json";
+import it from "@/messages/it/components/admin-navigation.json";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -5,16 +9,19 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Users, Building2, LayoutDashboard, Settings2, CreditCard, Activity } from "lucide-react";
 
-const adminNav = [
-  { href: "/admin", label: "Übersicht", icon: LayoutDashboard },
-  { href: "/admin/users", label: "Benutzer", icon: Users },
-  { href: "/admin/cards", label: "Karten", icon: CreditCard },
-  { href: "/admin/access-log", label: "Access Log", icon: Activity },
-  { href: "/admin/organizations", label: "Organisationen", icon: Building2 },
-  { href: "/admin/settings", label: "Einstellungen", icon: Settings2 },
-];
-
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale();
+  const t = translator(locale, de, it);
+
+  const adminNav = [
+    { href: "/admin", label: t("overview"), icon: LayoutDashboard },
+    { href: "/admin/users", label: t("users"), icon: Users },
+    { href: "/admin/cards", label: t("cards"), icon: CreditCard },
+    { href: "/admin/access-log", label: t("accessLog"), icon: Activity },
+    { href: "/admin/organizations", label: t("organizations"), icon: Building2 },
+    { href: "/admin/settings", label: t("settings"), icon: Settings2 },
+  ];
+
   const session = await auth.api.getSession({ headers: await headers() });
   const user = session?.user as { role?: string } | undefined;
 
@@ -45,7 +52,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <Button asChild variant="outline" size="sm">
             <Link href="/dashboard">
               <ArrowLeft className="h-3.5 w-3.5" />
-              Dashboard
+              {t("dashboard")}
             </Link>
           </Button>
         </div>
@@ -55,7 +62,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <span className="text-[10px] text-muted-foreground/40 select-none tabular-nums">
           v{process.env.NEXT_PUBLIC_APP_VERSION}
           {process.env.NEXT_PUBLIC_BUILD_TIME && (
-            <> · {new Date(process.env.NEXT_PUBLIC_BUILD_TIME).toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" })}</>
+            <> · {new Date(process.env.NEXT_PUBLIC_BUILD_TIME).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" })}</>
           )}
         </span>
       </footer>

@@ -1,10 +1,16 @@
+import { getLocale } from "@/lib/i18n/server";
+import { translator } from "@/lib/i18n/messages";
+import de from "@/messages/de/pages/admin-access-log.json";
+import it from "@/messages/it/pages/admin-access-log.json";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import { AccessLogClient } from "./client";
 
-export const metadata = { title: "Access Log" };
+export async function generateMetadata() {
+  return { title: translator(await getLocale(), de, it)("title") };
+}
 
 const PAGE_SIZE = 50;
 
