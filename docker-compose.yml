@@ -1,6 +1,6 @@
 services:
   cardnexus:
-    image: ghcr.io/brightcolor/cardnexus:main
+    build: .
     container_name: cardnexus
     restart: unless-stopped
     ports:
@@ -21,6 +21,9 @@ services:
       NEXT_PUBLIC_APP_URL: ${APP_URL:-http://localhost:3000}
       APP_URL: ${APP_URL:-http://localhost:3000}
       DATABASE_URL: file:/app/data/app.db
+      DEFAULT_LOCALE: ${DEFAULT_LOCALE:-de}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
       # Stripe — leave STRIPE_SECRET_KEY empty to disable payments
       STRIPE_SECRET_KEY:             ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET:         ${STRIPE_WEBHOOK_SECRET:-}
@@ -41,7 +44,7 @@ services:
       SMTP_PASS:   ${SMTP_PASS:-}
       SMTP_FROM:   ${SMTP_FROM:-CardNexus <noreply@cardnexus.app>}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3000/api/health/ready"]
       interval: 30s
       timeout: 10s
       retries: 3

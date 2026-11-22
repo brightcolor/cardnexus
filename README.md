@@ -28,50 +28,19 @@ Built for teams and organizations.
 
 ## Quick start
 
-One command. Clones the repo to `/opt/cardnexus`, generates a secret and starts everything.
+From your checkout of this branch, copy the environment template and set the required values.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/brightcolor/cardnexus/main/quickstart.sh | sudo sh
+cp .env.example .env
+chmod 600 .env
+# Set APP_URL and generate a unique BETTER_AUTH_SECRET.
+# On first install, set BOOTSTRAP_ADMIN_EMAIL and BOOTSTRAP_ADMIN_PASSWORD.
+docker compose up -d --build
 ```
 
-Open **http://&lt;your-ip&gt;:3000** and log in with `admin@example.com` / `admin123`.
+Use a unique bootstrap password of 16–128 characters. Open `/login` at the configured application URL and sign in with that administrator account.
 
-> **Change the admin password immediately** after first login.
-
-The script:
-- Creates `/opt/cardnexus` and clones the repository there
-- Generates a random `BETTER_AUTH_SECRET` and writes `.env`
-- Pulls the Docker image and starts the stack via `docker compose`
-- On re-run: pulls the latest code and image instead of re-installing
-
-<details>
-<summary>Manual setup</summary>
-
-```bash
-git clone https://github.com/brightcolor/cardnexus.git /opt/cardnexus
-cd /opt/cardnexus
-echo "BETTER_AUTH_SECRET=$(openssl rand -base64 32)" > .env
-echo "APP_URL=http://your-server-ip:3000" >> .env
-docker compose up -d
-```
-
-</details>
-
-<details>
-<summary>docker run (one-liner, no git)</summary>
-
-```bash
-docker run -d \
-  --name cardnexus \
-  -p 3000:3000 \
-  -v cardnexus-db:/app/data \
-  -v cardnexus-uploads:/app/public/uploads \
-  -e BETTER_AUTH_SECRET="$(openssl rand -base64 32)" \
-  -e APP_URL="http://localhost:3000" \
-  ghcr.io/brightcolor/cardnexus:latest
-```
-
-</details>
+Compose builds the checked-out code and keeps database and uploads data in the configured volumes. Rebuild with `docker compose up -d --build` after updating the checkout.
 
 ---
 
