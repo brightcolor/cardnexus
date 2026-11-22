@@ -2,5 +2,6 @@
   "super_admin": "Super Admin",
   "company_admin": "Amministratore dell'azienda",
   "team_leader": "Responsabile del team",
-  "member": "Membro"
+  "member": "Membro",
+  "close": "Chiudi"
 }

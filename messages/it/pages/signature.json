@@ -34,5 +34,15 @@
   "appleStep1": "Mail → Impostazioni → Firme",
   "appleStep2": "Seleziona «+» e inserisci un nome",
   "appleStep3": "Disattiva l’opzione per usare sempre il formato predefinito",
-  "appleStep4": "Salva l’HTML in un file .html e trascinalo nel riquadro della firma"
+  "appleStep4": "Salva l’HTML in un file .html e trascinalo nel riquadro della firma",
+  "compactStyle": "Compatto",
+  "compactStyleDescription": "Due colonne, compatto",
+  "richStyleDescription": "Foto e link social",
+  "modernStyleDescription": "Barra colorata in alto",
+  "minimalStyleDescription": "Solo testo, senza icone",
+  "darkStyleDescription": "Sfondo scuro",
+  "from": "Da:",
+  "to": "A:",
+  "subject": "Oggetto:",
+  "exampleSubject": "Il mio messaggio"
 }

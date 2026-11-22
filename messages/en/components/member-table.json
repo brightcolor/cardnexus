@@ -1,0 +1,16 @@
+{
+  "confirmDelete": "Remove this member?",
+  "empty": "No members yet.",
+  "user": "User",
+  "role": "Role",
+  "card": "Card",
+  "joined": "Joined",
+  "me": "You",
+  "admin": "Admin",
+  "leader": "Team leader",
+  "member": "Member",
+  "active": "Active",
+  "noCard": "No card",
+  "viewCard": "View card",
+  "delete": "Remove"
+}

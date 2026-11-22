@@ -5,6 +5,7 @@ import type { Session } from "./lib/auth";
 import { db } from "./lib/db";
 import deAuth from "./messages/de/api/authentication.json";
 import itAuth from "./messages/it/api/authentication.json";
+import enAuth from "./messages/en/api/authentication.json";
 import { defaultLocale, localeCookie, localeCookieOptions, parseLocale } from "./lib/i18n/locales";
 import { rateLimit } from "./lib/rate-limit";
 
@@ -72,7 +73,7 @@ export async function proxy(request: NextRequest) {
     if (!rateLimit({ key: `auth:${ip}`, max: 10, windowMs: 60_000 })) {
       const locale = parseLocale(request.cookies.get(localeCookie)?.value) ?? defaultLocale();
       return new NextResponse(
-        JSON.stringify({ error: (locale === "it" ? itAuth : deAuth).proxyRateLimit }),
+        JSON.stringify({ error: ({ de: deAuth, it: itAuth, en: enAuth }[locale]).proxyRateLimit }),
         { status: 429, headers: { "Content-Type": "application/json", "Retry-After": "60" } }
       );
     }

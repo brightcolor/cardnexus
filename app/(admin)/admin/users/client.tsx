@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/pages/admin-users.json";
 import it from "@/messages/it/pages/admin-users.json";
+import en from "@/messages/en/pages/admin-users.json";
 import { useState, useCallback, useTransition } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -51,7 +52,7 @@ export function AdminUsersClient({
   initialSearch?: string;
 }) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const router   = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

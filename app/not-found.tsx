@@ -2,12 +2,13 @@ import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/pages/not-found.json";
 import it from "@/messages/it/pages/not-found.json";
+import en from "@/messages/en/pages/not-found.json";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default async function NotFound() {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   return (
     <div className="min-h-screen flex flex-col items-center justify-center text-center p-4">
       <p className="text-7xl font-bold text-muted-foreground mb-4">404</p>

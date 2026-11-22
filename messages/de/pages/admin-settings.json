@@ -28,5 +28,6 @@
   "saving": "Wird gespeichert…",
   "saveSettings": "Einstellungen speichern",
   "reloadHint": "Änderungen aktiv — Browser-Tab neu laden zum Prüfen",
-  "footerExample": "© 2025 Meine Firma. Alle Rechte vorbehalten."
+  "footerExample": "© 2025 Meine Firma. Alle Rechte vorbehalten.",
+  "saveFailed": "Speichern fehlgeschlagen."
 }

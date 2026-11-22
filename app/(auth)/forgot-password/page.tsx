@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/pages/forgot-password.json";
 import it from "@/messages/it/pages/forgot-password.json";
+import en from "@/messages/en/pages/forgot-password.json";
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,7 @@ import { authClient } from "@/lib/auth-client";
 
 export default function ForgotPasswordPage() {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);

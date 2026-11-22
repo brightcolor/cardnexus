@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/sidebar.json";
 import it from "@/messages/it/components/sidebar.json";
+import en from "@/messages/en/components/sidebar.json";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -32,7 +33,7 @@ export function SidebarNav({
   userRole, orgName, appName = "CardNexus", logoUrl, onNavigate, className,
 }: SidebarProps) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
 
   const sections: NavSection[] = [
     {

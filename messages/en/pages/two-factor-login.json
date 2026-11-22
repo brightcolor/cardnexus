@@ -1,0 +1,15 @@
+{
+  "invalidCode": "Invalid verification code.",
+  "invalidBackupCode": "Invalid backup code.",
+  "heading": "Two-factor authentication",
+  "totpInstructions": "Enter the code from your authenticator app.",
+  "backupInstructions": "Enter one of your saved backup codes.",
+  "totpCode": "Verification code",
+  "backupCode": "Backup code",
+  "trustDevice": "Trust this device",
+  "verifying": "Verifying…",
+  "verify": "Verify",
+  "switchToBackup": "Use a backup code",
+  "switchToTotp": "Use an authenticator code",
+  "backToLogin": "Back to sign in"
+}

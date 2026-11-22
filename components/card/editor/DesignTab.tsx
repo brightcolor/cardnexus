@@ -4,8 +4,10 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import optionsDe from "@/messages/de/components/card-design-options.json";
 import optionsIt from "@/messages/it/components/card-design-options.json";
+import optionsEn from "@/messages/en/components/card-design-options.json";
 import de from "@/messages/de/components/card-design.json";
 import it from "@/messages/it/components/card-design.json";
+import en from "@/messages/en/components/card-design.json";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -32,7 +34,7 @@ interface Props {
 
 function LockedBadge() {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   return (
     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
       <Lock className="h-3 w-3" /> {t("locked")}
@@ -42,8 +44,8 @@ function LockedBadge() {
 
 export function DesignTab({ card, update, policy, allTemplates, allowedDomains, canCustomDomain }: Props) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
-  const option = translator(locale, optionsDe, optionsIt);
+  const t = translator(locale, de, it, en);
+  const option = translator(locale, optionsDe, optionsIt, optionsEn);
   const hasBrandColors = policy.brandColors.length > 0;
 
   return (

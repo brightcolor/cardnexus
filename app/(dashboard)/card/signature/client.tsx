@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/pages/signature.json";
 import it from "@/messages/it/pages/signature.json";
+import en from "@/messages/en/pages/signature.json";
 import { useEffect, useState } from "react";
 import type { CardData } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -21,15 +22,15 @@ interface Props {
 
 export function SignatureClient({ card: initialCard, allCards = [] }: Props) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
 
   const STYLES: { id: SigStyle; label: string; desc: string }[] = [
     { id: "standard", label: t("standardStyle"), desc: t("standardStyleDescription") },
-    { id: "compact",  label: "Kompakt",   desc: "Zweispaltig, klein" },
-    { id: "rich",     label: "Rich",      desc: "Foto + Social-Links" },
-    { id: "modern",   label: "Modern",    desc: "Farbiger Headerstreifen" },
-    { id: "minimal",  label: "Minimal",   desc: "Nur Text, keine Icons" },
-    { id: "dark",     label: "Dark",      desc: "Dunkler Hintergrund" },
+    { id: "compact",  label: t("compactStyle"),   desc: t("compactStyleDescription") },
+    { id: "rich",     label: "Rich",      desc: t("richStyleDescription") },
+    { id: "modern",   label: "Modern",    desc: t("modernStyleDescription") },
+    { id: "minimal",  label: "Minimal",   desc: t("minimalStyleDescription") },
+    { id: "dark",     label: "Dark",      desc: t("darkStyleDescription") },
   ];
 
   const GUIDES: Record<string, { title: string; steps: string[] }> = {
@@ -242,9 +243,9 @@ export function SignatureClient({ card: initialCard, allCards = [] }: Props) {
         <div className="border border-border rounded-xl bg-white overflow-hidden">
           <div className="border-b border-gray-100 px-4 py-3 bg-gray-50 space-y-1">
             {[
-              { label: "Von:",  val: card.email ?? "deine@email.de" },
-              { label: "An:",   val: "empfaenger@beispiel.de" },
-              { label: "Betr.:",val: "Meine Nachricht" },
+              { label: t("from"),  val: card.email ?? "sender@example.com" },
+              { label: t("to"),   val: "recipient@example.com" },
+              { label: t("subject"),val: t("exampleSubject") },
             ].map(({ label, val }) => (
               <div key={label} className="flex items-center gap-2 text-xs text-muted-foreground">
                 <span className="font-medium w-10">{label}</span>

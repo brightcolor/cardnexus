@@ -1,4 +1,4 @@
-export const locales = ["de", "it"] as const;
+export const locales = ["de", "it", "en"] as const;
 export type Locale = (typeof locales)[number];
 
 export const localeCookie = "cardnexus_locale";
@@ -12,7 +12,7 @@ export function defaultLocale(): Locale {
 }
 
 export function formatLocale(locale: Locale): string {
-  return locale === "it" ? "it-IT" : "de-DE";
+  return { de: "de-DE", it: "it-IT", en: "en-GB" }[locale];
 }
 
 export const localeCookieOptions = {

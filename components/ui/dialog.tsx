@@ -1,5 +1,12 @@
 "use client";
 
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import de from "@/messages/de/common.json";
+import it from "@/messages/it/common.json";
+import en from "@/messages/en/common.json";
+
+const labels = { de, it, en };
+
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
@@ -42,7 +49,7 @@ const DialogContent = React.forwardRef<
       {children}
       <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
         <X className="h-4 w-4" />
-        <span className="sr-only">Schließen</span>
+        <span className="sr-only">{labels[useLocale()].close}</span>
       </DialogClose>
     </DialogPrimitive.Content>
   </DialogPortal>

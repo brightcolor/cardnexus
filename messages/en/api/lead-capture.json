@@ -1,0 +1,7 @@
+{
+  "notFound": "Card not found.",
+  "unavailable": "Lead capture is unavailable for this card.",
+  "rateLimit": "Too many requests. Try again later.",
+  "invalidInput": "Check the information you entered.",
+  "serverError": "Could not save the contact."
+}

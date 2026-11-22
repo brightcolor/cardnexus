@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/image-upload.json";
 import it from "@/messages/it/components/image-upload.json";
+import en from "@/messages/en/components/image-upload.json";
 import { useRef, useState } from "react";
 import { Button } from "./button";
 import { Input } from "./input";
@@ -26,7 +27,7 @@ export function ImageUpload({
   className,
 }: ImageUploadProps) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [urlInput, setUrlInput] = useState("");

@@ -1,0 +1,19 @@
+{
+  "title": "Organization suspended – {org}",
+  "subject": "Organization suspended: {org}",
+  "heading": "Your organization has been suspended",
+  "intro": "Hi {name}, the <strong>Business</strong> plan for {org} has expired or was canceled.",
+  "description": "Your organization and member data will be retained. Members can continue using {app} with their Free accounts. Organization features are suspended.",
+  "suspendedTitle": "Suspended features",
+  "members": "Member management",
+  "design": "Shared card designs",
+  "import": "CSV import",
+  "directory": "Public team directory",
+  "retainedTitle": "Still available",
+  "cards": "Personal business cards",
+  "analytics": "Personal analytics",
+  "membership": "Organization membership and stored data",
+  "reactivate": "Reactivate your organization",
+  "subscribe": "Reactivate Business",
+  "reason": "You received this email because you administer this organization."
+}

@@ -2,17 +2,22 @@ import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/pages/admin-overview.json";
 import it from "@/messages/it/pages/admin-overview.json";
+import en from "@/messages/en/pages/admin-overview.json";
 import { db } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Building2, CreditCard, Activity, TrendingUp } from "lucide-react";
 import { CHANGELOG } from "@/lib/changelog";
+import deChanges from "@/messages/de/pages/changelog.json";
+import itChanges from "@/messages/it/pages/changelog.json";
+import enChanges from "@/messages/en/pages/changelog.json";
 import { PLANS } from "@/lib/plans";
 
 export const metadata = { title: "Admin" };
 
 export default async function AdminPage() {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
+  const changes = translator(locale, deChanges, itChanges, enChanges);
   const now = new Date();
   const [userCount, orgCount, cardCount, recentAnalytics, planGroups, newUsersThisMonth] =
     await Promise.all([
@@ -147,9 +152,9 @@ export default async function AdminPage() {
                 {entry.changes.map((c, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm">
                     <span className={`mt-0.5 shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${c.type === "feature" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"}`}>
-                      {c.type === "feature" ? "Neu" : "Fix"}
+                      {c.type === "feature" ? t("newFeature") : t("fix")}
                     </span>
-                    <span className="text-muted-foreground">{c.text}</span>
+                    <span className="text-muted-foreground">{changes(c.message)}</span>
                   </li>
                 ))}
               </ul>

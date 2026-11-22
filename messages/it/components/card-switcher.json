@@ -10,5 +10,6 @@
   "delete": "Elimina",
   "creating": "Creazione in corso…",
   "cloning": "Duplicazione in corso…",
-  "clone": "Duplica"
+  "clone": "Duplica",
+  "deleteFailed": "Non è stato possibile eliminare il biglietto."
 }

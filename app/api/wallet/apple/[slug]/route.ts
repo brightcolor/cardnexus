@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { canReadCard, publishedCardScope, unexpiredCardScope } from "@/lib/card-publication";
 import { generateAppleWalletPass, WalletFeatureDisabledError } from "@/lib/wallet";
 import { headers } from "next/headers";
+import { getLocale } from "@/lib/i18n/server";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -34,7 +35,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ slu
       primaryColor: card.primaryColor,
       avatarUrl:    card.avatarUrl,
       cardUrl:      `${proto}://${host}/c/${card.slug}`,
-    });
+    }, await getLocale());
 
     return new Response(new Uint8Array(pass), {
       headers: {

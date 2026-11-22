@@ -1,0 +1,7 @@
+{
+  "title": "Card domain",
+  "description": "Choose the address people use to open this card.",
+  "standard": "Platform domain",
+  "custom": "Custom domain",
+  "example": "card.example.com"
+}

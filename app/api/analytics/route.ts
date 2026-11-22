@@ -3,6 +3,7 @@ import { defaultLocale, parseLocale } from "@/lib/i18n/locales";
 import { translator } from "@/lib/i18n/messages";
 import deMilestone from "@/messages/de/components/milestone-notification.json";
 import itMilestone from "@/messages/it/components/milestone-notification.json";
+import enMilestone from "@/messages/en/components/milestone-notification.json";
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -120,7 +121,7 @@ async function checkMilestone(cardSlug: string) {
   if (!canUseFeature("milestoneNotifications", user.plan ?? "free", user.planExpiresAt)) return;
 
   const locale = parseLocale(user.locale) ?? defaultLocale();
-  const t = translator(locale, deMilestone, itMilestone);
+  const t = translator(locale, deMilestone, itMilestone, enMilestone);
   await db.notification.upsert({
     where: { userId_type_value: { userId: card.userId, type: "milestone", value: String(milestone) } },
     update: {},

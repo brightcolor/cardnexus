@@ -2,16 +2,17 @@ import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/pages/imprint.json";
 import it from "@/messages/it/pages/imprint.json";
+import en from "@/messages/en/pages/imprint.json";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export async function generateMetadata() {
-  return { title: translator(await getLocale(), de, it)("title") };
+  return { title: translator(await getLocale(), de, it, en)("title") };
 }
 
 export default async function ImpressumPage() {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-2xl px-4 py-16">

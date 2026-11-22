@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/organization-settings.json";
 import it from "@/messages/it/components/organization-settings.json";
+import en from "@/messages/en/components/organization-settings.json";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +23,7 @@ interface OrgBasicProps {
 }
 export function OrgInfoCard({ orgName, setOrgName, orgColor, setOrgColor, orgDisplayName }: OrgBasicProps) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   return (
     <Card>
       <CardHeader>
@@ -56,7 +57,7 @@ interface DesignDefaultsProps {
 }
 export function DesignDefaultsCard(p: DesignDefaultsProps) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   return (
     <Card>
       <CardHeader>
@@ -124,7 +125,7 @@ interface BrandColorsProps {
 }
 export function BrandColorsCard({ brandColors, newColor, setNewColor, onAdd, onRemove }: BrandColorsProps) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   return (
     <Card>
       <CardHeader>
@@ -168,7 +169,7 @@ interface PermissionsProps {
 }
 export function PermissionsCard(p: PermissionsProps) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const rows = [
     { label: "Template-Wahl",  sub: t("pickTemplate"),  val: p.allowTemplateChange, set: p.setAllowTemplateChange },
     { label: "Farbwahl",       sub: t("pickColor"),          val: p.allowColorChange,    set: p.setAllowColorChange },
@@ -207,7 +208,7 @@ interface DeptPoliciesProps {
 }
 export function DeptPoliciesCard({ deptRows, newDeptName, setNewDeptName, onAdd, onRemove, onUpdatePolicy }: DeptPoliciesProps) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   return (
     <Card>
       <CardHeader>
@@ -275,7 +276,7 @@ interface TemplateCardProps {
 }
 export function TemplateCardSection(p: TemplateCardProps) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   return (
     <Card>
       <CardHeader>

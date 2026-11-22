@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/two-factor-settings.json";
 import it from "@/messages/it/components/two-factor-settings.json";
+import en from "@/messages/en/components/two-factor-settings.json";
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,7 @@ type Step = "idle" | "password" | "verify" | "done";
 
 export function SecurityCard({ twoFactorEnabled }: Props) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const [enabled, setEnabled] = useState(twoFactorEnabled);
 
   /* --- enable flow ----------------------------------------------------- */
@@ -248,7 +249,7 @@ export function SecurityCard({ twoFactorEnabled }: Props) {
                   <p className="text-sm font-semibold text-amber-900">{t("backupCodes")}</p>
                   <Button type="button" variant="ghost" size="sm" onClick={copyBackup}>
                     {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    {copied ? "Kopiert" : "Kopieren"}
+                    {copied ? t("copied") : t("copy")}
                   </Button>
                 </div>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 font-mono text-sm text-amber-900">

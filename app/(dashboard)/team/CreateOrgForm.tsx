@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/create-organization.json";
 import it from "@/messages/it/components/create-organization.json";
+import en from "@/messages/en/components/create-organization.json";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,7 @@ function slugify(s: string) {
 
 export function CreateOrgForm() {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const router = useRouter();
   const [name,  setName]  = useState("");
   const [slug,  setSlug]  = useState("");

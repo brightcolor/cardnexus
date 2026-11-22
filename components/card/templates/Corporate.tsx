@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/corporate-card.json";
 import it from "@/messages/it/components/corporate-card.json";
+import en from "@/messages/en/components/corporate-card.json";
 import { Phone, Mail, Globe, MapPin } from "lucide-react";
 import type { CardData } from "@/types";
 import { fontClass, radiusClass, shadowClass, avatarBorderStyle } from "../CardPreview";
@@ -11,7 +12,7 @@ import { SocialLinks } from "./SocialLinks";
 
 export function CorporateTemplate({ card }: { card: Partial<CardData> }) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const color   = card.primaryColor ?? "#1e3a5f";
   const accent  = card.accentColor  ?? color;
   const font    = fontClass(card.fontFamily);

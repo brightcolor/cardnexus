@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/team-analytics.json";
 import it from "@/messages/it/components/team-analytics.json";
+import en from "@/messages/en/components/team-analytics.json";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
@@ -50,7 +51,7 @@ export function OrgAnalyticsClient({
   memberCount, topCards, topCardsByLeads, viewsLast30Days,
 }: Props) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const maxCount = Math.max(...viewsLast30Days.map((d) => d.count), 1);
 
   return (

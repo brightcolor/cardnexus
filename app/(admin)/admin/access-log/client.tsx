@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/pages/admin-access-log.json";
 import it from "@/messages/it/pages/admin-access-log.json";
+import en from "@/messages/en/pages/admin-access-log.json";
 import { useRouter, usePathname } from "next/navigation";
 
 
@@ -39,7 +40,7 @@ interface Props {
 
 export function AccessLogClient({ entries, total, page, pageSize, cards, filters }: Props) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
 
   const EVENT_LABELS: Record<string, { label: string; color: string }> = {
     view:           { label: t("view"),     color: "bg-blue-100 text-blue-700" },

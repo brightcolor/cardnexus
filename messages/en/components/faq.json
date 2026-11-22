@@ -1,0 +1,18 @@
+{
+  "freeQuestion": "Is {appName} really free?",
+  "freeAnswer": "Yes. The Free plan stays free and includes a digital business card with a QR code, vCard downloads and lead capture. No credit card required.",
+  "appQuestion": "Do I need an app?",
+  "appAnswer": "No. Your card opens in a web browser.",
+  "nfcQuestion": "How do NFC tags work?",
+  "nfcAnswer": "Write your card URL to an NFC tag (about €0.50–€2). Anyone who taps the tag with a compatible phone can open your digital card. NFC is supported on iPhone 7 and later and Android 4.4 and later.",
+  "teamQuestion": "Can I use {appName} for my team?",
+  "teamAnswer": "Yes. The Business plan lets you manage unlimited members, assign roles, import CSV data and apply the same company design to every card.",
+  "expiryQuestion": "What happens when my plan expires?",
+  "expiryAnswer": "Your account moves to the Free plan and your card stays active. Renew to keep using Pro or Business features such as white labeling and campaigns.",
+  "cancelQuestion": "Can I cancel at any time?",
+  "cancelAnswer": "Yes. You can cancel your subscription at any time.",
+  "safetyQuestion": "How is my data protected?",
+  "safetyAnswer": "Your data is protected in line with the GDPR and stored in the EU.",
+  "domainQuestion": "Can I use my own domain?",
+  "domainAnswer": "Yes. A custom domain is available with the Pro and Business plans."
+}

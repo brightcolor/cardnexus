@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/pages/admin-organizations.json";
 import it from "@/messages/it/pages/admin-organizations.json";
+import en from "@/messages/en/pages/admin-organizations.json";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,7 @@ interface Member { id: string; name: string; role: string }
 
 export function OrgAdminClient({ orgs: initial }: { orgs: Org[] }) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const router = useRouter();
   const [orgs, setOrgs] = useState(initial);
   const [open, setOpen] = useState(false);

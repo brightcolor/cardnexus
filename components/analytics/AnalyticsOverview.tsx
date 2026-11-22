@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/analytics-overview.json";
 import it from "@/messages/it/components/analytics-overview.json";
+import en from "@/messages/en/components/analytics-overview.json";
 import { useEffect, useState } from "react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -48,7 +49,7 @@ function StatCard({ label, value, icon: Icon }: { label: string; value: number; 
 
 export function AnalyticsOverview({ cards = [], initialCardId }: Props) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const [data, setData] = useState<AnalyticsSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(30);

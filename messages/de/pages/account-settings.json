@@ -19,5 +19,6 @@
   "settingsSaved": "Gespeichert!",
   "saveSettings": "Einstellungen speichern",
   "comingSoon": "Demnächst",
-  "walletDescription": "Karten direkt in Apple Wallet oder Google Wallet speichern. Diese Funktion wird bald verfügbar sein."
+  "walletDescription": "Karten direkt in Apple Wallet oder Google Wallet speichern. Diese Funktion wird bald verfügbar sein.",
+  "emailChangeFailed": "E-Mail-Adresse konnte nicht geändert werden."
 }

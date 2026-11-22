@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/billing-actions.json";
 import it from "@/messages/it/components/billing-actions.json";
+import en from "@/messages/en/components/billing-actions.json";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -26,7 +27,7 @@ export function UpgradeButtons({
   paypalConfigured,
 }: Props) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const [loading, setLoading] = useState<"stripe" | "paypal" | "portal" | null>(null);
 
   async function startStripe() {

@@ -28,5 +28,6 @@
   "saving": "Salvataggio in corso…",
   "saveSettings": "Salva impostazioni",
   "reloadHint": "Le modifiche sono attive. Ricarica la scheda del browser per verificarle.",
-  "footerExample": "© 2025 La mia azienda. Tutti i diritti riservati."
+  "footerExample": "© 2025 La mia azienda. Tutti i diritti riservati.",
+  "saveFailed": "Non è stato possibile salvare le impostazioni."
 }

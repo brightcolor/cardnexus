@@ -12,5 +12,7 @@
   "organizations": "Organisationen",
   "paying": "Bezahlend",
   "local": "lokal",
-  "changelog": "Changelog"
+  "changelog": "Changelog",
+  "newFeature": "Neu",
+  "fix": "Fix"
 }

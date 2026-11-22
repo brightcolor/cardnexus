@@ -1,0 +1,7 @@
+{
+  "unauthorized": "Sign in to upload files.",
+  "missingFile": "Select a file.",
+  "invalidType": "Upload a JPEG, PNG, WebP or GIF image.",
+  "tooLarge": "The image exceeds the 5 MB limit.",
+  "limit": "You have reached the limit of {max} files. Delete any images you no longer need."
+}

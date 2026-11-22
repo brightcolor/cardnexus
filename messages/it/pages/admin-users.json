@@ -27,5 +27,7 @@
   "title": "Gestione utenti",
   "all": "Tutti gli utenti",
   "requestError": "Errore: {detail}",
-  "networkError": "Errore di rete: {detail}"
+  "networkError": "Errore di rete: {detail}",
+  "searchResults": "{count} risultati per «{query}» ({total} in totale)",
+  "totalUsers": "Utenti sulla piattaforma: {total}"
 }

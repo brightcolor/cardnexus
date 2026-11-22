@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/pages/csv-import.json";
 import it from "@/messages/it/pages/csv-import.json";
+import en from "@/messages/en/pages/csv-import.json";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload, FileText, CheckCircle2, AlertCircle, Loader2, Download } from "lucide-react";
@@ -21,7 +22,7 @@ Erika,Musterfrau,erika@firma.de,Projektmanagerin,Firma GmbH,,+49 171 9876543,Man
 
 export function ImportClient() {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const fileRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -31,7 +32,7 @@ export function ImportClient() {
 
   function handleFile(f: File) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
     if (!f.name.endsWith(".csv")) {
       setError(t("fileRequired"));
       return;
@@ -43,7 +44,7 @@ export function ImportClient() {
 
   async function upload() {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
     if (!file) return;
     setLoading(true);
     setError("");

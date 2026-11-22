@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/card-qr-code.json";
 import it from "@/messages/it/components/card-qr-code.json";
+import en from "@/messages/en/components/card-qr-code.json";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -14,7 +15,7 @@ interface QRCodeDisplayProps {
 
 export function QRCodeDisplay({ slug, size = 200 }: QRCodeDisplayProps) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const src = `/api/qr/${slug}`;
 
   function downloadQR() {

@@ -1,0 +1,17 @@
+{
+  "title": "Team",
+  "manageUsers": "Manage users",
+  "adminHint": "As a Super Admin, you can manage all users and organizations from the admin panel. The Team area is for organization members.",
+  "adminPanel": "Admin panel",
+  "suspended": "Organization suspended",
+  "subscribe": "Subscribe",
+  "directory": "Team directory",
+  "upgrade": "Upgrade",
+  "createOrg": "Create an organization",
+  "createOrgHint": "Create an organization to manage your team and its business cards.",
+  "suspendedAdmin": "The Business plan for {organization} has expired. Your data is still available. Reactivate your plan to restore the organization immediately.",
+  "suspendedMember": "{organization} is suspended. Contact your administrator.",
+  "suspendedSince": "Suspended since {date}",
+  "businessHint": "The {plan} gives you access to the team directory, member management and invitations.",
+  "businessPlan": "Business plan"
+}

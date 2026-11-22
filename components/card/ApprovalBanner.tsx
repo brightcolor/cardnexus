@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/card-approval.json";
 import it from "@/messages/it/components/card-approval.json";
+import en from "@/messages/en/components/card-approval.json";
 import { Clock, XCircle } from "lucide-react";
 
 interface Props {
@@ -13,7 +14,7 @@ interface Props {
 
 export function ApprovalBanner({ status, note }: Props) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   if (status === "pending") {
     return (
       <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">

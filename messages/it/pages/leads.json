@@ -11,5 +11,12 @@
   "delete": "Elimina contatto",
   "noResults": "Nessun risultato per «{query}»",
   "single": "contatto",
-  "multiple": "contatti"
+  "multiple": "contatti",
+  "csvDate": "Data",
+  "csvName": "Nome",
+  "csvEmail": "Email",
+  "csvPhone": "Telefono",
+  "csvMessage": "Messaggio",
+  "csvCard": "Biglietto da visita",
+  "csvMember": "Membro"
 }

@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/gradient-card.json";
 import it from "@/messages/it/components/gradient-card.json";
+import en from "@/messages/en/components/gradient-card.json";
 import { Phone, Mail, Globe, MapPin } from "lucide-react";
 import type { CardData } from "@/types";
 import { fontClass, shadowClass, avatarBorderStyle } from "../CardPreview";
@@ -20,7 +21,7 @@ function darken(hex: string, amount = 0.35): string {
 
 export function GradientTemplate({ card }: { card: Partial<CardData> }) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const color   = card.primaryColor ?? "#7c3aed";
   const accent  = card.accentColor  ?? darken(color, 0.2);
   const font    = fontClass(card.fontFamily);

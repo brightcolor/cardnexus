@@ -1,0 +1,9 @@
+{
+  "notFound": "Team not found",
+  "empty": "No public cards yet.",
+  "poweredBy": "Powered by",
+  "noName": "Unnamed member",
+  "viewCard": "View card",
+  "title": "Team – {name}",
+  "description": "Digital business cards from the {name} team"
+}

@@ -1,0 +1,13 @@
+{
+  "title": "Welcome to {app}",
+  "subject": "Welcome to {app}!",
+  "greeting": "Hi {name} 👋",
+  "intro": "Your {app} account is ready.",
+  "description": "Create your digital business card and share it by link, QR code or NFC.",
+  "dashboard": "Open dashboard",
+  "nextSteps": "Get started",
+  "customize": "Customize your business card",
+  "share": "Download a QR code or set up an NFC tag",
+  "analytics": "Track your card visits in Analytics",
+  "reason": "You received this email because you created an account."
+}

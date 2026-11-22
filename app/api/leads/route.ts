@@ -3,6 +3,7 @@ import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/api/lead-capture.json";
 import it from "@/messages/it/api/lead-capture.json";
+import en from "@/messages/en/api/lead-capture.json";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { canReadCard, publishedCardScope, unexpiredCardScope } from "@/lib/card-publication";
@@ -23,7 +24,7 @@ const schema = z.object({
 
 export async function POST(req: NextRequest) {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   try {
     const body = await req.json();
     const data = schema.parse(body);

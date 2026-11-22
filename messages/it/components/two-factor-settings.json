@@ -20,5 +20,7 @@
   "confirmEnable": "Attiva",
   "enabled": "Autenticazione a due fattori attivata ✓",
   "nextLogin": "Al prossimo accesso dovrai inserire anche il codice dell’app di autenticazione.",
-  "close": "Chiudi"
+  "close": "Chiudi",
+  "copied": "Copiato",
+  "copy": "Copia"
 }

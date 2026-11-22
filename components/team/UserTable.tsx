@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/member-table.json";
 import it from "@/messages/it/components/member-table.json";
+import en from "@/messages/en/components/member-table.json";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -44,7 +45,7 @@ const roleBadgeVariant: Record<string, "default" | "secondary" | "outline" | "wa
 
 export function UserTable({ users, currentUserId, currentUserRole, onRoleChange, onDelete }: UserTableProps) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   async function handleRoleChange(userId: string, role: string) {

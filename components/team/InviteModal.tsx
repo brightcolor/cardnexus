@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/invite-member.json";
 import it from "@/messages/it/components/invite-member.json";
+import en from "@/messages/en/components/invite-member.json";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ interface InviteModalProps {
 
 export function InviteModal({ onInvited }: InviteModalProps) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("member");
@@ -37,11 +38,11 @@ export function InviteModal({ onInvited }: InviteModalProps) {
         body: JSON.stringify({ email, role }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Fehler");
+      if (!res.ok) throw new Error(json.error ?? t("inviteFailed"));
       setInviteUrl(json.inviteUrl);
       onInvited?.();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Fehler");
+      setError(e instanceof Error ? e.message : t("inviteFailed"));
     } finally {
       setLoading(false);
     }

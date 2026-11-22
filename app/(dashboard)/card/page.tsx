@@ -2,6 +2,7 @@ import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/pages/my-card.json";
 import it from "@/messages/it/pages/my-card.json";
+import en from "@/messages/en/pages/my-card.json";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -17,7 +18,7 @@ import Link from "next/link";
 import { BarChart2 } from "lucide-react";
 
 export async function generateMetadata() {
-  return { title: translator(await getLocale(), de, it)("heading") };
+  return { title: translator(await getLocale(), de, it, en)("heading") };
 }
 
 export default async function CardPage({
@@ -26,7 +27,7 @@ export default async function CardPage({
   searchParams: Promise<{ card?: string }>;
 }) {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const session = await auth.api.getSession({ headers: await headers() });
   const user = session!.user as {
     id: string;

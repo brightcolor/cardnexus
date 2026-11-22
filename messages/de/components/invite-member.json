@@ -9,5 +9,6 @@
   "create": "Einladung erstellen",
   "created": "Einladung erstellt!",
   "sendAnother": "Weitere einladen",
-  "shareHint": "Link an {email} senden (gültig 7 Tage)"
+  "shareHint": "Link an {email} senden (gültig 7 Tage)",
+  "inviteFailed": "Einladung konnte nicht erstellt werden."
 }

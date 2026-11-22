@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/pages/campaigns.json";
 import it from "@/messages/it/pages/campaigns.json";
+import en from "@/messages/en/pages/campaigns.json";
 import { useState } from "react";
 import type { Campaign } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,7 @@ interface Props {
 
 export function CampaignsClient({ campaigns: init, cardSlug, baseUrl, hasCard }: Props) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const [campaigns, setCampaigns] = useState(init);
   const [name, setName] = useState("");
   const [expiresAt, setExpiresAt] = useState("");

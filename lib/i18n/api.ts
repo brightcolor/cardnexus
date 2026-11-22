@@ -3,15 +3,16 @@ import { getLocale } from "./server";
 import { translator } from "./messages";
 import de from "@/messages/de/api/errors.json";
 import it from "@/messages/it/api/errors.json";
+import en from "@/messages/en/api/errors.json";
 
 export async function apiMessage(key: keyof typeof de, values?: Record<string, string | number>) {
-  return translator(await getLocale(), de, it)(key, values);
+  return translator(await getLocale(), de, it, en)(key, values);
 }
 
 export async function apiValidation(error: ZodError) {
   const locale = await getLocale();
   if (locale === "de") return flattenError(error);
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   return flattenError(error, (issue) => {
     switch (issue.code) {
       case "invalid_format": return t(issue.format === "email" ? "invalidEmail" : "invalidValue");
@@ -24,12 +25,12 @@ export async function apiValidation(error: ZodError) {
 
 export async function apiCardLimit(count: number, offerUpgrade = false) {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const message = t(count === 1 ? "cardLimitOne" : "cardLimitOther", { count });
   return offerUpgrade ? message + " " + t("upgradeMore") : message;
 }
 
 export async function apiProviderError(original: string, key: keyof typeof de) {
   const locale = await getLocale();
-  return locale === "de" ? original : translator(locale, de, it)(key);
+  return locale === "de" ? original : translator(locale, de, it, en)(key);
 }

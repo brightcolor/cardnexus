@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/card-domain.json";
 import it from "@/messages/it/components/card-domain.json";
+import en from "@/messages/en/components/card-domain.json";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import type { CardData } from "@/types";
@@ -17,7 +18,7 @@ interface Props {
 
 export function DomainSection({ card, update, allowedDomains, canCustomDomain }: Props) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   if (!((allowedDomains && allowedDomains.length > 0) || canCustomDomain)) return null;
 
   return (

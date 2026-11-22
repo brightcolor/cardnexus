@@ -19,5 +19,6 @@
   "settingsSaved": "Impostazioni salvate",
   "saveSettings": "Salva impostazioni",
   "comingSoon": "In arrivo",
-  "walletDescription": "Presto potrai salvare i biglietti da visita direttamente in Apple Wallet o Google Wallet."
+  "walletDescription": "Presto potrai salvare i biglietti da visita direttamente in Apple Wallet o Google Wallet.",
+  "emailChangeFailed": "Non è stato possibile cambiare l’indirizzo email."
 }

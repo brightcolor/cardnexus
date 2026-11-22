@@ -9,5 +9,6 @@
   "create": "Crea invito",
   "created": "Invito creato",
   "sendAnother": "Invita un’altra persona",
-  "shareHint": "Invia il link a {email}. È valido per 7 giorni."
+  "shareHint": "Invia il link a {email}. È valido per 7 giorni.",
+  "inviteFailed": "Non è stato possibile creare l’invito."
 }

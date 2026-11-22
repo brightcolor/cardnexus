@@ -2,6 +2,7 @@ import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/pages/campaign-overview.json";
 import it from "@/messages/it/pages/campaign-overview.json";
+import en from "@/messages/en/pages/campaign-overview.json";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -11,12 +12,12 @@ import { UpgradePrompt } from "@/components/plan/UpgradePrompt";
 import type { Campaign } from "@/types";
 
 export async function generateMetadata() {
-  return { title: translator(await getLocale(), de, it)("title") };
+  return { title: translator(await getLocale(), de, it, en)("title") };
 }
 
 export default async function CampaignsPage() {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const session = await auth.api.getSession({ headers: await headers() });
   const user = session!.user as { id: string; plan?: string; planExpiresAt?: Date };
 

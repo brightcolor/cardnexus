@@ -2,6 +2,7 @@ import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/pages/home.json";
 import it from "@/messages/it/pages/home.json";
+import en from "@/messages/en/pages/home.json";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +16,7 @@ import { FaqSection } from "./FaqSection";
 
 export default async function LandingPage() {
   const [locale, { appName, logoUrl }] = await Promise.all([getLocale(), getPlatformSettings()]);
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const brand = (
     <>
       {logoUrl ? (

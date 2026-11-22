@@ -8,12 +8,13 @@ import { getLocale } from "@/lib/i18n/server";
 import { translator } from "@/lib/i18n/messages";
 import de from "@/messages/de/pages/site.json";
 import it from "@/messages/it/pages/site.json";
+import en from "@/messages/en/pages/site.json";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const s = await getPlatformSettings();
 
-  const t = translator(await getLocale(), de, it);
+  const t = translator(await getLocale(), de, it, en);
 
   return {
     title: {

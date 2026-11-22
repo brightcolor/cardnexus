@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/card-switcher.json";
 import it from "@/messages/it/components/card-switcher.json";
+import en from "@/messages/en/components/card-switcher.json";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,7 @@ interface CardSwitcherProps {
 
 export function CardSwitcher({ cards, activeCardId, maxCards = Infinity }: CardSwitcherProps) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
@@ -88,7 +89,7 @@ export function CardSwitcher({ cards, activeCardId, maxCards = Infinity }: CardS
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
-      if (!res.ok) throw new Error("Fehler");
+      if (!res.ok) throw new Error(t("deleteFailed"));
       // If we deleted the active card, route to remaining default
       const remaining = cards.find((c) => c.id !== id);
       if (id === activeCardId && remaining) {

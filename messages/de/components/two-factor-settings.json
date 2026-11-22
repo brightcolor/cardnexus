@@ -20,5 +20,7 @@
   "confirmEnable": "Aktivieren",
   "enabled": "2FA aktiviert ✓",
   "nextLogin": "Beim nächsten Login wirst du zusätzlich nach einem Code aus deiner Authenticator-App gefragt.",
-  "close": "Schließen"
+  "close": "Schließen",
+  "copied": "Kopiert",
+  "copy": "Kopieren"
 }

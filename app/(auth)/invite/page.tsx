@@ -7,6 +7,7 @@ import { translator } from "@/lib/i18n/messages";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import de from "@/messages/de/pages/accept-invitation.json";
 import it from "@/messages/it/pages/accept-invitation.json";
+import en from "@/messages/en/pages/accept-invitation.json";
 import { InviteActions } from "./InviteActions";
 
 export const metadata = { referrer: "no-referrer" as const };
@@ -15,7 +16,7 @@ export default async function InvitePage({ searchParams }: { searchParams: Promi
   const { invite } = await searchParams;
   if (typeof invite !== "string" || !/^[\w-]{32}$/.test(invite)) notFound();
   const session = await auth.api.getSession({ headers: await headers() });
-  const t = translator(await getLocale(), de, it);
+  const t = translator(await getLocale(), de, it, en);
   const query = new URLSearchParams({ invite }).toString();
 
   return (

@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/pages/organization-members.json";
 import it from "@/messages/it/pages/organization-members.json";
+import en from "@/messages/en/pages/organization-members.json";
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -56,7 +57,7 @@ export function TeamClientPage({
   canImport = false,
 }: Props) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const router = useRouter();
   const [users, setUsers] = useState(initialUsers);
   const [invitations, setInvitations] = useState(initialInvitations);
@@ -262,7 +263,7 @@ export function TeamClientPage({
                     </div>
                   </td>
                   <td className="px-4 py-3 hidden md:table-cell">
-                    <Badge variant="secondary">{locale === "it" ? getRoleLabel(u.role, locale) : u.role}</Badge>
+                    <Badge variant="secondary">{getRoleLabel(u.role, locale)}</Badge>
                   </td>
                   <td className="px-4 py-3">
                     {u.card ? (
@@ -394,7 +395,7 @@ export function TeamClientPage({
                   <tr key={inv.id} className="hover:bg-muted/20">
                     <td className="px-4 py-3 font-medium">{inv.email}</td>
                     <td className="px-4 py-3">
-                      <Badge variant="secondary">{locale === "it" ? getRoleLabel(inv.role, locale) : inv.role}</Badge>
+                      <Badge variant="secondary">{getRoleLabel(inv.role, locale)}</Badge>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
                       {formatDate(inv.createdAt, locale)}

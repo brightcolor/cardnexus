@@ -3,6 +3,7 @@ import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/pages/custom-domain.json";
 import it from "@/messages/it/pages/custom-domain.json";
+import en from "@/messages/en/pages/custom-domain.json";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -10,12 +11,12 @@ import Link from "next/link";
 import { ArrowLeft, Globe, Server, CheckCircle } from "lucide-react";
 
 export async function generateMetadata() {
-  return { title: translator(await getLocale(), de, it)("title") };
+  return { title: translator(await getLocale(), de, it, en)("title") };
 }
 
 export default async function CustomDomainPage() {
   const [locale, { appName }] = await Promise.all([getLocale(), getPlatformSettings()]);
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
 

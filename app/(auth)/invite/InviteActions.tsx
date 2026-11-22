@@ -7,9 +7,10 @@ import { useLocale } from "@/components/i18n/LocaleProvider";
 import { Button } from "@/components/ui/button";
 import de from "@/messages/de/pages/accept-invitation.json";
 import it from "@/messages/it/pages/accept-invitation.json";
+import en from "@/messages/en/pages/accept-invitation.json";
 
 export function InviteActions({ token, email, verified }: { token: string; email: string; verified: boolean }) {
-  const t = translator(useLocale(), de, it);
+  const t = translator(useLocale(), de, it, en);
   const [pending, setPending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");

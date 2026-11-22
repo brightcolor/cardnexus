@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import type { Locale } from "@/lib/i18n/locales";
 import de from "@/messages/de/common.json";
 import it from "@/messages/it/common.json";
+import en from "@/messages/en/common.json";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -36,7 +37,7 @@ export function getInitials(name: string): string {
 }
 
 export function getRoleLabel(role: string, locale: Locale = "de"): string {
-  const labels: Record<string, string> = locale === "it" ? it : de;
+  const labels: Record<string, string> = { de: de, it: it, en: en }[locale];
   return Object.hasOwn(labels, role) ? labels[role] : role;
 }
 

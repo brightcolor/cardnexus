@@ -2,6 +2,7 @@ import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/pages/admin-cards.json";
 import it from "@/messages/it/pages/admin-cards.json";
+import en from "@/messages/en/pages/admin-cards.json";
 import { db } from "@/lib/db";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -11,12 +12,12 @@ import { getInitials, formatDate } from "@/lib/utils";
 import { Pencil, Eye, Globe, EyeOff } from "lucide-react";
 
 export async function generateMetadata() {
-  return { title: translator(await getLocale(), de, it)("title") };
+  return { title: translator(await getLocale(), de, it, en)("title") };
 }
 
 export default async function AdminCardsPage() {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const cards = await db.card.findMany({
     include: {
       user: { select: { name: true, email: true, image: true } },

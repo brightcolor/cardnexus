@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/classic-card.json";
 import it from "@/messages/it/components/classic-card.json";
+import en from "@/messages/en/components/classic-card.json";
 import { Phone, Mail, Globe, MapPin, Linkedin, Twitter, Instagram, Github, Youtube } from "lucide-react";
 import type { CardData } from "@/types";
 import { fontClass, radiusClass, radiusInnerClass, shadowClass, cardBgStyle, avatarBorderStyle } from "../CardPreview";
@@ -11,7 +12,7 @@ import { SocialLinks } from "./SocialLinks";
 
 export function ClassicTemplate({ card }: { card: Partial<CardData> }) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const color  = card.primaryColor ?? "#0F172A";
   const accent = card.accentColor  ?? color;
   const layout      = card.layoutStyle ?? "standard";

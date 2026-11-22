@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/analytics-technology.json";
 import it from "@/messages/it/components/analytics-technology.json";
+import en from "@/messages/en/components/analytics-technology.json";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell } from "recharts";
 import { Monitor, Cpu } from "lucide-react";
@@ -14,7 +15,7 @@ const OS_COLORS     = ["#0F172A", "#64748B", "#94A3B8", "#CBD5E1", "#E2E8F0", "#
 
 function PieLegend({ items, colors }: { items: { label: string; count: number }[]; colors: string[] }) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   if (items.length === 0) return <p className="text-sm text-muted-foreground">{t("empty")}</p>;
   const pieData = items.map((i) => ({ name: i.label, value: i.count }));
   return (
@@ -44,7 +45,7 @@ interface Props {
 
 export function AnalyticsTech({ browserSplit, osSplit }: Props) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   if (browserSplit.length === 0 && osSplit.length === 0) return null;
   return (
     <div className="grid md:grid-cols-2 gap-4">

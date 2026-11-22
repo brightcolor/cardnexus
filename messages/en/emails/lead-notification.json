@@ -1,0 +1,12 @@
+{
+  "title": "New lead for {card}",
+  "subject": "New lead: {lead} ({card})",
+  "heading": "You have a new lead",
+  "body": "{lead} shared their contact details on the {card} business card.",
+  "email": "Email",
+  "phone": "Phone",
+  "message": "Message",
+  "name": "Name",
+  "viewLeads": "View leads",
+  "reason": "You received this email because you enabled instant notifications for new leads. You can change this in Settings."
+}

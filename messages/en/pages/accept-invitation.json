@@ -1,0 +1,9 @@
+{
+  "title": "Organization invitation",
+  "signIn": "Sign in",
+  "register": "Create an account",
+  "verify": "Verify your email address",
+  "sent": "Verification email sent.",
+  "accept": "Accept invitation",
+  "error": "Could not accept the invitation."
+}

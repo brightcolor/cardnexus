@@ -2,6 +2,7 @@ import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/api/upload.json";
 import it from "@/messages/it/api/upload.json";
+import en from "@/messages/en/api/upload.json";
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -27,7 +28,7 @@ const MAX_UPLOADS_PER_USER = 20;
 
 export async function POST(request: NextRequest) {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return NextResponse.json({ error: t("unauthorized") }, { status: 401 });
 

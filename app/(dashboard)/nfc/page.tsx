@@ -2,18 +2,19 @@ import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/pages/nfc.json";
 import it from "@/messages/it/pages/nfc.json";
+import en from "@/messages/en/pages/nfc.json";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { Smartphone, Nfc, ExternalLink, Copy } from "lucide-react";
 
 export async function generateMetadata() {
-  return { title: translator(await getLocale(), de, it)("title") };
+  return { title: translator(await getLocale(), de, it, en)("title") };
 }
 
 export default async function NfcPage() {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const hdrs = await headers();
   const session = await auth.api.getSession({ headers: hdrs });
   const user = session!.user as { id: string };

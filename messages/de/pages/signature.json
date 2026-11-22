@@ -34,5 +34,15 @@
   "appleStep1": "Mail → Einstellungen → Signaturen",
   "appleStep2": "„+\" klicken, Namen eingeben",
   "appleStep3": "Haken bei „Immer klassisches Design\" entfernen",
-  "appleStep4": "HTML-Code als .html-Datei speichern und in das Signaturfeld ziehen"
+  "appleStep4": "HTML-Code als .html-Datei speichern und in das Signaturfeld ziehen",
+  "compactStyle": "Kompakt",
+  "compactStyleDescription": "Zweispaltig, klein",
+  "richStyleDescription": "Foto und Social-Links",
+  "modernStyleDescription": "Farbiger Headerstreifen",
+  "minimalStyleDescription": "Nur Text, keine Icons",
+  "darkStyleDescription": "Dunkler Hintergrund",
+  "from": "Von:",
+  "to": "An:",
+  "subject": "Betr.:",
+  "exampleSubject": "Meine Nachricht"
 }

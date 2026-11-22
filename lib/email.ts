@@ -1,25 +1,34 @@
 import orgRestoredDe from "@/messages/de/emails/organization-restored.json";
 import orgRestoredIt from "@/messages/it/emails/organization-restored.json";
+import orgRestoredEn from "@/messages/en/emails/organization-restored.json";
 import orgFrozenDe from "@/messages/de/emails/organization-frozen.json";
 import orgFrozenIt from "@/messages/it/emails/organization-frozen.json";
+import orgFrozenEn from "@/messages/en/emails/organization-frozen.json";
 import nodemailer from "nodemailer";
 import { db } from "./db";
 import { defaultLocale, parseLocale, type Locale } from "./i18n/locales";
 import { translator } from "./i18n/messages";
 import layoutDe from "@/messages/de/emails/layout.json";
 import layoutIt from "@/messages/it/emails/layout.json";
+import layoutEn from "@/messages/en/emails/layout.json";
 import invitationDe from "@/messages/de/emails/invitation.json";
 import invitationIt from "@/messages/it/emails/invitation.json";
+import invitationEn from "@/messages/en/emails/invitation.json";
 import passwordResetDe from "@/messages/de/emails/password-reset.json";
 import passwordResetIt from "@/messages/it/emails/password-reset.json";
+import passwordResetEn from "@/messages/en/emails/password-reset.json";
 import welcomeDe from "@/messages/de/emails/welcome.json";
 import welcomeIt from "@/messages/it/emails/welcome.json";
+import welcomeEn from "@/messages/en/emails/welcome.json";
 import leadNotificationDe from "@/messages/de/emails/lead-notification.json";
 import leadNotificationIt from "@/messages/it/emails/lead-notification.json";
+import leadNotificationEn from "@/messages/en/emails/lead-notification.json";
 import emailChangeNotificationDe from "@/messages/de/emails/email-change.json";
 import emailChangeNotificationIt from "@/messages/it/emails/email-change.json";
+import emailChangeNotificationEn from "@/messages/en/emails/email-change.json";
 import verificationDe from "@/messages/de/emails/email-verification.json";
 import verificationIt from "@/messages/it/emails/email-verification.json";
+import verificationEn from "@/messages/en/emails/email-verification.json";
 
 
 // ── Transport ──────────────────────────────────────────────────────────────
@@ -68,7 +77,7 @@ function strong(value: string) {
 
 // ── Base layout ────────────────────────────────────────────────────────────
 function layout(locale: Locale, title: string, body: string) {
-  const t = translator(locale, layoutDe, layoutIt);
+  const t = translator(locale, layoutDe, layoutIt, layoutEn);
   return `<!DOCTYPE html>
 <html lang="${locale}">
 <head>
@@ -150,7 +159,7 @@ export async function sendEmailVerification({ to, url }: { to: string; url: stri
   const transport = createTransport();
   if (!transport) throw new Error("SMTP unavailable");
   const locale = await recipientLocale(to);
-  const t = translator(locale, verificationDe, verificationIt);
+  const t = translator(locale, verificationDe, verificationIt, verificationEn);
   const subject = t("subject");
   const html = layout(locale, esc(subject), h1(esc(subject)) + p(esc(t("body"))) + btn(esc(t("confirm")), esc(url)));
   await transport.sendMail({ from: FROM, to, subject, html });
@@ -166,7 +175,7 @@ export async function sendInvitationEmail({
   inviteUrl: string;
 }) {
   const locale = await recipientLocale(to);
-  const t = translator(locale, invitationDe, invitationIt);
+  const t = translator(locale, invitationDe, invitationIt, invitationEn);
   const roleLabel: Record<string, string> = {
     company_admin: t("admin"),
     team_leader:   t("leader"),
@@ -199,7 +208,7 @@ export async function sendWelcomeEmail({
   dashboardUrl: string;
 }) {
   const locale = await recipientLocale(to);
-  const t = translator(locale, welcomeDe, welcomeIt);
+  const t = translator(locale, welcomeDe, welcomeIt, welcomeEn);
   const html = layout(
     locale,
     esc(t("title", { app: APP_NAME })),
@@ -241,7 +250,7 @@ export async function sendLeadNotificationEmail({
   dashboardUrl: string;
 }) {
   const locale = await recipientLocale(to);
-  const t = translator(locale, leadNotificationDe, leadNotificationIt);
+  const t = translator(locale, leadNotificationDe, leadNotificationIt, leadNotificationEn);
   const rows = [
     leadEmail ? `<tr><td style="color:#6b7280;padding:4px 0;width:80px;">${t("email")}</td><td style="padding:4px 0;"><a href="mailto:${esc(leadEmail)}" style="color:#0f172a;">${esc(leadEmail)}</a></td></tr>` : "",
     leadPhone ? `<tr><td style="color:#6b7280;padding:4px 0;">${t("phone")}</td><td style="padding:4px 0;">${esc(leadPhone)}</td></tr>` : "",
@@ -278,7 +287,7 @@ export async function sendOrgFrozenEmail({
   upgradeUrl: string;
 }) {
   const locale = await recipientLocale(to);
-  const t = translator(locale, orgFrozenDe, orgFrozenIt);
+  const t = translator(locale, orgFrozenDe, orgFrozenIt, orgFrozenEn);
   const html = layout(
     locale,
     esc(t("title", { org: orgName })),
@@ -319,7 +328,7 @@ export async function sendOrgRestoredEmail({
   dashboardUrl: string;
 }) {
   const locale = await recipientLocale(to);
-  const t = translator(locale, orgRestoredDe, orgRestoredIt);
+  const t = translator(locale, orgRestoredDe, orgRestoredIt, orgRestoredEn);
   const html = layout(
     locale,
     esc(t("title", { org: orgName })),
@@ -345,7 +354,7 @@ export async function sendEmailChangeNotification({
   userId: string;
 }) {
   const locale = await recipientLocale(to, userId);
-  const t = translator(locale, emailChangeNotificationDe, emailChangeNotificationIt);
+  const t = translator(locale, emailChangeNotificationDe, emailChangeNotificationIt, emailChangeNotificationEn);
   const html = layout(
     locale,
     esc(t("subject", { app: APP_NAME })),
@@ -368,7 +377,7 @@ export async function sendPasswordResetEmail({
   url: string;
 }) {
   const locale = await recipientLocale(to);
-  const t = translator(locale, passwordResetDe, passwordResetIt);
+  const t = translator(locale, passwordResetDe, passwordResetIt, passwordResetEn);
   const html = layout(
     locale,
     esc(t("subject", { app: APP_NAME })),

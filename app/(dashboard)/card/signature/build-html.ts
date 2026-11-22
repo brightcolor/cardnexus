@@ -1,6 +1,7 @@
 import type { Locale } from "@/lib/i18n/locales";
 import de from "@/messages/de/components/signature-export.json";
 import it from "@/messages/it/components/signature-export.json";
+import en from "@/messages/en/components/signature-export.json";
 import type { CardData } from "@/types";
 
 export type SigStyle = "standard" | "compact" | "rich" | "modern" | "minimal" | "dark";
@@ -48,7 +49,7 @@ function addressHtml(address?: string | null) {
 }
 
 export function buildPlainText(card: CardData, locale: Locale = "de"): string {
-  const labels = locale === "it" ? it : de;
+  const labels = { de: de, it: it, en: en }[locale];
   const name = `${card.firstName ?? ""} ${card.lastName ?? ""}`.trim();
   const header = [name, [card.title, card.company].filter(Boolean).join(" | ")].filter(Boolean);
   const contact = [
@@ -62,7 +63,7 @@ export function buildPlainText(card: CardData, locale: Locale = "de"): string {
 }
 
 export function buildHtml(card: CardData, style: SigStyle, baseUrl: string, opts: SigOptions, locale: Locale = "de"): string {
-  const labels = locale === "it" ? it : de;
+  const labels = { de: de, it: it, en: en }[locale];
   const { color, showAvatar, showSocials, showCardLink, footerText } = opts;
   const name    = `${card.firstName ?? ""} ${card.lastName ?? ""}`.trim();
   const avatar  = card.avatarUrl && showAvatar ? abs(card.avatarUrl, baseUrl) : null;

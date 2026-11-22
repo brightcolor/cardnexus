@@ -1,0 +1,18 @@
+{
+  "users": "Users",
+  "newUsers": "New users",
+  "cards": "Business cards",
+  "events": "Events",
+  "heading": "Platform overview",
+  "description": "Activity and usage across the platform.",
+  "planDistribution": "Plan distribution",
+  "revenueEstimate": "Estimated revenue",
+  "mrr": "Monthly recurring revenue",
+  "basedOn": "Based on active subscriptions",
+  "organizations": "Organizations",
+  "paying": "Paying customers",
+  "local": "Local environment",
+  "changelog": "Changelog",
+  "newFeature": "New",
+  "fix": "Fix"
+}

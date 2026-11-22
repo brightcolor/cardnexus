@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/account-actions.json";
 import it from "@/messages/it/components/account-actions.json";
+import en from "@/messages/en/components/account-actions.json";
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,7 @@ export function AccountActions() {
 
 function PasswordCard() {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [busy, setBusy] = useState(false);
@@ -113,7 +114,7 @@ function PasswordCard() {
 
 function DataExportCard() {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const [busy, setBusy] = useState(false);
 
   async function downloadExport() {
@@ -165,7 +166,7 @@ function DataExportCard() {
 
 function DeleteAccountCard() {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const REQUIRED = t("deleteToken");
@@ -208,9 +209,7 @@ function DeleteAccountCard() {
             <AlertDialogHeader>
               <AlertDialogTitle>{t("confirmTitle")}</AlertDialogTitle>
               <AlertDialogDescription>
-                {t("irreversiblePrefix")} <strong>{t("irreversible")}</strong> gemacht werden. Alle
-                deine Karten, Leads, Analytics, Webhooks und API-Keys werden
-                unwiderruflich gelöscht.
+                {t("irreversiblePrefix")} <strong>{t("irreversible")}</strong>{t("irreversibleSuffix")}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <div className="space-y-1.5">

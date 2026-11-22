@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/settings-integrations.json";
 import it from "@/messages/it/components/settings-integrations.json";
+import en from "@/messages/en/components/settings-integrations.json";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,7 @@ interface Webhook {
 
 export function WebhooksCard() {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const [items, setItems] = useState<Webhook[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -47,7 +48,7 @@ export function WebhooksCard() {
 
   async function create(e: React.FormEvent) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
     e.preventDefault();
     setErr("");
     setBusy(true);
@@ -80,7 +81,7 @@ export function WebhooksCard() {
 
   async function remove(id: string) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
     if (!confirm(t("deleteHook"))) return;
     const res = await fetch("/api/webhooks", {
       method: "DELETE",
@@ -178,7 +179,7 @@ interface ApiKey {
 
 export function ApiKeysCard() {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const [items, setItems] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -198,7 +199,7 @@ export function ApiKeysCard() {
 
   async function create(e: React.FormEvent) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
     e.preventDefault();
     setBusy(true);
     const res = await fetch("/api/api-keys", {
@@ -221,7 +222,7 @@ export function ApiKeysCard() {
 
   async function remove(id: string) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
     if (!confirm(t("revokeKey"))) return;
     const res = await fetch("/api/api-keys", {
       method: "DELETE",
@@ -328,7 +329,7 @@ export function ApiKeysCard() {
 
 export function ReferralsCard() {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const [data, setData] = useState<{ code: string; signupCount: number; referralUrl: string } | null>(null);
   const [copied, setCopied] = useState(false);
 

@@ -27,5 +27,7 @@
   "title": "Benutzer verwalten",
   "all": "Alle Benutzer",
   "requestError": "Fehler: {detail}",
-  "networkError": "Netzwerkfehler: {detail}"
+  "networkError": "Netzwerkfehler: {detail}",
+  "searchResults": "{count} Treffer für „{query}“ ({total} gesamt)",
+  "totalUsers": "Benutzer auf der Plattform: {total}"
 }

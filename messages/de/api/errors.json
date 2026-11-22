@@ -58,5 +58,6 @@
   "cardLimitOne": "Dein Plan erlaubt maximal {count} Karte.",
   "cardLimitOther": "Dein Plan erlaubt maximal {count} Karten.",
   "upgradeMore": "Upgrade für mehr.",
-  "importRowError": "Die Zeile konnte nicht importiert werden."
+  "importRowError": "Die Zeile konnte nicht importiert werden.",
+  "defaultCardName": "Meine Karte"
 }

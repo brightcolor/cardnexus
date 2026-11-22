@@ -3,6 +3,7 @@ import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/pages/print.json";
 import it from "@/messages/it/pages/print.json";
+import en from "@/messages/en/pages/print.json";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { canReadCard, publicCardFields, publishedCardScope, unexpiredCardScope } from "@/lib/card-publication";
@@ -16,13 +17,13 @@ export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
   const card = await db.card.findUnique({ where: { slug, ...publishedCardScope, ...unexpiredCardScope(), passwordHash: null }, select: { firstName: true, lastName: true } });
   if (!card) return {};
-  const t = translator(await getLocale(), de, it);
+  const t = translator(await getLocale(), de, it, en);
   return { title: [card.firstName, card.lastName, t("subtitle")].filter(Boolean).join(" ") };
 }
 
 export default async function PrintPage({ params }: Props) {
   const [locale, { appName }] = await Promise.all([getLocale(), getPlatformSettings()]);
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const { slug } = await params;
   const raw = await db.card.findUnique({
     where: { slug, ...publishedCardScope, ...unexpiredCardScope() },

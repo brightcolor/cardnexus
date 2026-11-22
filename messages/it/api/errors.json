@@ -58,5 +58,6 @@
   "cardLimitOne": "Il tuo piano consente al massimo {count} biglietto da visita.",
   "cardLimitOther": "Il tuo piano consente al massimo {count} biglietti da visita.",
   "upgradeMore": "Passa a un piano superiore per aggiungerne altri.",
-  "importRowError": "Non è stato possibile importare questa riga."
+  "importRowError": "Non è stato possibile importare questa riga.",
+  "defaultCardName": "Il mio biglietto da visita"
 }

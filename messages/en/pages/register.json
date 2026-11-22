@@ -1,0 +1,14 @@
+{
+  "failure": "Could not create your account.",
+  "heading": "Create an account",
+  "invited": "You have been invited to join a team.",
+  "description": "Create your digital business card in minutes.",
+  "name": "Name",
+  "nameExample": "Jane Smith",
+  "email": "Email",
+  "password": "Password",
+  "passwordHint": "Use at least 8 characters.",
+  "submitting": "Creating account…",
+  "alreadyRegistered": "Already have an account?",
+  "signIn": "Sign in"
+}

@@ -3,6 +3,7 @@ import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/api/invitations.json";
 import it from "@/messages/it/api/invitations.json";
+import en from "@/messages/en/api/invitations.json";
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -19,7 +20,7 @@ const inviteSchema = z.object({
 
 export async function GET() {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return NextResponse.json({ error: t("unauthorized") }, { status: 401 });
 
@@ -41,7 +42,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return NextResponse.json({ error: t("unauthorized") }, { status: 401 });
 
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return NextResponse.json({ error: t("unauthorized") }, { status: 401 });
 

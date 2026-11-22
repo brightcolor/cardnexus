@@ -1,0 +1,16 @@
+{
+  "createError": "Could not create the organization.",
+  "unknownError": "An unknown error occurred.",
+  "organizationName": "Organization name",
+  "nameExample": "Example Company",
+  "slug": "URL slug",
+  "slugExample": "example-company",
+  "slugHint": "Use letters, numbers and hyphens.",
+  "color": "Brand color",
+  "colorHint": "Used as the default color for team cards.",
+  "creating": "Creating…",
+  "create": "Create organization",
+  "nextSteps": "You can invite members and customize your organization in",
+  "settings": "Settings",
+  "nextStepsEnd": "after creating it."
+}

@@ -5,6 +5,7 @@ import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/pages/public-directory.json";
 import it from "@/messages/it/pages/public-directory.json";
+import en from "@/messages/en/pages/public-directory.json";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { publishedCardScope, unexpiredCardScope } from "@/lib/card-publication";
@@ -18,7 +19,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const { orgSlug } = await params;
   const org = await db.organization.findUnique({ where: { slug: orgSlug, isActive: true, OR: [{ settings: null }, { settings: { teamDirectoryEnabled: true } }] }, select: { name: true } });
   if (!org) return { title: t("notFound") };
@@ -27,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PublicTeamPage({ params }: Props) {
   const [locale, { appName, logoUrl }] = await Promise.all([getLocale(), getPlatformSettings()]);
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const { orgSlug } = await params;
 
   const [org, orgUsers] = await Promise.all([
@@ -129,7 +130,7 @@ function MemberCard({
   orgColor: string;
   locale: Locale;
 }) {
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const color = member.primaryColor ?? orgColor;
   const name = `${member.firstName ?? ""} ${member.lastName ?? ""}`.trim();
   const initials = `${member.firstName?.[0] ?? ""}${member.lastName?.[0] ?? ""}`;

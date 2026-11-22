@@ -2,11 +2,12 @@ import { getLocale } from "@/lib/i18n/server";
 import { translator } from "@/lib/i18n/messages";
 import de from "@/messages/de/pages/admin-organizations.json";
 import it from "@/messages/it/pages/admin-organizations.json";
+import en from "@/messages/en/pages/admin-organizations.json";
 import { db } from "@/lib/db";
 import { OrgAdminClient } from "./client";
 
 export async function generateMetadata() {
-  return { title: translator(await getLocale(), de, it)("organizations") };
+  return { title: translator(await getLocale(), de, it, en)("organizations") };
 }
 
 export default async function AdminOrgsPage() {

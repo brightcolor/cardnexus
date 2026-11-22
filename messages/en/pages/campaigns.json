@@ -1,0 +1,15 @@
+{
+  "cardRequired": "Create a business card before setting up a campaign.",
+  "newCampaign": "New campaign",
+  "name": "Name",
+  "example": "Example: Trade show",
+  "expiry": "Expiration date",
+  "create": "Create campaign",
+  "empty": "No campaigns yet.",
+  "expired": "Expired",
+  "clicks": "Clicks",
+  "until": "Until",
+  "copyLink": "Copy link",
+  "testLink": "Test link",
+  "delete": "Delete"
+}

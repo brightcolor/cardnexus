@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/pages/widget.json";
 import it from "@/messages/it/pages/widget.json";
+import en from "@/messages/en/pages/widget.json";
 import { useState } from "react";
 import { Copy, Check, Code2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,7 @@ interface WidgetClientProps {
 
 export function WidgetClient({ cards, canSelectMultiple }: WidgetClientProps) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const [selectedSlug, setSelectedSlug] = useState(cards[0]?.slug ?? "");
   const [width, setWidth] = useState("400");
   const [height, setHeight] = useState("700");

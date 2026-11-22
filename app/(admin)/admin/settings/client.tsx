@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/pages/admin-settings.json";
 import it from "@/messages/it/pages/admin-settings.json";
+import en from "@/messages/en/pages/admin-settings.json";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,7 +21,7 @@ function parseAllowedDomains(val: string | null): string[] {
 
 export function AdminSettingsClient({ settings: initial }: { settings: PlatformSettings }) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const router = useRouter();
   const [s, setS] = useState(initial);
   const [saving, setSaving] = useState(false);
@@ -52,12 +53,12 @@ export function AdminSettingsClient({ settings: initial }: { settings: PlatformS
         body: JSON.stringify(payload),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(typeof json.error === "string" ? json.error : "Fehler");
+      if (!res.ok) throw new Error(typeof json.error === "string" ? json.error : t("saveFailed"));
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Fehler");
+      setError(e instanceof Error ? e.message : t("saveFailed"));
     } finally {
       setSaving(false);
     }

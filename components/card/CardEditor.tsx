@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/pages/card-editor.json";
 import it from "@/messages/it/pages/card-editor.json";
+import en from "@/messages/en/pages/card-editor.json";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -49,7 +50,7 @@ const SOCIAL_FIELDS = [
 
 export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, saveEndpoint, userPlan = "free", allowedDomains, canCustomDomain }: CardEditorProps) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const router = useRouter();
   const allTemplates = userPlan !== "free";
 

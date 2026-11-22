@@ -4,12 +4,13 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/faq.json";
 import it from "@/messages/it/components/faq.json";
+import en from "@/messages/en/components/faq.json";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 export function FaqSection({ appName }: { appName: string }) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const faqs = [
     {
       q: t("freeQuestion", { appName }),

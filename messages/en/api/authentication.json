@@ -1,0 +1,13 @@
+{
+  "credentials": "Invalid email or password.",
+  "invalidEmail": "Enter a valid email address.",
+  "emailInUse": "An account already exists with this email address.",
+  "shortPassword": "The password is too short.",
+  "longPassword": "The password is too long.",
+  "invalidPassword": "Incorrect password.",
+  "invalidToken": "This link is invalid or has expired.",
+  "invalidCode": "Invalid verification code.",
+  "rateLimit": "Too many attempts. Try again later.",
+  "generic": "Authentication failed.",
+  "proxyRateLimit": "Too many login attempts. Try again in a minute."
+}

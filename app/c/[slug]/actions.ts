@@ -4,6 +4,7 @@ import { getLocale } from "@/lib/i18n/server";
 import { translator } from "@/lib/i18n/messages";
 import de from "@/messages/de/components/card-password-gate.json";
 import it from "@/messages/it/components/card-password-gate.json";
+import en from "@/messages/en/components/card-password-gate.json";
 import { cookies, headers } from "next/headers";
 import { db } from "@/lib/db";
 import { verifyPassword, makeCardUnlockToken } from "@/lib/password-hash";
@@ -16,7 +17,7 @@ export async function unlockCard(
   slug: string,
   password: string
 ): Promise<{ ok: boolean; error?: string }> {
-  const t = translator(await getLocale(), de, it);
+  const t = translator(await getLocale(), de, it, en);
   const card = await db.card.findUnique({
     where: { slug, ...publishedCardScope },
     select: { passwordHash: true, expiresAt: true },

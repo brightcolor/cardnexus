@@ -4,6 +4,7 @@ import { getLocale } from "@/lib/i18n/server";
 import { translator } from "@/lib/i18n/messages";
 import de from "@/messages/de/pages/card-editor.json";
 import it from "@/messages/it/pages/card-editor.json";
+import en from "@/messages/en/pages/card-editor.json";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -148,6 +149,7 @@ export async function POST(req: NextRequest) {
     );
   }
   const isDefault = existingCount === 0;
+  const name = body.name ?? await apiMessage("defaultCardName");
 
   // Generate a unique slug by inserting and retrying on unique-constraint
   // violations (P2002). This is race-condition-safe — no gap between check
@@ -159,7 +161,7 @@ export async function POST(req: NextRequest) {
         data: {
           userId:       session.user.id,
           slug:         generateCardSlug(body.firstName, body.lastName),
-          name:         body.name ?? "Meine Karte",
+          name:         name,
           isDefault,
           isPublic:     body.isPublic ?? false,
           approvalStatus: dbUser?.organization?.settings?.managerApproval ? "pending" : "approved",
@@ -190,7 +192,7 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 

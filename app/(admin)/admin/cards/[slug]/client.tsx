@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/admin-card-preview.json";
 import it from "@/messages/it/components/admin-card-preview.json";
+import en from "@/messages/en/components/admin-card-preview.json";
 import { CardEditor } from "@/components/card/CardEditor";
 import { QRCodeDisplay } from "@/components/card/QRCodeDisplay";
 import type { CardData, DesignPolicy } from "@/types";
@@ -24,7 +25,7 @@ interface Props {
 
 export function AdminCardEditClient({ card }: Props) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const saveEndpoint = `/api/admin/cards/${card.slug}`;
 
   return (

@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/dashboard-header.json";
 import it from "@/messages/it/components/dashboard-header.json";
+import en from "@/messages/en/components/dashboard-header.json";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -34,7 +35,7 @@ interface HeaderProps {
 
 export function Header({ user, cardSlug, appName, orgName, logoUrl }: HeaderProps) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const router = useRouter();
   const { resolvedTheme, setTheme } = useTheme();
 

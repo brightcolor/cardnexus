@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/analytics-geography.json";
 import it from "@/messages/it/components/analytics-geography.json";
+import en from "@/messages/en/components/analytics-geography.json";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Globe, MapPin, Link as LinkIcon, Languages } from "lucide-react";
 import type { AnalyticsSummary } from "@/types";
@@ -20,7 +21,7 @@ function BarList({ items, labelKey, countKey }: {
   countKey: string;
 }) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const max = (items[0]?.[countKey] as number) ?? 1;
   if (items.length === 0) return <p className="text-sm text-muted-foreground">{t("empty")}</p>;
   return (
@@ -50,7 +51,7 @@ interface Props {
 
 export function AnalyticsGeo({ topCountries, topCities, topReferrers, topLanguages }: Props) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const hasAny = topCountries.length + topCities.length + topReferrers.length + topLanguages.length > 0;
   if (!hasAny) return null;
 

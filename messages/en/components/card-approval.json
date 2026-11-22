@@ -1,0 +1,6 @@
+{
+  "pending": "Awaiting approval",
+  "pendingHint": "Your card will be visible once it has been approved.",
+  "rejected": "Changes requested",
+  "rejectedHint": "Update the card and submit it for review again."
+}

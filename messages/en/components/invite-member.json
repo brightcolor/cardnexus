@@ -1,0 +1,14 @@
+{
+  "invite": "Invite member",
+  "heading": "Invite a team member",
+  "email": "Email address",
+  "role": "Role",
+  "leader": "Team leader",
+  "member": "Member",
+  "sending": "Sending…",
+  "create": "Create invitation",
+  "created": "Invitation created",
+  "sendAnother": "Send another invitation",
+  "shareHint": "Send this link to {email}. It is valid for 7 days.",
+  "inviteFailed": "Could not create the invitation."
+}

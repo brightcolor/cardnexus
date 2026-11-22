@@ -2,6 +2,7 @@ import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/components/admin-navigation.json";
 import it from "@/messages/it/components/admin-navigation.json";
+import en from "@/messages/en/components/admin-navigation.json";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -12,7 +13,7 @@ import { ArrowLeft, Users, Building2, LayoutDashboard, Settings2, CreditCard, Ac
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
 
   const adminNav = [
     { href: "/admin", label: t("overview"), icon: LayoutDashboard },

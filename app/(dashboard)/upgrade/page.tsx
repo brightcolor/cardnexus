@@ -2,6 +2,7 @@ import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/pages/billing.json";
 import it from "@/messages/it/pages/billing.json";
+import en from "@/messages/en/pages/billing.json";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -12,7 +13,7 @@ import { Check, ArrowLeft, Zap } from "lucide-react";
 import { UpgradeButtons } from "./UpgradeButtons";
 
 export async function generateMetadata() {
-  return { title: translator(await getLocale(), de, it)("metadata") };
+  return { title: translator(await getLocale(), de, it, en)("metadata") };
 }
 
 export default async function UpgradePage({
@@ -21,7 +22,7 @@ export default async function UpgradePage({
   searchParams: Promise<{ success?: string; canceled?: string }>;
 }) {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
 
   const FEATURE_LABELS: Record<string, string | ((v: number | boolean) => string)> = {
     whiteLabel:             t("whiteLabel"),

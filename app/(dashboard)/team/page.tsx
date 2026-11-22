@@ -2,6 +2,7 @@ import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/pages/team.json";
 import it from "@/messages/it/pages/team.json";
+import en from "@/messages/en/pages/team.json";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -13,12 +14,12 @@ import { Users, Zap, LayoutDashboard, Building2, SnowflakeIcon } from "lucide-re
 import { CreateOrgForm } from "./CreateOrgForm";
 
 export async function generateMetadata() {
-  return { title: translator(await getLocale(), de, it)("title") };
+  return { title: translator(await getLocale(), de, it, en)("title") };
 }
 
 export default async function TeamPage() {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const session = await auth.api.getSession({
     headers: await headers(),
     query: { disableCookieCache: true },

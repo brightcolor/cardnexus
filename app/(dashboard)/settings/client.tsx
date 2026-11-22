@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/pages/account-settings.json";
 import it from "@/messages/it/pages/account-settings.json";
+import en from "@/messages/en/pages/account-settings.json";
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -46,7 +47,7 @@ function parseJson<T>(val: string | null | undefined, fallback: T): T {
 
 export function SettingsClientPage({ user, org }: Props) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const [orgName, setOrgName]   = useState(org?.name ?? "");
   const [orgColor, setOrgColor] = useState(org?.primaryColor ?? "#0F172A");
 
@@ -130,7 +131,7 @@ export function SettingsClientPage({ user, org }: Props) {
       body: JSON.stringify({ email: newEmail }),
     });
     const data = await res.json();
-    if (!res.ok) { setEmailError(data.error ?? "Fehler"); }
+    if (!res.ok) { setEmailError(data.error ?? t("emailChangeFailed")); }
     else { setEmailSaved(true); setTimeout(() => setEmailSaved(false), 3000); setNewEmail(""); }
     setEmailSaving(false);
   }

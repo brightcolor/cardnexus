@@ -1,0 +1,12 @@
+{
+  "title": "Invitation to {orgName}",
+  "subject": "{senderName} invited you to join {orgName}",
+  "heading": "You have been invited",
+  "admin": "Administrator",
+  "leader": "Team leader",
+  "member": "Member",
+  "body": "{sender} invited you to join {organization} on {app} as a {role}.",
+  "description": "Accept the invitation to get started with your team.",
+  "accept": "Accept invitation",
+  "expiry": "This link is valid for 7 days. If you were not expecting this invitation, you can ignore this message.<br/>Link: {url}"
+}

@@ -6,10 +6,11 @@ import { toast } from "sonner";
 import { useLocale } from "./LocaleProvider";
 import de from "@/messages/de/components/language-switcher.json";
 import it from "@/messages/it/components/language-switcher.json";
+import en from "@/messages/en/components/language-switcher.json";
 
 export function LanguageSwitcher() {
   const locale = useLocale();
-  const messages = locale === "it" ? it : de;
+  const messages = { de: de, it: it, en: en }[locale];
   const [pending, startTransition] = useTransition();
   const [selected, setSelected] = useState<string>();
   return (
@@ -44,6 +45,7 @@ export function LanguageSwitcher() {
       >
         <option value="it" lang="it">Italiano</option>
         <option value="de" lang="de">Deutsch</option>
+        <option value="en" lang="en">English</option>
       </select>
     </label>
   );

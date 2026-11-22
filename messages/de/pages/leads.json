@@ -11,5 +11,12 @@
   "delete": "Lead löschen",
   "noResults": "Keine Ergebnisse für „{query}\"",
   "single": "Lead",
-  "multiple": "Leads"
+  "multiple": "Leads",
+  "csvDate": "Datum",
+  "csvName": "Name",
+  "csvEmail": "E-Mail",
+  "csvPhone": "Telefon",
+  "csvMessage": "Nachricht",
+  "csvCard": "Karte",
+  "csvMember": "Mitglied"
 }

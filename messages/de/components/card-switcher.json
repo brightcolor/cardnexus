@@ -10,5 +10,6 @@
   "delete": "Löschen",
   "creating": "Wird erstellt…",
   "cloning": "Wird geklont…",
-  "clone": "Klonen"
+  "clone": "Klonen",
+  "deleteFailed": "Karte konnte nicht gelöscht werden."
 }

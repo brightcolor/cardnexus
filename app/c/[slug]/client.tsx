@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/pages/public-card.json";
 import it from "@/messages/it/pages/public-card.json";
+import en from "@/messages/en/pages/public-card.json";
 import { useEffect, useState } from "react";
 import { CardPreview } from "@/components/card/CardPreview";
 import { QRCodeDisplay } from "@/components/card/QRCodeDisplay";
@@ -53,7 +54,7 @@ function readUtmFromUrl(): { utmSource?: string; utmMedium?: string; utmCampaign
 
 export function PublicCardView({ card, source, showBadge = true, showLeadForm = false, appName, logoUrl }: Props) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const [showQR, setShowQR] = useState(false);
   const [showLead, setShowLead] = useState(false);
   const [shared, setShared] = useState(false);
@@ -298,7 +299,7 @@ export function PublicCardView({ card, source, showBadge = true, showLeadForm = 
 
 function LeadModal({ card, onClose }: { card: CardData; onClose: () => void }) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);

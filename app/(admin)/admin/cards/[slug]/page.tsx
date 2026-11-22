@@ -2,6 +2,7 @@ import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/pages/admin-card-editor.json";
 import it from "@/messages/it/pages/admin-card-editor.json";
+import en from "@/messages/en/pages/admin-card-editor.json";
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -16,7 +17,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const { slug } = await params;
   return { title: t("title", { slug }) };
 }
@@ -27,7 +28,7 @@ export default async function AdminCardEditPage({
   params: Promise<{ slug: string }>;
 }) {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const { slug } = await params;
 
   const raw = await db.card.findUnique({

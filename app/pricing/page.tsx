@@ -2,6 +2,7 @@ import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/pages/pricing.json";
 import it from "@/messages/it/pages/pricing.json";
+import en from "@/messages/en/pages/pricing.json";
 import Link from "next/link";
 import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,12 +10,12 @@ import { PLANS, FREE_TEMPLATES } from "@/lib/plans";
 import type { Plan } from "@/lib/plans";
 
 export async function generateMetadata() {
-  return { title: translator(await getLocale(), de, it)("title") };
+  return { title: translator(await getLocale(), de, it, en)("title") };
 }
 
 export default async function PricingPage() {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const currency = new Intl.NumberFormat(locale, { style: "currency", currency: "EUR", minimumFractionDigits: 0 });
 
   const FEATURE_ROWS = [

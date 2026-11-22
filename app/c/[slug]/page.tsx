@@ -2,6 +2,7 @@ import { translator } from "@/lib/i18n/messages";
 import { getLocale } from "@/lib/i18n/server";
 import de from "@/messages/de/pages/public-card-status.json";
 import it from "@/messages/it/pages/public-card-status.json";
+import en from "@/messages/en/pages/public-card-status.json";
 import { notFound, redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import type { CardData } from "@/types";
@@ -19,7 +20,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const { slug } = await params;
   const card = await db.card.findUnique({
     where: { slug, ...publishedCardScope },
@@ -41,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PublicCardPage({ params, searchParams }: Props) {
   const locale = await getLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const { slug } = await params;
   const { source } = await searchParams;
 

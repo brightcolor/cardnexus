@@ -1,0 +1,7 @@
+{
+  "unauthorized": "Sign in to continue.",
+  "forbidden": "Access denied.",
+  "leaderRestriction": "Team leaders can only invite members.",
+  "alreadyInvited": "This person has already been invited.",
+  "notFound": "Invitation not found."
+}

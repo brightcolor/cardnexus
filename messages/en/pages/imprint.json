@@ -1,0 +1,21 @@
+{
+  "title": "Legal notice",
+  "home": "Back to home",
+  "heading": "Legal notice",
+  "publisher": "Information pursuant to § 5 TMG",
+  "publisherName": "[Name or company name]",
+  "publisherAddress": "[Street and number]",
+  "publisherCity": "[Postal code and city]",
+  "country": "Germany",
+  "contact": "Contact",
+  "email": "Email:",
+  "responsible": "Responsible for content (§ 55(2) RStV)",
+  "responsibleName": "[Name]",
+  "responsibleAddress": "[Address as above]",
+  "liability": "Liability",
+  "liabilityText": "We prepared this site's content with the utmost care. However, we cannot guarantee that it is accurate, complete or up to date. As a service provider, we are responsible for the content we publish on these pages under general law pursuant to § 7(1) TMG.",
+  "disputes": "Dispute resolution",
+  "disputeIntro": "The European Commission provides a platform for online dispute resolution (ODR):",
+  "disputeDetails": ". Our email address is listed above. We are neither willing nor obliged to participate in dispute resolution proceedings before a consumer arbitration body.",
+  "templateReminder": "Replace the placeholders in brackets with your actual details."
+}

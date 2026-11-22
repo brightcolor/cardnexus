@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/components/card-password-gate.json";
 import it from "@/messages/it/components/card-password-gate.json";
+import en from "@/messages/en/components/card-password-gate.json";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ interface Props {
 
 export function CardPasswordGate({ slug }: Props) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");

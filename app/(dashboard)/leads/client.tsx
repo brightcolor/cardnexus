@@ -4,6 +4,7 @@ import { translator } from "@/lib/i18n/messages";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import de from "@/messages/de/pages/leads.json";
 import it from "@/messages/it/pages/leads.json";
+import en from "@/messages/en/pages/leads.json";
 import { useState } from "react";
 import type { Lead } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,7 @@ interface Props {
 
 export function LeadsClient({ leads: initialLeads, hasCard }: Props) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const [leads, setLeads] = useState(initialLeads);
   const [query, setQuery] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -145,7 +146,7 @@ function LeadCard({
   lead: Lead; onDelete: () => void; deleting: boolean;
 }) {
   const locale = useLocale();
-  const t = translator(locale, de, it);
+  const t = translator(locale, de, it, en);
   const [showFull, setShowFull] = useState(false);
   const date = new Date(lead.createdAt);
 
