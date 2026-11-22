@@ -96,13 +96,14 @@ CardNexus is a self-hosted **digital business card platform** that replaces pape
 | **12 card templates** | Classic, Modern, Minimal, Dark, Gradient, Glassmorphism, Bold, Elegant, Neon, Corporate, Retro, Wave |
 | **Brand customization** | Primary color, accent color, font family, layout style, corner radius |
 | **Avatar & cover photo** | Upload profile picture and cover background |
-| **Full contact block** | Phone, mobile, email, website, address |
+| **Full contact block** | Phone, mobile, email, website and a multiline address. Line breaks are preserved on cards, in the team directory and print view, and in email signatures and vCard downloads. |
 | **Social links** | LinkedIn, Xing, Twitter, Instagram, GitHub, YouTube and more |
 | **Custom link buttons** | Branded CTAs on your card (e.g. "Book a call") |
 | **Booking URL** | Link directly to your calendar (Cal.com, Calendly, etc.) |
-| **Email signature** | Auto-generated HTML signature for Gmail, Outlook and co. |
-| **vCard download** | One tap adds all contacts to phone address book |
-| **QR code** | Per-card QR code, color-matched, downloadable as SVG |
+| **Email signature** | Six layouts with independently selectable profile photo and company logo. Save footer notes and image preferences per card, and copy the signature as HTML or plain text. |
+| **vCard download** | Save contact details with the public card URL and an embedded JPEG when a profile photo has been uploaded. |
+| **QR code** | High-contrast black-on-white QR code, downloadable as SVG. |
+| **Dashboard sharing** | Open the default card using the public application URL set in Platform Settings. |
 | **Analytics** | Views, sources, devices, top clicked links — with UTM campaign breakdown |
 | **Realtime view counter** | Live updating view count on your dashboard |
 | **NFC setup guide** | Step-by-step instructions to program your NFC tag |
@@ -132,7 +133,7 @@ CardNexus is a self-hosted **digital business card platform** that replaces pape
 
 | Feature | Description |
 |---------|-------------|
-| **Platform branding** | Set app name, URL, favicon and logo — white-label ready |
+| **Platform branding** | Set the app name, URL, favicon and logo. The home page and admin area use the configured branding, as do platform badges on public cards and team directories. |
 | **Organization management** | Create, edit, delete organizations; assign company admin per org |
 | **User management** | View all users, change roles, plans, expiry dates and org assignment; ban, unban and delete individual users |
 | **Plan assignment** | Manually assign Free / Pro / Business plan to any user |
@@ -153,6 +154,8 @@ CardNexus is a self-hosted **digital business card platform** that replaces pape
 | **Role system** | `super_admin` → `company_admin` → `team_leader` → `member` |
 | **Invitation flow** | Invite members by email with role-scoped tokens |
 | **Image uploads** | Local storage by default, swap to S3 by pointing the upload handler |
+| **Languages** | English, Italian and German across the interface, system emails and localized error messages. |
+| **Public demo** | Open `/demo` from the home page to view a sample card without creating an account or seeding the database. |
 
 ---
 
