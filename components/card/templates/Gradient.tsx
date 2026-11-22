@@ -123,7 +123,7 @@ export function GradientTemplate({ card }: { card: Partial<CardData> }) {
 
         {card.showQrOnCard && card.slug && (
           <div className="mt-5 flex items-center gap-3">
-            <img src={`/api/qr/${card.slug}`} alt={t("qrAlt")} className="h-10 w-10 rounded opacity-90" />
+            <img src={`/api/qr/${card.slug}`} alt={t("qrAlt")} className="h-10 w-10 rounded" />
             <p className="text-xs text-white/50">{t("scan")}</p>
           </div>
         )}

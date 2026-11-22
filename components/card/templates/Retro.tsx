@@ -133,7 +133,7 @@ export function RetroTemplate({ card }: { card: Partial<CardData> }) {
 
         {card.showQrOnCard && card.slug && (
           <div className="mt-4 flex justify-center">
-            <img src={`/api/qr/${card.slug}`} alt={t("qrAlt")} className="h-14 w-14 opacity-50" />
+            <img src={`/api/qr/${card.slug}`} alt={t("qrAlt")} className="h-14 w-14" />
           </div>
         )}
       </div>

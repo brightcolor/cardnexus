@@ -61,7 +61,7 @@ export function BoldTemplate({ card }: { card: Partial<CardData> }) {
 
         {/* QR at bottom */}
         {card.showQrOnCard && card.slug
-          ? <img src={`/api/qr/${card.slug}`} alt={t("qrAlt")} className="h-12 w-12 invert opacity-60" />
+          ? <img src={`/api/qr/${card.slug}`} alt={t("qrAlt")} className="h-12 w-12" />
           : <div />}
       </div>
 

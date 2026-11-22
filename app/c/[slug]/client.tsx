@@ -270,7 +270,7 @@ export function PublicCardView({ card, source, showBadge = true, showLeadForm = 
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <QRCodeDisplay slug={card.slug} color={card.primaryColor} size={240} />
+            <QRCodeDisplay slug={card.slug} size={240} />
           </div>
         </div>
       )}

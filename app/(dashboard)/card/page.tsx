@@ -129,7 +129,7 @@ export default async function CardPage({
       {activeCard && (
         <div className="border-t border-border pt-8">
           <h2 className="text-lg font-semibold mb-4">{t("qr")}</h2>
-          <QRCodeDisplay slug={activeCard.slug} color={activeCard.primaryColor} />
+          <QRCodeDisplay slug={activeCard.slug} />
         </div>
       )}
     </div>

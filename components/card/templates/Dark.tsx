@@ -122,7 +122,7 @@ export function DarkTemplate({ card }: { card: Partial<CardData> }) {
 
         {card.showQrOnCard && card.slug && (
           <div className="mt-4 flex items-center gap-3">
-            <img src={`/api/qr/${card.slug}`} alt={t("qrAlt")} className="h-12 w-12 invert opacity-70" />
+            <img src={`/api/qr/${card.slug}`} alt={t("qrAlt")} className="h-12 w-12" />
             <p className="text-xs text-gray-500">{t("scan")}</p>
           </div>
         )}
