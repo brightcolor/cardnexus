@@ -59,6 +59,7 @@ export default async function PublicCardPage({ params, searchParams }: Props) {
       select: { cardSlug: true },
     });
     if (alias) redirect(`/c/${alias.cardSlug}${source ? `?source=${encodeURIComponent(source)}` : ""}`);
+    if (slug === "demo") redirect("/demo");
     notFound();
   }
 

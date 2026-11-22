@@ -7,12 +7,12 @@ import it from "@/messages/it/components/faq.json";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-export function FaqSection() {
+export function FaqSection({ appName }: { appName: string }) {
   const locale = useLocale();
   const t = translator(locale, de, it);
   const faqs = [
     {
-      q: t("freeQuestion"),
+      q: t("freeQuestion", { appName }),
       a: t("freeAnswer"),
     },
     {
@@ -24,7 +24,7 @@ export function FaqSection() {
       a: t("nfcAnswer"),
     },
     {
-      q: t("teamQuestion"),
+      q: t("teamQuestion", { appName }),
       a: t("teamAnswer"),
     },
     {

@@ -33,7 +33,7 @@ function isLikelyCustomDomain(host: string): boolean {
 // ─── Auth route constants ─────────────────────────────────────────────────────
 
 const PUBLIC_PAGES = new Set([
-  "/", "/login", "/login/2fa", "/register", "/invite",
+  "/", "/demo", "/login", "/login/2fa", "/register", "/invite",
   "/forgot-password", "/reset-password", "/pricing", "/impressum", "/datenschutz",
 ]);
 const AUTH_PATHS = ["/login", "/register"];

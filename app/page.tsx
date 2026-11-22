@@ -10,11 +10,24 @@ import {
   Shield, Megaphone, CalendarDays, Download,
 } from "lucide-react";
 import { PLANS } from "@/lib/plans";
+import { getPlatformSettings } from "@/lib/platform";
 import { FaqSection } from "./FaqSection";
 
 export default async function LandingPage() {
-  const locale = await getLocale();
+  const [locale, { appName, logoUrl }] = await Promise.all([getLocale(), getPlatformSettings()]);
   const t = translator(locale, de, it);
+  const brand = (
+    <>
+      {logoUrl ? (
+        <img src={logoUrl} alt="" className="h-8 w-8 shrink-0 rounded-lg object-cover" />
+      ) : (
+        <div aria-hidden="true" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-foreground">
+          <span className="text-xs font-bold text-background">{appName.slice(0, 2).toUpperCase()}</span>
+        </div>
+      )}
+      <span className="truncate font-semibold">{appName}</span>
+    </>
+  );
   const features = [
     { icon: Nfc,          title: t("nfc"),           desc: t("nfcDescription") },
     { icon: QrCode,       title: t("qr"),             desc: t("qrDescription") },
@@ -27,7 +40,7 @@ export default async function LandingPage() {
     { icon: Download,     title: t("pdf"),   desc: t("pdfDescription") },
     { icon: FileText,     title: t("leadCapture"),         desc: t("leadDescription") },
     { icon: Shield,       title: t("privacyFeature"),  desc: t("privacyDescription") },
-    { icon: Zap,          title: t("whiteLabel"),           desc: t("whiteLabelDescription") },
+    { icon: Zap,          title: t("whiteLabel"),           desc: t("whiteLabelDescription", { appName }) },
   ];
 
   const steps = [
@@ -51,11 +64,8 @@ export default async function LandingPage() {
       <nav className="sticky top-0 z-50 border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-900">
-                <span className="text-xs font-bold text-white">CN</span>
-              </div>
-              <span className="font-semibold">CardNexus</span>
+            <div className="flex min-w-0 items-center gap-2">
+              {brand}
             </div>
             <div className="hidden md:flex items-center gap-6 text-sm text-gray-500 dark:text-gray-400">
               <a href="#features" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors">{t("features")}</a>
@@ -97,7 +107,7 @@ export default async function LandingPage() {
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg">
-            <Link href="/c/demo">{t("demo")}</Link>
+            <Link href="/demo">{t("demo")}</Link>
           </Button>
         </div>
 
@@ -225,7 +235,7 @@ export default async function LandingPage() {
           <div className="text-center mb-14">
             <h2 className="text-3xl font-bold mb-3">{t("faqTitle")}</h2>
           </div>
-          <FaqSection />
+          <FaqSection appName={appName} />
         </div>
       </section>
 
@@ -249,10 +259,7 @@ export default async function LandingPage() {
           <div className="grid sm:grid-cols-3 gap-8 mb-10">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <div className="flex h-7 w-7 items-center justify-center rounded bg-gray-900">
-                  <span className="text-[10px] font-bold text-white">CN</span>
-                </div>
-                <span className="font-semibold text-gray-900 dark:text-gray-100">CardNexus</span>
+                {brand}
               </div>
               <p className="text-sm text-gray-400 dark:text-gray-500 leading-relaxed">
                 {t("footerDescription")}
@@ -263,7 +270,7 @@ export default async function LandingPage() {
               <ul className="space-y-2 text-sm text-gray-400 dark:text-gray-500">
                 <li><a href="#features"  className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">{t("features")}</a></li>
                 <li><a href="#pricing"   className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">{t("pricing")}</a></li>
-                <li><Link href="/c/demo" className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">Demo</Link></li>
+                <li><Link href="/demo" className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">Demo</Link></li>
                 <li><Link href="/login"  className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">{t("login")}</Link></li>
               </ul>
             </div>
@@ -276,7 +283,7 @@ export default async function LandingPage() {
             </div>
           </div>
           <div className="border-t border-gray-100 dark:border-gray-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-gray-400 dark:text-gray-500">
-            <p>&copy; {new Date().getFullYear()} {t("copyright")}</p>
+            <p>&copy; {new Date().getFullYear()} {t("copyright", { appName })}</p>
             <p>{t("madeIn")}</p>
           </div>
         </div>
