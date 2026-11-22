@@ -124,7 +124,7 @@ export function SignatureClient({ card: initialCard, allCards: cards, baseUrl }:
     setSaving(true);
     setFeedback(null);
     try {
-      const response = await fetch(`/api/cards/${encodeURIComponent(card.id)}/signature`, {
+      const response = await fetch(`/api/cards/${encodeURIComponent(card.slug)}/signature`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings),

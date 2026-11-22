@@ -11,7 +11,7 @@ const SignatureSettings = z.object({
   showLogo: z.boolean(),
 });
 
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   const session = await auth.api.getSession({ headers: request.headers });
   if (!session) return NextResponse.json({ error: await apiMessage("unauthorized") }, { status: 401 });
 
@@ -20,10 +20,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: await apiMessage("invalidInput") }, { status: 400 });
   }
 
-  const { id } = await params;
+  const { slug } = await params;
   try {
     await db.card.update({
-      where: { id, userId: session.user.id },
+      where: { slug, userId: session.user.id },
       data: { emailSignature: { upsert: { create: settings.data, update: settings.data } } },
       select: { id: true },
     });
