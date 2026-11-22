@@ -105,7 +105,7 @@ export function ClassicTemplate({ card }: { card: Partial<CardData> }) {
           {card.address && (
             <div className="flex items-start gap-3 text-sm text-gray-600">
               <ContactIcon icon={MapPin} accent={accent} />
-              {card.address}
+              <span className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]">{card.address}</span>
             </div>
           )}
         </div>

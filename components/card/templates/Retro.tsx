@@ -113,7 +113,7 @@ export function RetroTemplate({ card }: { card: Partial<CardData> }) {
             <RetroRow icon={Globe} label="Web" value={card.website.replace(/^https?:\/\//, "")} href={card.website} color={color} external />
           )}
           {card.address && (
-            <RetroRow icon={MapPin} label={t("address")} value={card.address} color={color} />
+            <RetroRow icon={MapPin} label={t("address")} value={card.address} color={color} multiline />
           )}
         </div>
 
@@ -159,10 +159,10 @@ function CornerOrnament({
 }
 
 function RetroRow({
-  icon: Icon, label, value, href, color, external,
+  icon: Icon, label, value, href, color, external, multiline,
 }: {
   icon: React.ElementType; label: string; value: string;
-  href?: string; color: string; external?: boolean;
+  href?: string; color: string; external?: boolean; multiline?: boolean;
 }) {
   const content = (
     <div className="flex items-center gap-2.5">
@@ -170,7 +170,7 @@ function RetroRow({
         {label}
       </span>
       <div className="h-3 w-px" style={{ backgroundColor: `${color}30` }} />
-      <span className="text-xs text-stone-600 hover:text-stone-900 transition-colors">{value}</span>
+      <span className={`text-xs text-stone-600 hover:text-stone-900 transition-colors ${multiline ? "min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]" : ""}`}>{value}</span>
     </div>
   );
   if (href) {

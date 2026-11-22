@@ -121,7 +121,7 @@ export function BoldTemplate({ card }: { card: Partial<CardData> }) {
           {card.address && (
             <div className="flex items-start gap-2.5">
               <BoldIcon icon={MapPin} color={color} />
-              <span className="text-xs text-gray-500">{card.address}</span>
+              <span className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere] text-xs text-gray-500">{card.address}</span>
             </div>
           )}
         </div>

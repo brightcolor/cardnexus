@@ -106,7 +106,7 @@ export function NeonTemplate({ card }: { card: Partial<CardData> }) {
             <NeonRow icon={Globe} value={card.website.replace(/^https?:\/\//, "")} href={card.website} color={color} external />
           )}
           {card.address && (
-            <NeonRow icon={MapPin} value={card.address} color={color} />
+            <NeonRow icon={MapPin} value={card.address} color={color} multiline />
           )}
         </div>
 
@@ -145,9 +145,9 @@ export function NeonTemplate({ card }: { card: Partial<CardData> }) {
 }
 
 function NeonRow({
-  icon: Icon, value, href, color, external,
+  icon: Icon, value, href, color, external, multiline,
 }: {
-  icon: React.ElementType; value: string; href?: string; color: string; external?: boolean;
+  icon: React.ElementType; value: string; href?: string; color: string; external?: boolean; multiline?: boolean;
 }) {
   const content = (
     <div className="flex items-center gap-3 group">
@@ -157,7 +157,7 @@ function NeonRow({
       >
         <Icon className="h-3.5 w-3.5" style={{ color }} />
       </div>
-      <span className="text-xs font-mono text-white/60 group-hover:text-white/90 transition-colors truncate">{value}</span>
+      <span className={`text-xs font-mono text-white/60 group-hover:text-white/90 transition-colors ${multiline ? "min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]" : "truncate"}`}>{value}</span>
     </div>
   );
   if (href) {

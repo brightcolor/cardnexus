@@ -91,7 +91,7 @@ export function MinimalTemplate({ card }: { card: Partial<CardData> }) {
           {card.address && (
             <div>
               <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400">{t("address")}</p>
-              <p className="text-sm text-gray-700 mt-0.5">{card.address}</p>
+              <p className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere] text-sm text-gray-700 mt-0.5">{card.address}</p>
             </div>
           )}
         </div>

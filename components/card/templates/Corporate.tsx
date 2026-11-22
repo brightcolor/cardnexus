@@ -105,7 +105,7 @@ export function CorporateTemplate({ card }: { card: Partial<CardData> }) {
             <CorpRow icon={Globe} label={t("website")} value={card.website.replace(/^https?:\/\//, "")} href={card.website} color={color} external />
           )}
           {card.address && (
-            <CorpRow icon={MapPin} label={t("address")} value={card.address} color={color} />
+            <CorpRow icon={MapPin} label={t("address")} value={card.address} color={color} multiline />
           )}
         </div>
 
@@ -138,17 +138,17 @@ export function CorporateTemplate({ card }: { card: Partial<CardData> }) {
 }
 
 function CorpRow({
-  icon: Icon, label, value, href, color, external,
+  icon: Icon, label, value, href, color, external, multiline,
 }: {
   icon: React.ElementType; label: string; value: string;
-  href?: string; color: string; external?: boolean;
+  href?: string; color: string; external?: boolean; multiline?: boolean;
 }) {
   const content = (
     <div className="flex items-start gap-3 py-2.5 group">
       <Icon className="h-3.5 w-3.5 mt-0.5 shrink-0" style={{ color }} />
       <div className="min-w-0">
         <p className="text-[9px] font-bold tracking-widest uppercase text-gray-400 leading-none mb-0.5">{label}</p>
-        <p className="text-xs text-gray-700 group-hover:text-gray-900 transition-colors truncate">{value}</p>
+        <p className={`text-xs text-gray-700 group-hover:text-gray-900 transition-colors ${multiline ? "min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]" : "truncate"}`}>{value}</p>
       </div>
     </div>
   );

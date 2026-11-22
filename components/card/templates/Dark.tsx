@@ -101,7 +101,7 @@ export function DarkTemplate({ card }: { card: Partial<CardData> }) {
           {card.address && (
             <div className="flex items-start gap-3">
               <DarkIcon icon={MapPin} accent={accent} />
-              <span className="text-sm text-gray-400">{card.address}</span>
+              <span className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere] text-sm text-gray-400">{card.address}</span>
             </div>
           )}
         </div>

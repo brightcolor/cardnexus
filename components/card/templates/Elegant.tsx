@@ -101,7 +101,7 @@ export function ElegantTemplate({ card }: { card: Partial<CardData> }) {
           {card.address && (
             <div className="flex items-start gap-3 text-sm text-gray-600">
               <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5" style={{ color: accent }} />
-              <span>{card.address}</span>
+              <span className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]">{card.address}</span>
             </div>
           )}
         </div>

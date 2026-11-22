@@ -125,7 +125,7 @@ export function GlassTemplate({ card }: { card: Partial<CardData> }) {
           {card.address && (
             <div className="flex items-start gap-3">
               <GlassIcon icon={MapPin} />
-              <span className="text-xs text-white/70">{card.address}</span>
+              <span className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere] text-xs text-white/70">{card.address}</span>
             </div>
           )}
         </div>

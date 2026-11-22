@@ -5,6 +5,7 @@ import it from "@/messages/it/pages/dashboard.json";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getPlatformSettings } from "@/lib/platform";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,10 +20,6 @@ export default async function DashboardPage() {
   const hdrs   = await headers();
   const session = await auth.api.getSession({ headers: hdrs });
   const user = session!.user as { id: string; name: string; role?: string };
-
-  const proto  = hdrs.get("x-forwarded-proto") ?? "https";
-  const host   = hdrs.get("x-forwarded-host") ?? hdrs.get("host") ?? "localhost:3000";
-  const appUrl = `${proto}://${host}`;
 
   const cards = await db.card.findMany({
     where: { userId: user.id },
@@ -64,6 +61,9 @@ export default async function DashboardPage() {
 
   const firstName = user.name.split(" ")[0];
   const defaultCard = cards.find((c) => c.isDefault) ?? cards[0] ?? null;
+  const cardUrl = defaultCard
+    ? new URL(`/c/${encodeURIComponent(defaultCard.slug)}`, (await getPlatformSettings()).appUrl).href
+    : null;
 
   return (
     <div className="space-y-8">
@@ -71,7 +71,9 @@ export default async function DashboardPage() {
       <div>
         <h1 className="text-2xl font-bold text-foreground">{t("greeting")} {firstName} 👋</h1>
         <p className="text-muted-foreground mt-1">
-          {cards.length > 0 ? `Du hast ${cards.length} Karte${cards.length > 1 ? "n" : ""}.` : t("firstCard")}
+          {cards.length === 0
+            ? t("firstCard")
+            : t(cards.length === 1 ? "cardCountOne" : "cardCountMany", { count: cards.length.toLocaleString(locale) })}
         </p>
       </div>
 
@@ -128,7 +130,7 @@ export default async function DashboardPage() {
                         <Badge variant="outline" className="text-xs shrink-0">{t("defaultCard")}</Badge>
                       )}
                       <Badge variant={c.isPublic ? "success" : "outline"} className="text-xs shrink-0">
-                        {c.isPublic ? t("publicCard") : "Privat"}
+                        {c.isPublic ? t("publicCard") : t("privateCard")}
                       </Badge>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">/c/{c.slug}</p>
@@ -178,33 +180,24 @@ export default async function DashboardPage() {
       )}
 
       {/* Quick actions for default card */}
-      {defaultCard && (
+      {defaultCard && cardUrl && (
         <div className="grid sm:grid-cols-2 gap-4">
           <Card>
             <CardHeader>
               <CardTitle className="text-base">{t("share")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {/* Prefer custom domain, then app URL derived from request headers */}
-              {(({ cardUrl }: { cardUrl: string }) => (
-                <>
-                  <div className="flex items-center gap-2 rounded-lg bg-muted p-3 text-sm font-mono text-muted-foreground overflow-hidden">
-                    <span className="truncate">{cardUrl}</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button asChild variant="outline" size="sm" className="flex-1">
-                      <Link href={cardUrl} target="_blank">{t("open")}</Link>
-                    </Button>
-                    <Button asChild variant="outline" size="sm" className="flex-1">
-                      <Link href={`/api/vcard/${defaultCard.slug}`}>vCard</Link>
-                    </Button>
-                  </div>
-                </>
-              ))({
-                cardUrl: defaultCard.cardDomain
-                  ? `https://${defaultCard.cardDomain}/c/${defaultCard.slug}`
-                  : `${appUrl}/c/${defaultCard.slug}`,
-              })}
+              <div className="flex items-center gap-2 rounded-lg bg-muted p-3 text-sm font-mono text-muted-foreground overflow-hidden">
+                <span className="truncate">{cardUrl}</span>
+              </div>
+              <div className="flex gap-2">
+                <Button asChild variant="outline" size="sm" className="flex-1">
+                  <Link href={cardUrl} target="_blank">{t("open")}</Link>
+                </Button>
+                <Button asChild variant="outline" size="sm" className="flex-1">
+                  <Link href={`/api/vcard/${defaultCard.slug}`}>vCard</Link>
+                </Button>
+              </div>
             </CardContent>
           </Card>
 

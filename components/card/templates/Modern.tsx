@@ -93,7 +93,7 @@ export function ModernTemplate({ card }: { card: Partial<CardData> }) {
         {card.address && (
           <div className="flex items-start gap-4 px-6 py-3">
             <MapPin className="h-4 w-4 shrink-0 mt-0.5" style={{ color: accent }} />
-            <span className="text-sm text-gray-700">{card.address}</span>
+            <span className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere] text-sm text-gray-700">{card.address}</span>
           </div>
         )}
       </div>

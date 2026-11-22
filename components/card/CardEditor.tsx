@@ -265,8 +265,8 @@ export function CardEditor({ initialCard, isNew = false, policy = OPEN_POLICY, s
               <Input value={card.website ?? ""} onChange={(e) => update("website", e.target.value || null)} placeholder="https://example.com" type="url" />
             </div>
             <div className="space-y-1.5">
-              <Label>{t("address")}</Label>
-              <Input value={card.address ?? ""} onChange={(e) => update("address", e.target.value || null)} placeholder={t("addressExample")} />
+              <Label htmlFor="card-address">{t("address")}</Label>
+              <Textarea id="card-address" rows={3} value={card.address ?? ""} onChange={(e) => update("address", e.target.value || null)} placeholder={t("addressExample")} />
             </div>
             <div className="space-y-1.5">
               <Label>{t("bookingLink")} <span className="text-xs font-normal text-muted-foreground">(Pro)</span></Label>

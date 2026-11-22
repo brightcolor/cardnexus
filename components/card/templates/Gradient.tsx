@@ -101,7 +101,7 @@ export function GradientTemplate({ card }: { card: Partial<CardData> }) {
           {card.address && (
             <div className="flex items-start gap-3 text-sm text-white/80 px-3 py-2">
               <MapPin className="h-3.5 w-3.5 shrink-0 text-white/60 mt-0.5" />
-              {card.address}
+              <span className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]">{card.address}</span>
             </div>
           )}
         </div>

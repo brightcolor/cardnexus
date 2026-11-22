@@ -104,7 +104,7 @@ export function WaveTemplate({ card }: { card: Partial<CardData> }) {
         {card.address && (
           <div className="flex items-start gap-3 px-4 py-2.5 text-sm text-gray-600">
             <MapPin className="h-4 w-4 shrink-0 mt-0.5" style={{ color: accent }} />
-            {card.address}
+            <span className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]">{card.address}</span>
           </div>
         )}
       </div>

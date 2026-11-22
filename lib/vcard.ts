@@ -22,7 +22,7 @@ function fold(line: string): string {
 
 /** Escape special vCard 4.0 text characters */
 function esc(value: string): string {
-  return value.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+  return value.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r\n?|\n/g, "\\n");
 }
 
 /** Map free-text gender to vCard 4.0 GENDER value */

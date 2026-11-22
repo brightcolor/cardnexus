@@ -38,6 +38,15 @@ function footerRow(text: string, cols = 1) {
   return `<tr><td colspan="${cols}" style="padding-top:10px;font-size:10px;color:#999999;border-top:1px solid #eeeeee;">${text.replace(/\n/g, "<br>")}</td></tr>`;
 }
 
+function addressHtml(address?: string | null) {
+  if (!address) return "";
+  return "📍 " + address
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\r\n?|\n/g, "<br>");
+}
+
 export function buildPlainText(card: CardData, locale: Locale = "de"): string {
   const labels = locale === "it" ? it : de;
   const name = `${card.firstName ?? ""} ${card.lastName ?? ""}`.trim();
@@ -47,7 +56,7 @@ export function buildPlainText(card: CardData, locale: Locale = "de"): string {
     card.mobile  && `${labels.mobile.padEnd(8)}${card.mobile}`,
     card.email   && `${labels.email.padEnd(8)}${card.email}`,
     card.website && `${labels.website.padEnd(8)}${card.website}`,
-    card.address && `${labels.address.padEnd(8)}${card.address}`,
+    card.address && `${labels.address.padEnd(8)}${card.address.replace(/\r\n?/g, "\n")}`,
   ].filter(Boolean) as string[];
   return [...header, "", ...contact].join("\n");
 }
@@ -59,6 +68,7 @@ export function buildHtml(card: CardData, style: SigStyle, baseUrl: string, opts
   const avatar  = card.avatarUrl && showAvatar ? abs(card.avatarUrl, baseUrl) : null;
   const cardUrl = `${baseUrl}/c/${card.slug}`;
   const socials = showSocials ? getSocials(card) : [];
+  const address = addressHtml(card.address);
   const btn     = showCardLink
     ? `<a href="${cardUrl}" style="font-family:Arial,sans-serif;font-size:11px;background-color:${color};color:#ffffff;text-decoration:none;padding:5px 12px;border-radius:4px;display:inline-block;">${labels.card}</a>`
     : "";
@@ -68,7 +78,7 @@ export function buildHtml(card: CardData, style: SigStyle, baseUrl: string, opts
     card.mobile ? `📱 <a href="tel:${card.mobile}" style="color:#555555;text-decoration:none;">${card.mobile}</a>`  : "",
     card.email  ? `✉ <a href="mailto:${card.email}" style="color:#555555;text-decoration:none;">${card.email}</a>` : "",
     card.website ? `🌐 <a href="${card.website}" style="color:${color};text-decoration:none;">${card.website.replace(/^https?:\/\//, "")}</a>` : "",
-    card.address ? `📍 ${card.address}` : "",
+    address,
   ].filter(Boolean).join("<br>");
 
   if (style === "compact") {
@@ -83,6 +93,7 @@ export function buildHtml(card: CardData, style: SigStyle, baseUrl: string, opts
       ${card.phone   ? `📞 <a href="tel:${card.phone}" style="color:#555555;text-decoration:none;">${card.phone}</a><br>` : ""}
       ${card.email   ? `✉ <a href="mailto:${card.email}" style="color:#555555;text-decoration:none;">${card.email}</a><br>` : ""}
       ${card.website ? `🌐 <a href="${card.website}" style="color:${color};text-decoration:none;">${card.website.replace(/^https?:\/\//, "")}</a><br>` : ""}
+      ${address ? `${address}<br>` : ""}
       ${socials.length > 0 ? `<div style="margin-top:5px;">${socialLinks(socials, color)}</div>` : ""}
       ${btn ? `<div style="margin-top:8px;">${btn}</div>` : ""}
     </td>
@@ -132,6 +143,7 @@ export function buildHtml(card: CardData, style: SigStyle, baseUrl: string, opts
           </td>
         </tr>
       </table>
+      ${address ? `<div style="margin-top:6px;font-size:11px;color:#555555;">${address}</div>` : ""}
       ${socials.length > 0 ? `<div style="margin-top:8px;">${socialLinks(socials, color)}</div>` : ""}
       ${btn ? `<div style="margin-top:8px;">${btn}</div>` : ""}
     </td>
@@ -153,6 +165,7 @@ export function buildHtml(card: CardData, style: SigStyle, baseUrl: string, opts
     <td>
       <span style="font-size:14px;color:#111111;font-weight:600;">${parts}</span><br>
       <span style="font-size:12px;color:#888888;">${contacts}</span>
+      ${address ? `<br><span style="font-size:12px;color:#888888;">${address}</span>` : ""}
       ${socials.length > 0 ? `<br><span style="font-size:11px;">${socialLinks(socials, color)}</span>` : ""}
       ${btn ? `<br><span style="font-size:11px;display:inline-block;margin-top:6px;">${btn}</span>` : ""}
     </td>
@@ -177,6 +190,7 @@ export function buildHtml(card: CardData, style: SigStyle, baseUrl: string, opts
               ${card.mobile ? `📱 <a href="tel:${card.mobile}" style="color:#94a3b8;text-decoration:none;">${card.mobile}</a><br>` : ""}
               ${card.email  ? `✉ <a href="mailto:${card.email}" style="color:#94a3b8;text-decoration:none;">${card.email}</a><br>` : ""}
               ${card.website ? `🌐 <a href="${card.website}" style="color:${color};text-decoration:none;">${card.website.replace(/^https?:\/\//, "")}</a><br>` : ""}
+              ${address}
             </span>
             ${socials.length > 0 ? `<div style="margin-top:8px;">${socialLinks(socials, color)}</div>` : ""}
             ${btn ? `<div style="margin-top:10px;">${btn}</div>` : ""}

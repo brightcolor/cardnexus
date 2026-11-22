@@ -190,9 +190,9 @@ function MemberCard({
             </div>
           )}
           {member.address && (
-            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 truncate">
-              <MapPin className="h-3 w-3 shrink-0" />
-              <span className="truncate">{member.address}</span>
+            <div className="flex items-start gap-2 text-xs text-gray-500 dark:text-gray-400">
+              <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
+              <span className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]">{member.address}</span>
             </div>
           )}
         </div>
